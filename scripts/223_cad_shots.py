@@ -9,10 +9,11 @@ Three things this has to get right that the earlier export scripts did not:
 1. REF_Shank belongs with the shank. vlow.py has always posed it; 221/222 never did,
    which was invisible while the reference limb was hidden and wrong the moment it was
    shown -- the limb stayed straight while the device flexed.
-2. None of FreeCAD's standard views stand the device up, because the limb axis is +Y and
-   anterior is +Z. Camera orientation maps the camera frame into world and the camera
-   looks down its own -Z with +Y up, so identity is the frontal view with the limb
-   vertical.
+2. None of FreeCAD's standard views stand the device up. The axes are: +Y proximal, Z
+   medial-lateral (the knee pin runs along Z, so this is a lateral upright), +X
+   posterior -- the shank swings toward +X in flexion. Camera orientation maps the
+   camera frame into world and the camera looks down its own -Z with +Y up, so identity
+   is the SAGITTAL view with the limb vertical.
 3. The MCP's get_active_screenshot forces one of the standard views, overwriting any
    custom camera. Use the view's own saveImage instead.
 
@@ -81,9 +82,12 @@ for n in REFS:
         o.ViewObject.ShapeColor = (0.80, 0.66, 0.58)
         o.ViewObject.Transparency = 75
 
+# The knee axis is Z, so Z is medial-lateral and the limb swings in the XY plane.
+# Looking along -Z therefore views the SAGITTAL plane; looking along -X views the
+# CORONAL one. These two names were the wrong way round until measured.
 CAMS = {
-    "frontal":  Rot(),
-    "sagittal": Rot(V(0, 1, 0), 90),
+    "sagittal": Rot(),
+    "coronal":  Rot(V(0, 1, 0), 90),
     "tq":       Rot(V(0, 1, 0), 40).multiply(Rot(V(1, 0, 0), -16)),
 }
 
@@ -145,14 +149,14 @@ def save(name, w, h):
 
 
 # technical views: orthographic
-prep(0.0, fair=True, refs=True, cam="sagittal", ortho=True)
-save("sagittal_clad", 1000, 1700)
-prep(0.0, fair=False, refs=False, cam="frontal", ortho=True)
-save("frontal_open", 1000, 1700)
+prep(0.0, fair=True, refs=True, cam="coronal", ortho=True)
+save("coronal_clad", 1000, 1700)
+prep(0.0, fair=False, refs=False, cam="sagittal", ortho=True)
+save("sagittal_open", 1000, 1700)
 
 # the differential pair -- fit once on the wider pose, then change pose WITHOUT refitting
 # so the two frames are directly comparable
-prep(104.0, fair=False, refs=False, cam="frontal", ortho=True,
+prep(104.0, fair=False, refs=False, cam="sagittal", ortho=True,
      focus=["A1_Extrusion_20x60_VSlot", "P3_Carriage", "P3b_CarriageB",
             "A2_BallScrew_SFU1620", "A2c_BallScrew_LH"])
 save("diff_flexed", 1100, 1500)

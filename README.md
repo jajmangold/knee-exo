@@ -61,6 +61,7 @@ A **belt capstan** at the knee, driven by **two opposed ball screws**:
 
 | | |
 |---|---|
+| **Axes** | +Y proximal, **Z is the knee axis** so Z is medial-lateral, +X posterior. This is a **lateral upright** — the whole device hangs off the outside of the leg |
 | **29T HTD-8M pulley** | concentric with the knee pin, integral with the shank hinge fork |
 | **180° belt wrap** | both runs parallel to the thigh rail, at X = ±36.9 mm |
 | **Two carriages** | on one 20×60 V-slot rail, one per belt run |
@@ -251,8 +252,8 @@ chosen for its *mount*, not its capacity — see [`docs/BOM.md`](docs/BOM.md) §
 ## Packaging
 
 <div align="center">
-<img src="renders/cad/sagittal_clad.png" width="150"> <img src="renders/cad/frontal_open.png" width="136"> <img src="renders/flexed_40deg/05_profile_clad.png" width="235">
-<br><sub>FreeCAD orthographic sagittal and frontal · then the same profile as a Cycles render</sub>
+<img src="renders/cad/coronal_clad.png" width="150"> <img src="renders/cad/sagittal_open.png" width="136"> <img src="renders/flexed_40deg/05_profile_clad.png" width="235">
+<br><sub>FreeCAD orthographic coronal and sagittal · then the same coronal profile as a Cycles render</sub>
 </div>
 
 The device sits **86 mm proud of the knee** clad, 80 mm bare. That left-hand orthographic
@@ -346,12 +347,41 @@ parts at 1° steps:
 | Tapered tip to Y = −60 | 0.20 cm³ into `P20` at 104° |
 
 So **34 of the 55 mm can be closed** by tapering the proximal tip in both width and height
-so it ducks under the knee shroud as it swings. That leaves a 21 mm gap, which genuinely
-does need a fabric gaiter — standard orthotic practice, but it has to be designed, not
-forgotten. The extension itself is not yet in the model.
+so it ducks under the knee shroud as it swings, leaving a 21 mm gap.
 
-This is the same mistake as the yoke radius earlier in this project: a cut made for a
-correct reason, then the reason generalised into a constraint that was never tested.
+### Better: cover the fan from the static side
+
+All of the above treats the cover as **shank-mounted**, which is why it is constrained at
+all — a shank-mounted shell has to sweep past the static thigh fairing. A **thigh-mounted**
+cover has no such problem. It never sweeps; it only has to clear the shank *laterally*,
+in Z. And that clearance already exists: the hinge plate tops out at Z = 126 and
+`P20_KneeShroud` already reaches Z = 133, so **Z 126.5…133 is a free lateral band**.
+
+A static cheek sector on the knee axis, r 40…108 mm, Z 126.5…133, spanning −100°…+26°,
+swept against every shank part at 1° steps over the full ROM:
+
+| | Result |
+|---|---|
+| vs. the moving shank (incl. reference limb) | **clean, 0 cm³ at every pose** |
+| vs. static parts | 2.62 cm³ into `P20_KneeShroud` — an overlap to *merge*, not a clash |
+
+That covers the entire 106° fan with **no gap at all**, and no gaiter. It is a single valid
+closed solid. The cheek is naturally grown from `P20_KneeShroud`, which is already static
+and already at the knee, and bolted through to `P1_KneeYoke` for support — the yoke itself
+sits at Z 76…88, medial of the rail, so it is the right *anchor* but the wrong *side* to
+grow the skin from.
+
+The same trick closes the top. Nothing moves above Y = 312, and the motor pokes out to
+Z = 149.5, past the thigh fairing's 138. A cap of X ±95, Y 310…394, Z 86…154 is clean
+against everything that moves, overlapping only `P21_ShellAnterior` by 1.22 cm³ — again, a
+merge.
+
+**Neither part is modelled yet.** Both are verified as clean envelopes, not drawn shapes.
+
+Two lessons in one section: the shank-fairing limit was the same mistake as the yoke radius
+earlier in this project — a cut made for a correct reason, then the reason generalised into
+a constraint nobody re-tested. And the better answer came from asking *which frame the
+cover lives in*, which is a question the original analysis never posed.
 
 ---
 
