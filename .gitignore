@@ -1,0 +1,7 @@
+*.png
+*.jpg
+*.mp4
+jpg/
+frames/
+clash.json
+__pycache__/
