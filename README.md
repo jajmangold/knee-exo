@@ -41,9 +41,9 @@ nonlinear and the two rigid screws fight the belt.
 | belt tension | 764 N + 150 N pretension |
 | motor | 0.70 N·m, 16 A |
 | carriage travel | 68.3 mm each, opposed |
-| proud of the knee skin | **80 mm** |
+| proud of the knee skin | **86 mm** with fairings (80 mm bare) |
 | knee pin | M12, SF 5.9 · PETG hub SF 3.7 |
-| printed mass | structural 970 cm³ + shrouds 239 cm³ ≈ 1.54 kg PETG + 351 g rail |
+| printed mass | structural 967 cm³ + fairings 275 cm³ ≈ 1.38 kg PETG + 351 g rail |
 
 ## Verification
 
@@ -87,36 +87,55 @@ anchor** — 3 mm travel at ~500 N/mm, which absorbs bedding-in in 1/20th the tr
 constant-force drum needed. Lost motion 1.58 mm = 2.45° of knee, and a Hall sensor on the
 slide reads its deflection as **live belt tension**.
 
-## Guards and shrouds
+## Fairings
 
 | part | covers |
 |---|---|
-| `P20_KneeShroud` | the 180 deg belt wrap and **both nip points** - the worst pinch hazard in the machine |
-| `P21_ShellAnterior` / `P22_ShellPosterior` | screw, ball nut, carriage and belt run on each side |
-| `P23_DriveCover` | the twin-screw coupling at the proximal end |
+| `P20_KneeCap` | closed nose over the pulley and the 180 deg belt wrap, including both nip points |
+| `P21_FairingThigh` | one canopy Y 28..312 over screws, nuts, carriages, belt runs and the coupling |
+| `P24_FairingShank` | the shank member below the knee |
 
-The knee shroud spans 172-368 deg, overhanging each nip by 8 deg, and stands 1.88 mm clear
-of the belt's outer radius. Two legs at 185 and 230 deg land on the yoke.
+Sections are **superellipses at exponent 5.5** - a rounded rectangle, not a slab. The thigh
+fairing flares 58 -> 84 mm half-width over Y 28..58 on a smoothstep, carries 8 vent slots,
+and mounts on a **central spine into the rail's middle outboard slot at X=0** - the one
+channel nothing else uses (the carriages take X=+/-20 outboard and X=+/-30 side), so the
+mounts are never swept. The knee pin head is recessed **flush** into the hub at Z=126.
 
-Fitting it needed two changes, and both were about **swept** volume rather than static shape:
+The enabling fact: the pulley's *inside* is what swings. Measured, nothing moving occupies
+r 41..70 at Z 96..126, and nothing at all sits above Z=126 once the pin is recessed - so the
+belt and the pulley's outer face can be fully enclosed by static covers tied into the thigh
+fairing.
 
-- **A4's proximal end moved from Y=-45 to Y=-70.** Its inner corner used to swing at r=45,
-  leaving only **3.88 mm** above the belt - no room for any guard. At -70 it swings at
-  r=70.7, giving **28.9 mm** of clear annulus. The length was doing nothing: the fork bolts
-  are at Y -90 to -125 and the socket engages at Y -208 to -318.
-- **The yoke's disc went back to a full r=47**, with the fork outer cheek's *swept sector*
-  (r 43-49, angles 241-43 deg) cut out of it. I had previously cut the disc to r=30 "to clear
-  the belt wrap" - but the yoke is at Z 76-88 and the belt at Z 96-126, so radius was never
-  the constraint. What actually sweeps through that annulus is the cheek.
+Two changes were needed first, both about **swept** volume rather than static shape:
 
-The shells are outer wall plus top flange only - no bottom flange, since the underside faces
-the limb and the thigh cuff already close it (and a bottom flange on the posterior side would
-foul the cuff, which reaches X=88 at Z<=88). Each mounts into the rail's side slot at Y
-positions that side's carriage never reaches: A at Y 238-278 (it travels 61-231), B at
-Y 64-104 (it travels 112-283).
+- **A4's proximal end moved from Y=-45 to Y=-70.** Its inner corner swung at r=45, leaving
+  only 3.88 mm above the belt. At -70 it swings at r=70.7, giving **28.9 mm**. The length was
+  doing nothing: the fork bolts are at Y -90..-125, the socket engages at -208..-318.
+- **The yoke's disc went back to a full r=47** with the fork outer cheek's *swept sector*
+  (r 43-49, angles 241-43 deg) cut out. An earlier r=30 was cut "to clear the belt wrap", but
+  the yoke is at Z 76-88 and the belt at Z 96-126 - radius was never the constraint.
 
-No inboard side plate on the knee shroud: that gap is only 2 mm - the fork cheek tops out at
-Z=94 and the belt starts at Z=96 - and the pulley at r<=35.6 plus the cheek already close it.
+### Three modelling traps worth recording
+
+1. **Spline lofts overshoot.** `makeLoft(..., ruled=False)` bulged sections to X +/-129 instead
+   of +/-83 and self-intersected. Use `ruled=True` with closer stations.
+2. **A superellipse narrows in Z at its X extremes.** Containing a box of half-size (W,H)
+   needs `(W/a)^n + (H/b)^n <= 1`. At n=3.4, b=22 the carriage needed **a=108**; a=80 was used,
+   so carriages, cuff, rail and belt all poked through the walls - eight clashes, one cause.
+3. **An inner loft must overrun the outer at both ends**, or `outer - inner` leaves a closed
+   end wall. Setting the shank fairing's inner to start at Y=-102 (distal of the outer's -100)
+   produced a wall A4 passed straight through - a constant 0.441 cm3 at every pose, which is
+   the signature of a static error rather than a sweep problem.
+
+### Limits
+
+The fairing is **open below Z=92**: the thigh cuff tops out at 88 and the carriage bottom is
+at 90, so there is no room for a wall between them. The underside faces the limb.
+
+The shank fairing **cannot start closer than Y=-100**. A shell from -66 swings to world
+X 57.7..70.3 at 104 deg, where the thigh fairing is already 63.5 wide. So **Y -45..-100 is a
+moving gap that no rigid part can bridge** - that needs a fabric gaiter, standard orthotic
+practice. The motor at the hip is also uncovered.
 
 ## Sensing
 
