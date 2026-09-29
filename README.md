@@ -304,11 +304,54 @@ Honest limits, because they are the parts a photo hides:
 
 - The fairing is **open below Z = 92**. The thigh cuff tops out at 88 and the carriage
   bottom is at 90 — there is no room for a wall between them. That underside faces the limb.
-- The shank fairing **cannot start closer than Y = −100**. A shell from −66 swings to world
-  X 57.7…70.3 at 104°, where the thigh fairing is already 63.5 mm wide. So **Y −45…−100 is
-  a moving gap no rigid part can bridge.** It needs a fabric gaiter — standard orthotic
-  practice, but it must be designed, not forgotten.
+- **Y −100…−45 is a moving gap** — 55 mm of bare hinge plate and two exposed joint-bolt
+  heads. A rigid shell here has to sweep past the static thigh fairing, so some of it can
+  never be closed. See below: less of it is forced than this repository used to claim.
 - The motor at the hip is uncovered.
+
+### Why the shank looks bare, and how much of that is necessary
+
+A fair question to ask of the renders. Measured coverage along the limb axis:
+
+| | Hardware span | Faired | Coverage |
+|---|---|---|---|
+| Thigh | Y 0…388 (388 mm) | `P21` Y 28…312 | **73%** |
+| Shank | Y −328…35 (364 mm) | `P24` Y −208…−100 | **30%** |
+
+30% sounds bad and mostly is not, for three separate reasons that are worth keeping apart:
+
+**Most of the shank has nothing to fair.** Every moving part of the transmission — two ball
+screws, two ball nuts, two carriages, both belt runs, the motor and the coupling — is on
+the thigh. Below the knee there is a rail, a hinge plate, a socket and a cuff, and relative
+to the shank *nothing moves at all*. The one genuine pinch hazard down there is the belt
+entering the capstan, and `P20_KneeShroud` already closes over both nip points. So the
+shank is 30% covered by length but close to 100% covered by hazard.
+
+**The distal 120 mm (Y −328…−208) is the socket and the cuff.** Those are closed
+structural shells and the interface to the limb. Putting a fairing over a cuff would be
+fairing a fairing.
+
+**The 55 mm gap is the only real hole** — and it is smaller than stated here until
+recently. The claim used to be that the shank fairing "cannot start closer than Y = −100",
+on the basis that a shell from −66 sweeps to X 70.3 at 104° where the thigh fairing is
+already 63.5 mm wide. That is true *of a constant-section shell*, and false as a general
+statement. Sweeping candidate extensions through the full ROM against all 25 non-shank
+parts at 1° steps:
+
+| Extension | Result |
+|---|---|
+| Constant ±24 section to Y = −80 | clean |
+| Constant ±24 section to Y = −70 | 0.35 cm³ into `P21` at 104° |
+| **Tapered tip to Y = −66** (±14, Z 101…117) | **clean** |
+| Tapered tip to Y = −60 | 0.20 cm³ into `P20` at 104° |
+
+So **34 of the 55 mm can be closed** by tapering the proximal tip in both width and height
+so it ducks under the knee shroud as it swings. That leaves a 21 mm gap, which genuinely
+does need a fabric gaiter — standard orthotic practice, but it has to be designed, not
+forgotten. The extension itself is not yet in the model.
+
+This is the same mistake as the yoke radius earlier in this project: a cut made for a
+correct reason, then the reason generalised into a constraint that was never tested.
 
 ---
 
