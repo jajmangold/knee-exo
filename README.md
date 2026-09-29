@@ -422,3 +422,17 @@ python scripts/fc.py run scripts/194_layout.py
   derating for high-speed running. A slow capstan can run closer to the cord limit — check
   against the actual belt's data before committing.
 - **No firmware yet.** Architecture is specified in `docs/ELECTRONICS.md`; no code written.
+
+---
+
+## License
+
+[Apache License 2.0](LICENSE) — hardware, software and documentation alike. Use it, build
+it, sell it, fork it; just keep the notice and the disclaimer.
+
+Apache-2.0 rather than MIT for two reasons that matter here: it carries an **explicit
+patent grant**, so nobody who contributes can later assert a patent on the mechanism
+against the people using it, and its limitation-of-liability clause is far more explicit —
+which is worth having on a device somebody might build and strap to a leg.
+
+That disclaimer is not decorative. Re-read the warning at the top before you build one.
