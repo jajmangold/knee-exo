@@ -20,7 +20,8 @@ A **belt capstan** at the knee driven by **two opposed lead screws**:
 - **29T HTD-8M pulley** concentric with the knee pin, integral with the shank hinge fork
 - **180° belt wrap**, both runs parallel to the thigh rail at X = ±36.9
 - **Two carriages** on one 20×60 V-slot rail, one per belt run, moving in *opposite*
-  senses via **right-hand and left-hand SFU1620 screws on a common shaft**
+  senses via **right-hand and left-hand ball screws on a common shaft**
+  (lead still open — see [the screw-lead decision](docs/BOM.md#1-open-decision-you-must-settle-before-ordering))
 - **Delrin L-gib sliders** — one tongue in the rail's outboard slot, one in the side slot
 - 6374 BLDC + ODrive
 
@@ -39,11 +40,12 @@ nonlinear and the two rigid screws fight the belt.
 |---|---|
 | moment arm | 36.92 mm, **constant at every angle** |
 | belt tension | 764 N + 150 N pretension |
-| motor | 0.70 N·m, 16 A |
+| motor | 6374 149 Kv — 0.70 N·m / 10.9 A at 5 mm lead, 1.39 N·m / 21.7 A at 10 mm |
 | carriage travel | 68.3 mm each, opposed |
 | proud of the knee skin | **86 mm** with fairings (80 mm bare) |
 | knee pin | M12, SF 5.9 · PETG hub SF 3.7 |
 | printed mass | structural 967 cm³ + fairings 275 cm³ ≈ 1.38 kg PETG + 351 g rail |
+| reflected rotor inertia | 0.167 kg·m² at 10 mm lead — 0.56× the limb's own |
 
 ## Verification
 
@@ -150,7 +152,9 @@ practice. The motor at the hip is also uncovered.
 ## Layout
 
 ```
+docs/        build list and electronics architecture
 model/       FreeCAD source (internal document name is KneeExo_v4)
+renders/     Cycles stills, 8 views x 2 poses
 stl/         printed parts (PETG) and Delrin slider stock
 kinematics/  kin_low.json — current pose law; legacy slider-crank solution kept for reference
 scripts/     chronological build and verification scripts, run over FreeCAD's XML-RPC
@@ -181,6 +185,31 @@ Two FreeCAD gotchas that cost real time, both worth reading before editing geome
 - Belt tooth-shear figures are from continuous-duty power ratings, which carry fatigue
   derating for high-speed running. A slow capstan can run closer to the cord limit —
   check against the actual belt's data before committing.
-- ODrive firmware and control not written.
+- **Screw lead is not settled.** Reflected rotor inertia goes as the square of the total
+  knee→motor ratio, so the lead decides what the leg feels like with the power off: 2.22×
+  the limb's own inertia at 5 mm lead, 0.56× at 10 mm. 10 mm is the right answer, but its
+  ball nut is OD 36 and fouls the belt at the current X = ±58 — **the screws need to move
+  out to ±62, which has not been modelled.** See [`docs/BOM.md`](docs/BOM.md) §1 and
+  [`scripts/300_drivetrain.py`](scripts/300_drivetrain.py).
+- The CAD ball nut is drawn at OD 28 (an SFU1605 nut) while the part is *labelled*
+  SFU1620. The label is wrong; the geometry is 1605.
+- ODrive firmware and control not written — architecture in
+  [`docs/ELECTRONICS.md`](docs/ELECTRONICS.md), no code yet.
 - The rendered assembly video in the project history shows the **retired rigid-rod**
   architecture and is not included here.
+
+## Build
+
+- [`docs/BOM.md`](docs/BOM.md) — full build list, the screw-lead decision, battery and
+  backpack mounting.
+- [`docs/ELECTRONICS.md`](docs/ELECTRONICS.md) — ODrive S1 configuration, the two-encoder
+  scheme, ESP32 roles, regen handling, control strategy and the bring-up order.
+- [`scripts/300_drivetrain.py`](scripts/300_drivetrain.py) — every drivetrain number in
+  both documents, in one place. Pure Python, no FreeCAD.
+
+## Renders
+
+Cycles, 512 samples, AgX. Eight views at 40° flexion and at full extension, in
+[`renders/`](renders). Black anodised extrusion, blue PETG, shot both clad and open so
+the mechanism is visible. Produced by [`scripts/render_cycles.py`](scripts/render_cycles.py)
+running headless in `blenderkit/headless-blender:blender-5.0-stable`.
