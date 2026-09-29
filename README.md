@@ -43,7 +43,7 @@ nonlinear and the two rigid screws fight the belt.
 | carriage travel | 68.3 mm each, opposed |
 | proud of the knee skin | **80 mm** |
 | knee pin | M12, SF 5.9 · PETG hub SF 3.7 |
-| printed mass | 940 cm³ ≈ 1.19 kg PETG + 351 g rail |
+| printed mass | structural 970 cm³ + shrouds 239 cm³ ≈ 1.54 kg PETG + 351 g rail |
 
 ## Verification
 
@@ -87,6 +87,37 @@ anchor** — 3 mm travel at ~500 N/mm, which absorbs bedding-in in 1/20th the tr
 constant-force drum needed. Lost motion 1.58 mm = 2.45° of knee, and a Hall sensor on the
 slide reads its deflection as **live belt tension**.
 
+## Guards and shrouds
+
+| part | covers |
+|---|---|
+| `P20_KneeShroud` | the 180 deg belt wrap and **both nip points** - the worst pinch hazard in the machine |
+| `P21_ShellAnterior` / `P22_ShellPosterior` | screw, ball nut, carriage and belt run on each side |
+| `P23_DriveCover` | the twin-screw coupling at the proximal end |
+
+The knee shroud spans 172-368 deg, overhanging each nip by 8 deg, and stands 1.88 mm clear
+of the belt's outer radius. Two legs at 185 and 230 deg land on the yoke.
+
+Fitting it needed two changes, and both were about **swept** volume rather than static shape:
+
+- **A4's proximal end moved from Y=-45 to Y=-70.** Its inner corner used to swing at r=45,
+  leaving only **3.88 mm** above the belt - no room for any guard. At -70 it swings at
+  r=70.7, giving **28.9 mm** of clear annulus. The length was doing nothing: the fork bolts
+  are at Y -90 to -125 and the socket engages at Y -208 to -318.
+- **The yoke's disc went back to a full r=47**, with the fork outer cheek's *swept sector*
+  (r 43-49, angles 241-43 deg) cut out of it. I had previously cut the disc to r=30 "to clear
+  the belt wrap" - but the yoke is at Z 76-88 and the belt at Z 96-126, so radius was never
+  the constraint. What actually sweeps through that annulus is the cheek.
+
+The shells are outer wall plus top flange only - no bottom flange, since the underside faces
+the limb and the thigh cuff already close it (and a bottom flange on the posterior side would
+foul the cuff, which reaches X=88 at Z<=88). Each mounts into the rail's side slot at Y
+positions that side's carriage never reaches: A at Y 238-278 (it travels 61-231), B at
+Y 64-104 (it travels 112-283).
+
+No inboard side plate on the knee shroud: that gap is only 2 mm - the fork cheek tops out at
+Z=94 and the belt starts at Z=96 - and the pulley at r<=35.6 plus the cheek already close it.
+
 ## Sensing
 
 - **Knee reference** — magnet in the fork cheek at (0, −25), Hall in the yoke disc. Both
@@ -123,8 +154,9 @@ Two FreeCAD gotchas that cost real time, both worth reading before editing geome
 - No FEA. Hand calculations only.
 - The motor sits at the hip, where the reference limb model ends (Y = 300) — its 100 mm
   clearance is measured against nothing and needs a fitting check on the patient.
-- Printed mass 1.19 kg is the largest unresolved issue; `P2a` (145 cm³) and `P1` (102 cm³)
-  are the candidates for lightening.
+- Printed mass **1.54 kg** is the largest unresolved issue. `P2a` (145 cm³), `P5` (167 cm³),
+  `P6` (165 cm³) and `P1` (131 cm³) are the structural candidates. The 239 cm³ of shrouds
+  should print at 2 walls / low infill - nearer 130 g than 303 g - since they carry no load.
 - Knee reference is single-point, not continuous. A full absolute encoder needs the pin's
   outboard end and ~6 mm more lateral.
 - Belt tooth-shear figures are from continuous-duty power ratings, which carry fatigue
