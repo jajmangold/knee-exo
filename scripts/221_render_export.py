@@ -15,6 +15,10 @@ K=json.load(open(r"C:/Users/Josh/KneeExo_anim/kin_low.json"))
 C0=K["C0"]; C1=K["C1"]; R=K["R"]; BZ=tuple(K["belt_z"]); BIN,BOUT=K["belt_x"][0]+0.05,K["belt_x"][1]
 SHANK=["A4_Shank2020_VSlot","P2a_KneeHingePlate","P6_ShankSocket","P7_ShankCuff",
        "P24_FairingShank","HW_JointBolts"]
+# posed with the shank but never exported: the renders leave the reference limb out.
+# vlow.py has always posed REF_Shank; this script used not to, which was invisible while
+# the limb was hidden and wrong the moment it was shown.
+POSED_REF=["REF_Shank"]
 CA=["P3_Carriage","A2b_BallNut_SFU1620","P10a_Slider_Delrin","P10b_Slider_Delrin"]
 CB=["P3b_CarriageB","A2d_BallNut_LH","P10c_Slider_Delrin","P10d_Slider_Delrin",
     "P11_SprungAnchor","A8_TensionSpring","P13_HallTension"]
@@ -36,7 +40,7 @@ O=lambda n: doc.getObject(n)
 def pose(th):
     r=FreeCAD.Rotation(V(0,0,1),th); rad=math.radians(th)
     cA=C0-R*rad; cB=C1+R*rad
-    for n in SHANK:
+    for n in SHANK+POSED_REF:
         o=O(n)
         if o: o.Placement=FreeCAD.Placement(V(0,0,0),r,V(0,0,0))
     for n in CA:

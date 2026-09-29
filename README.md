@@ -2,7 +2,9 @@
 
 # Powered Knee Orthosis
 
-<img src="renders/flexed_40deg/06_threequarter_open.png" width="460">
+<img src="renders/flexed_40deg/06_threequarter_open.png" width="440">
+
+<sub>Cycles render · 512 samples · the CAD itself is below</sub>
 
 **28.2 N·m** · **36.92 mm moment arm, constant at every angle** · **86 mm proud of the knee** · **0 clashes in 107 poses**
 
@@ -32,8 +34,8 @@ Everything else in this repository follows from those two numbers.
 
 ## It moves like this
 
-A full flexion cycle, 0° → 104° → 0°, rendered from 32 poses exported straight out of the
-CAD. Left: the mechanism. Right: the same cycle with the fairings on.
+A full flexion cycle, 0° → 104° → 0°, from 32 poses exported straight out of FreeCAD and
+rendered in **Cycles**. Left: the mechanism. Right: the same cycle with the fairings on.
 
 <div align="center">
 <img src="renders/anim/hero_open.gif" width="330"> <img src="renders/anim/hero_clad.gif" width="330">
@@ -49,6 +51,11 @@ that is the whole idea.
 ---
 
 ## How it works
+
+<div align="center">
+<img src="renders/cad/tq_open.png" width="300"> <img src="renders/cad/tq_clad.png" width="284">
+<br><sub>FreeCAD viewport · mechanism, and the same thing clad on the reference limb</sub>
+</div>
 
 A **belt capstan** at the knee, driven by **two opposed ball screws**:
 
@@ -82,6 +89,15 @@ is not an approximation of the constraint — it **is** the constraint, expresse
 hardware. The belt cannot go slack and it cannot be over-tensioned by driving the motor,
 because the mechanism has no way to change `Ya + Yb` at all.
 
+Here is that being true, in the model. Same camera, same scale, orthographic; only the
+knee angle differs. Watch carriage **A** (left) and **B** (right) trade places:
+
+<div align="center">
+<img src="renders/cad/diff_extended.png" width="290"> <img src="renders/cad/diff_flexed.png" width="290">
+<br><sub>FreeCAD · full extension (θ = 0°) and full flexion (θ = 104°).
+A drops 68.3 mm, B rises 68.3 mm, the sum never moves.</sub>
+</div>
+
 Verified constant at **242.00 mm** across all 107 poses, and re-checked on every one of the
 32 animation frames above:
 
@@ -97,6 +113,11 @@ nonlinear in θ and the two rigid screws fight the belt. Parallel runs are not a
 choice; they are load-bearing on the maths.
 
 ### The second gift: a constant moment arm
+
+<div align="center">
+<img src="renders/cad/knee_detail.png" width="420">
+<br><sub>FreeCAD · the 29T capstan, the yoke, and the 180° wrap</sub>
+</div>
 
 A capstan's moment arm is its pitch radius, and a pitch radius does not change with angle.
 So the device delivers **36.92 mm at 0° and 36.92 mm at 104°** — no dead spots, no torque
@@ -230,11 +251,13 @@ chosen for its *mount*, not its capacity — see [`docs/BOM.md`](docs/BOM.md) §
 ## Packaging
 
 <div align="center">
-<img src="renders/flexed_40deg/01_hero_clad.png" width="270"> <img src="renders/flexed_40deg/05_profile_clad.png" width="270">
+<img src="renders/cad/sagittal_clad.png" width="150"> <img src="renders/cad/frontal_open.png" width="136"> <img src="renders/flexed_40deg/05_profile_clad.png" width="235">
+<br><sub>FreeCAD orthographic sagittal and frontal · then the same profile as a Cycles render</sub>
 </div>
 
-The device sits **86 mm proud of the knee** clad, 80 mm bare. The right-hand image is the
-sagittal profile — that thin edge is the number that decides whether it fits under trousers.
+The device sits **86 mm proud of the knee** clad, 80 mm bare. That left-hand orthographic
+sagittal view is the one that matters — that thin edge is the number deciding whether it
+fits under trousers.
 
 ### The enabling observation
 
@@ -291,10 +314,6 @@ Honest limits, because they are the parts a photo hides:
 
 ## Verification
 
-<div align="center">
-<img src="renders/flexed_40deg/03_knee_open.png" width="620">
-</div>
-
 [`scripts/vlow.py`](scripts/vlow.py) runs a **full pairwise interference sweep with no skip
 list** — 107 poses, every part against every other part, in six chunks (the sweep exceeds
 FreeCAD's 90 s GUI dispatch limit in a single call).
@@ -341,7 +360,8 @@ a kinematic one. Read the constant; it tells you where to look.
 ## Sensing
 
 <div align="center">
-<img src="renders/flexed_40deg/07_drive_open.png" width="620">
+<img src="renders/flexed_40deg/07_drive_open.png" width="560">
+<br><sub>Cycles render · the drive head, both carriages and their Delrin gibs</sub>
 </div>
 
 | | |
@@ -370,7 +390,7 @@ docs/        BOM.md — build list and the screw-lead decision
 model/       FreeCAD source (internal document name is KneeExo_v4)
 stl/         15 printed parts (PETG) and Delrin slider stock
 kinematics/  kin_low.json — current pose law; legacy slider-crank kept for reference
-renders/     Cycles stills, 8 views × 2 poses, plus the animation GIFs
+renders/     cad/ FreeCAD viewport captures; Cycles stills and animation GIFs
 scripts/     chronological build and verification scripts, over FreeCAD's XML-RPC
 ```
 
@@ -387,21 +407,44 @@ including all four rejected architectures above.
 
 [`scripts/fc.py`](scripts/fc.py) is the FreeCAD client (XML-RPC, `PORT = 9880`).
 
-### Rendering
+### Images
 
-Stills: Cycles, **512 samples**, AgX medium-high contrast, f/11, on 4× RTX 3060 via
+Two kinds, and the difference matters when you are reading a shape off one of them:
+
+**FreeCAD viewport captures** ([`renders/cad/`](renders/cad)) are the model itself — flat
+shading, edge lines, orthographic wherever the view is a technical one, and the tan
+reference limb shown at 75% transparency. Nothing is retouched and nothing is
+approximated. Produced by [`scripts/223_cad_shots.py`](scripts/223_cad_shots.py), then
+autocropped by [`scripts/crop_cad.py`](scripts/crop_cad.py).
+
+Three things that script has to get right, all of which caught me out first time:
+
+- **`REF_Shank` belongs with the shank.** `vlow.py` has always posed it, so the clash
+  sweep was never blind — but `221_render_export.py` and `222_anim_export.py` both omitted
+  it. Invisible while the reference limb was hidden; wrong the instant it was shown, with
+  the limb standing straight while the device flexed.
+- **No standard FreeCAD view stands the device up**, because the limb axis is +Y and
+  anterior is +Z. Camera orientation maps the camera frame into world and the camera looks
+  down its own −Z with +Y up, so *identity* is the frontal view with the limb vertical.
+- **The MCP's `get_active_screenshot` forces a standard view**, silently discarding any
+  custom camera. Use the view's own `saveImage` instead.
+
+**Cycles renders** ([`renders/flexed_40deg/`](renders/flexed_40deg),
+[`renders/extended_0deg/`](renders/extended_0deg), [`renders/anim/`](renders/anim)) are
+presentation: **512 samples**, AgX medium-high contrast, f/11, on 4× RTX 3060 via
 `blenderkit/headless-blender:blender-5.0-stable`. Materials are keyed off the `MAT__`
 filename prefix the exporter writes, so no lookup table is needed on the Blender side.
 
-Animation: 32 poses on `θ = 52 − 52·cos(2πi/32)`, so the cycle is smooth and loops
+Animation: also Cycles, 96 samples. 32 poses on `θ = 52 − 52·cos(2πi/32)`, so the cycle is smooth and loops
 seamlessly with no duplicated end frame. 96 samples, three cameras per frame, rig transform
 computed **once** from the union of the two extreme poses and then held fixed — otherwise
 the per-frame bounding box moves and the whole device jitters instead of the shank swinging
 about a stationary knee.
 
 ```bash
-python scripts/300_drivetrain.py          # every drivetrain number, no FreeCAD needed
-python scripts/fc.py run scripts/194_layout.py
+python scripts/300_drivetrain.py               # every drivetrain number, no FreeCAD needed
+python scripts/fc.py run scripts/194_layout.py # build geometry
+python scripts/fc.py run scripts/223_cad_shots.py &&   python scripts/crop_cad.py C:/Users/Josh/KneeExo_render/cad
 ```
 
 ---
