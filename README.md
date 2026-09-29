@@ -2,8 +2,6 @@
 
 # Powered Knee Orthosis
 
-### A belt capstan driven by two opposed lead screws, in black extrusion and blue PETG
-
 <img src="renders/flexed_40deg/06_threequarter_open.png" width="460">
 
 **28.2 N·m** · **36.92 mm moment arm, constant at every angle** · **86 mm proud of the knee** · **0 clashes in 107 poses**
