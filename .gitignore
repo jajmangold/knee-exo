@@ -5,3 +5,4 @@ jpg/
 frames/
 clash.json
 __pycache__/
+!renders/**/*.png
