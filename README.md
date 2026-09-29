@@ -295,9 +295,25 @@ X = ±30 side. So the mounts are never swept.
 
 | Part | Covers |
 |---|---|
-| `P20_KneeCap` | closed nose over the pulley and the full 180° wrap, including both nip points |
-| `P21_FairingThigh` | one canopy, Y 28…312, over screws, nuts, carriages, both belt runs and the coupling |
+| `P20_KneeCap` | an inverted-U channel — walls at X ±50, roof at Z 132 — enclosing both belt runs and both in-running nips. Now also carries the lateral cheek, r 40…108 |
+| `P21_FairingThigh` | one canopy, Y 28…**290**, over screws, nuts, carriages, both belt runs and the coupling |
+| `P22_DriveCap` | Y 290…399 over the drive box and the motor, section centre walking to xc = −20 to follow the motor |
 | `P24_FairingShank` | the shank member below the knee |
+
+`P20` looks like a small nose piece in the renders and is easy to write off. The material
+map at Y=0 shows what it actually is:
+
+```
+      X  -60   -50   -40   -30   -20   -10     0    10    20    30    40    50    60
+Z 124      .     #     .     .     .     .     .     .     .     .     .     #     .
+Z 128      .     #     .     .     .     .     .     .     .     .     #     #     #
+Z 132      .     #     #     #     #     #     #     #     #     #     #     #     #
+```
+
+Two walls at X ±50 and a roof at Z 132, with the belt runs at X ±35.6…41.1, Z 96…126
+sitting inside that channel. It is the only guard on either nip — `P21` starts at Y=28 and
+the nips are at Y≈0 — and the channel is open only medially, through an 8 mm slot between
+the yoke at Z 88 and the shroud at Z 96.5, which no finger fits through.
 
 ### Where it stops
 
@@ -349,7 +365,7 @@ parts at 1° steps:
 So **34 of the 55 mm can be closed** by tapering the proximal tip in both width and height
 so it ducks under the knee shroud as it swings, leaving a 21 mm gap.
 
-### Better: cover the fan from the static side
+### Better: cover the fan from the static side — built
 
 All of the above treats the cover as **shank-mounted**, which is why it is constrained at
 all — a shank-mounted shell has to sweep past the static thigh fairing. A **thigh-mounted**
@@ -376,7 +392,21 @@ Z = 149.5, past the thigh fairing's 138. A cap of X ±95, Y 310…394, Z 86…15
 against everything that moves, overlapping only `P21_ShellAnterior` by 1.22 cm³ — again, a
 merge.
 
-**Neither part is modelled yet.** Both are verified as clean envelopes, not drawn shapes.
+Both are now in the model, and the full 107-pose sweep re-run with them in place returns
+**zero hard-part clashes** — the only overlaps remain the reference limb cones and
+0.836 cm³ of thigh-cuff foam compression. The knee standoff is unchanged at 86 mm,
+because the cheek sits at Z 132, under `P21`'s 138.
+
+Building them turned up two things the envelope study had not:
+
+- **The cap could not simply butt onto `P21`.** `P21` runs at a constant a=84, b=23,
+  zc=115 and then closes from Y=300, while the motor starts at Y=314 already needing
+  Z 86.5…149.5. There is nowhere to put the shoulder, so `P21` is trimmed back to Y=290
+  and the cap takes over the last 22 mm of canopy.
+- **Two constraints set when the cap's section centre may walk outboard.** Walking `xc`
+  negative early pulls the posterior wall into the drive box, which runs to X=+70 until
+  Y=311; necking down early puts the motor through the wall — 1.22 cm³ of it, at
+  Y 370…392. The section stays full until Y=389 because the motor ends at 388.
 
 Two lessons in one section: the shank-fairing limit was the same mistake as the yoke radius
 earlier in this project — a cut made for a correct reason, then the reason generalised into
@@ -527,11 +557,16 @@ python scripts/fc.py run scripts/223_cad_shots.py &&   python scripts/crop_cad.p
 - **No FEA.** Hand calculations only.
 - **Screw lead unsettled** — see the drivetrain table. 10 mm is right but needs the screws
   moved to X = ±62, which has not been modelled.
-- **Printed mass 1.54 kg** is the largest unresolved issue. `P2a` (145 cm³), `P5` (167 cm³),
+- **Printed mass 1.81 kg** (up from 1.63 with the two new covers) is the largest
+  unresolved issue. `P2a` (145 cm³), `P5` (167 cm³),
   `P6` (165 cm³) and `P1` (131 cm³) are the structural candidates for a diet. The 239 cm³ of
   shrouds should print at two walls and low infill — nearer 130 g than 303 g, since they
   carry no load.
-- **The Y −45…−100 moving gap** needs a fabric gaiter designed for it.
+- **Carriage guides are sliding, not rolling.** The Delrin L-gibs cost ~70 N of
+  friction, 7.7% of the belt pull, and worse, it is *sliding* friction — stick-slip and a
+  breakaway that differs from the running force, on a device that has to deliver 10%
+  assist smoothly. An MGN12H rail drops that to 1.4 N for +219 g. See
+  [`scripts/310_guides.py`](scripts/310_guides.py). Not changed yet.
 - **The motor sits at the hip**, where the reference limb model ends (Y = 300). Its 100 mm
   clearance is measured against nothing and needs a fitting check on the patient.
 - **Belt tooth-shear figures come from continuous-duty power ratings**, which carry fatigue

@@ -69,13 +69,14 @@ CAD and build 1610. Everything below assumes **1610 after the reposition**.
 |---|---|---|---|---|
 | S1 | V-slot extrusion 20x60, **black anodised**, 230 mm | 1 | Cut to Y 58 to 284.7. ~350 g | 15 |
 | S2 | Delrin / acetal sheet 6 mm, offcut | — | The four L-gib sliders. Print in PETG to fit-check, then cut the real ones | 12 |
+| S2a | *(alternative)* MGN12H rail 230 mm + 2 blocks | 1 set | Replaces S2. Cuts guide friction from ~70 N to 1.4 N at +219 g — see [`scripts/310_guides.py`](../scripts/310_guides.py). Not in the CAD yet | 35 |
 | S3 | M5 T-nuts + button head cap screws | ~40 | Everything mounts to the slots | 12 |
 | S4 | M3 / M4 cap screws, assorted | ~40 | Fairings, cuffs, electronics | 10 |
 | S5 | Padding — 6 mm EVA + hook-and-loop straps | 1 set | Cuff liners. Do not skip: the whole load path ends at skin | 20 |
 
 ## 5. Printed parts
 
-All 15 in [`stl/`](../stl). Blue PETG as rendered, 0.2 mm layers.
+All 16 in [`stl/`](../stl). Blue PETG as rendered, 0.2 mm layers.
 
 | Part | Qty | Suggested |
 |---|---|---|
@@ -85,9 +86,10 @@ All 15 in [`stl/`](../stl). Blue PETG as rendered, 0.2 mm layers.
 | `P10a`–`P10d_Slider_Delrin` | 1 each | Print in PETG to fit-check, then machine from acetal |
 | `P11_SprungAnchor` | 1 | 5 perimeters, 60% |
 | `P5_ThighCuff`, `P7_ShankCuff`, `P6_ShankSocket` | 1 each | 4 perimeters, 30% |
-| `P20_KneeCap`, `P21_FairingThigh`, `P24_FairingShank` | 1 each | 3 perimeters, 15%, cosmetic |
+| `P20_KneeCap` | 1 | 3 perimeters, 20%. Carries the lateral cheek, so it is ~220 mm across |
+| `P21_FairingThigh`, `P22_DriveCap`, `P24_FairingShank` | 1 each | 3 perimeters, 15%, cosmetic |
 
-Roughly 1.4–1.8 kg of filament including supports.
+Roughly 1.8–2.2 kg of filament including supports.
 
 ## 6. Electronics
 

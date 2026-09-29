@@ -13,7 +13,7 @@ for f in os.listdir(OUT):
     if f.endswith(".stl"): os.remove(os.path.join(OUT,f))
 STRUCT=["P1_KneeYoke","P2a_KneeHingePlate","P3_Carriage","P3b_CarriageB","P5_ThighCuff",
         "P6_ShankSocket","P7_ShankCuff","P11_SprungAnchor"]
-FAIR=["P20_KneeShroud","P21_ShellAnterior","P24_FairingShank"]
+FAIR=["P20_KneeShroud","P21_ShellAnterior","P22_DriveCap","P24_FairingShank"]
 MACH=["P10a_Slider_Delrin","P10b_Slider_Delrin","P10c_Slider_Delrin","P10d_Slider_Delrin"]
 ts=tf=0.
 for n in STRUCT+FAIR+MACH:

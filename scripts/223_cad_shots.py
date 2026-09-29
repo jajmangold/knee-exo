@@ -44,7 +44,7 @@ SHANK = ["A4_Shank2020_VSlot", "P2a_KneeHingePlate", "P6_ShankSocket", "P7_Shank
 CA = ["P3_Carriage", "A2b_BallNut_SFU1620", "P10a_Slider_Delrin", "P10b_Slider_Delrin"]
 CB = ["P3b_CarriageB", "A2d_BallNut_LH", "P10c_Slider_Delrin", "P10d_Slider_Delrin",
       "P11_SprungAnchor", "A8_TensionSpring", "P13_HallTension"]
-FAIR = ["P20_KneeShroud", "P21_ShellAnterior", "P24_FairingShank"]
+FAIR = ["P20_KneeShroud", "P21_ShellAnterior", "P22_DriveCap", "P24_FairingShank"]
 REFS = ["REF_Thigh", "REF_Knee", "REF_Shank"]
 O = lambda n: doc.getObject(n)
 ALL = [o.Name for o in doc.Objects if o.TypeId.startswith("Part::")]
@@ -56,7 +56,7 @@ for n in ("A1_Extrusion_20x60_VSlot", "A4_Shank2020_VSlot"):
 for n in ("P1_KneeYoke", "P2a_KneeHingePlate", "P3_Carriage", "P3b_CarriageB",
           "P5_ThighCuff", "P6_ShankSocket", "P7_ShankCuff", "P11_SprungAnchor"):
     COL[n] = (0.13, 0.31, 0.72)
-for n in ("P20_KneeShroud", "P21_ShellAnterior", "P24_FairingShank"):
+for n in ("P20_KneeShroud", "P21_ShellAnterior", "P22_DriveCap", "P24_FairingShank"):
     COL[n] = (0.22, 0.44, 0.85)
 for n in ("A2_BallScrew_SFU1620", "A2c_BallScrew_LH", "HW_PinB_10", "HW_JointBolts"):
     COL[n] = (0.72, 0.74, 0.78)
@@ -126,6 +126,11 @@ def prep(theta, fair=True, refs=True, cam="tq", focus=None, ortho=False):
     show(FAIR, fair)
     show(REFS, refs)
     v = Gui.ActiveDocument.ActiveView
+    try:
+        Gui.ActiveDocument.resetEdit()     # a live dragger gets baked into saveImage
+        v.setAxisCross(False)
+    except Exception:
+        pass
     v.setCameraType('Orthographic' if ortho else 'Perspective')
     v.setCameraOrientation(CAMS[cam])
     Gui.Selection.clearSelection()
