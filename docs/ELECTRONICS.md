@@ -124,9 +124,9 @@ odrv0.axis0.config.motor.torque_constant   = 9.549/149  # 0.0641 N.m/A
 odrv0.axis0.config.motor.current_soft_max  = 25         # 21.7 A peak + margin
 odrv0.axis0.config.motor.current_hard_max  = 40
 
-# --- bus ---------------------------------------------------------------
-odrv0.config.dc_bus_overvoltage_trip_level  = 46.0      # 42 V charged + headroom
-odrv0.config.dc_bus_undervoltage_trip_level = 30.0      # 10S cut-off
+# --- bus -------------------------------------- 12S LiFePO4, see section 7
+odrv0.config.dc_bus_overvoltage_trip_level  = 46.0      # 43.8 V charged + headroom
+odrv0.config.dc_bus_undervoltage_trip_level = 31.0      # 12S at 2.6 V/cell
 odrv0.config.dc_max_positive_current        =  25.0
 odrv0.config.dc_max_negative_current        =  -3.0     # see section 6
 odrv0.config.brake_resistance               =  2.0
@@ -167,17 +167,27 @@ CAN Simple frames the ESP32 needs (`cmd_id | node_id << 5`):
 patient whenever their intent differs from the trajectory, which is most of the time and is
 exactly how exo research devices hurt people. The ODrive only ever receives a torque.
 
-## 6. Regen is the thing that will bite you
+## 6. Regen is the thing that will bite you — and LiFePO4 makes it worse
 
 Descending stairs, sitting down, and the eccentric phase of every step all drive the knee
 backwards through the transmission and turn the motor into a generator. That current has to
 go somewhere.
 
-A 36 V ebike pack's BMS will usually **not** accept reverse current through its discharge
-FETs. If it blocks, the returning energy has nowhere to go but the DC bus capacitors, the
-bus voltage climbs, and the ODrive trips on overvoltage — mid-step, with a patient on the
-stairs. The failure is *safe* (the drive coasts and the joint free-swings, section 8) but
-it is not acceptable as a routine event.
+A pack's BMS will usually **not** accept reverse current through its discharge FETs. If it
+blocks, the returning energy has nowhere to go but the DC bus capacitors, the bus voltage
+climbs, and the ODrive trips on overvoltage — mid-step, with a patient on the stairs. The
+failure is *safe* (the drive coasts and the joint free-swings, section 8) but it is not
+acceptable as a routine event.
+
+**With LiFePO4 this stops being a maybe.** LiFePO4 must not be charged below 0 °C, and the
+chosen BMS has a low-temperature cutoff precisely to enforce that. Regen *is* charge. So on
+a cold morning the BMS will refuse it — outdoors, on stairs, which is exactly the situation
+the device exists for. The brake resistor is not a precaution here, it is the only path the
+energy has.
+
+A 12S LiFePO4 pack also leaves less headroom than the 10S Li-ion this was first sized for:
+43.8 V at full charge against a 46 V trip is **2.2 V**, where 10S Li-ion gave 4 V. Size the
+resistor for the full braking power, not a trickle.
 
 Three things together:
 
@@ -192,6 +202,37 @@ Three things together:
 
 This applies to the hoverboard pack too, and hoverboard BMSes are generally the more
 restrictive of the two.
+
+## 6a. The pack
+
+**A123 LiFePO4, 36 V nominal, 736 Wh** (BatteryHookup M1B module) with a 7–17S smart BMS,
+100 A, CAN + RS485 + UART, low-temperature cutoff.
+
+| | |
+|---|---|
+| Chemistry | LiFePO4 — 3.2 V nominal, 3.65 V max, 2.5 V min per cell |
+| 12S | 38.4 V nominal, **43.8 V full**, 30 V empty |
+| ODrive S1 window | 12–50 V — fits with room at the top |
+| BMS current | 100 A against a peak bus draw near 10 A. Enormous margin |
+
+Three things this changes from the ebike pack originally speced:
+
+- **Undervoltage trip** moves from 30 V to 31 V (2.6 V/cell). Confirm the pack's series
+  count before setting it — an 11S module empties at 27.5 V and would trip early at 31.
+- **Regen headroom shrinks** and the low-temp cutoff makes refusal routine rather than
+  possible. See section 6.
+- **Mass.** LiFePO4 runs about 90–110 Wh/kg, so 736 Wh is roughly **7–8 kg**, against
+  ~2.5 kg for the 374 Wh Li-ion pack. `300_drivetrain.py` puts mixed daily use at 12 W, so
+  374 Wh already lasted 31 hours: this is roughly twice the energy for three times the
+  weight. What it buys instead is real — LiFePO4 does not go into thermal runaway, the A123
+  cells take enormous discharge current, and cycle life is far longer. On something strapped
+  to a person that is a defensible trade, but it is a **safety and longevity** choice, not a
+  range one, and 7–8 kg in a backpack needs the waist belt taking the load.
+
+**Wiring the BMS.** The ESP32-C3 has **one** TWAI controller and it is already carrying the
+ODrive at 500 kbit/s. Do not put the BMS on that bus unless you have checked both the baud
+rate and the node IDs. The clean answer is to take the BMS on **UART or RS485** — the C3 has
+spare UARTs — and leave CAN to the motor controller.
 
 ## 7. Control strategy
 

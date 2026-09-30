@@ -127,31 +127,36 @@ Architecture and reasoning in [`ELECTRONICS.md`](ELECTRONICS.md).
 
 | # | Part | Qty | Notes | ~USD |
 |---|---|---|---|---|
-| B1 | 36 V ebike pack, Hailong / "shark" rail mount, 10.4 Ah | 1 | 374 Wh, slide-off dovetail with a key lock | 190 |
-| B2 | Hailong mounting rail / base plate | 1 | Usually supplied. Bolts to the pack frame | inc. |
-| B3 | Backpack with an internal frame | 1 | Rail bolts through to the frame stay | 60 |
+| B1 | **A123 LiFePO4 36 V, 736 Wh (M1B module)** | 1 | **Bought.** 12S, 43.8 V full, 30 V empty — inside the S1's 12–50 V window | — |
+| B2 | **7–17S LiFePO4 smart BMS, 100 A, CAN/RS485/UART, low-temp cutoff** | 1 | **Bought.** Take it on UART or RS485: the ESP32-C3 has one CAN controller and the ODrive already has it | — |
+| B3 | Backpack with an internal frame | 1 | The pack is **7–8 kg** — the waist belt must carry it, not the shoulders | 60 |
 
-Your existing **hoverboard 36 V 10 Ah** pack is 360 Wh and electrically fine (10S,
-30–42 V, inside the S1's 12–50 V window). Runtime from `300_drivetrain.py`:
+Runtime from `300_drivetrain.py`, against the 736 Wh now bought:
 
-| Use | Draw | Hoverboard 360 Wh | Ebike 504 Wh |
-|---|---|---|---|
-| Stair climbing, 1 step/s | 57 W | 6.4 h | 8.9 h |
-| Level walking | 23 W | 15.5 h | 21.6 h |
-| Mixed daily use | 12 W | 30.9 h | 43.3 h |
+| Use | Draw | 736 Wh |
+|---|---|---|
+| Stair climbing, 1 step/s | 57 W | 12.9 h |
+| Level walking | 23 W | 32.0 h |
+| Mixed daily use | 12 W | 61.3 h |
 
-**Energy is not the constraint — both packs vastly outlast a day.** So buy the ebike pack
-for the *mount*, not the capacity: the dovetail rail lets the patient dock and undock
-without taking the backpack off or fiddling with connectors, and a Hailong ships with an
-integrated BMS, a fuel gauge and a fused output. Buy the *smallest* capacity that comes on
-the rail you want — 10.4 Ah / 374 Wh is plenty, and saves ~0.9 kg over 14 Ah.
+**Energy was never the constraint** — the 374 Wh pack originally speced already gave
+31 hours of mixed use. What 736 Wh of LiFePO4 buys is chemistry, not range: no thermal
+runaway, very high discharge capability from the A123 cells, and far longer cycle life.
+On a device strapped to a person that is a defensible trade for the weight.
 
-Two cautions, both expanded in `ELECTRONICS.md`:
+The weight is the thing to plan around. LiFePO4 runs 90–110 Wh/kg, so this is roughly
+**7–8 kg** against ~2.5 kg for the Li-ion alternative. Mount it low, at the lumbar curve,
+and make sure the waist belt is carrying it.
 
-- Many ebike BMSes will not accept **regen** current back through the discharge FETs, and
-  descending stairs regenerates hard. Hence the brake resistor at E2.
-- Check the BMS continuous discharge rating. 22 A peak is fine for most 36 V ebike packs
-  (typically 20–30 A) but sits at the top of a hoverboard BMS's range.
+Three cautions, all expanded in `ELECTRONICS.md`:
+
+- **LiFePO4 must not be charged below 0 °C**, and the BMS enforces that with a low-temp
+  cutoff. Regen *is* charge, so on a cold morning the BMS will refuse it — outdoors, on
+  stairs. The brake resistor (E2) is the only path the energy has. Not optional.
+- **Regen headroom is tighter**: 43.8 V full against a 46 V trip is 2.2 V, where 10S
+  Li-ion gave 4 V.
+- **Confirm the series count** before setting the undervoltage trip. 12S empties at 30 V,
+  11S at 27.5 V, and a trip set for the wrong one cuts out early or too late.
 
 ## 8. Backpack mounting
 

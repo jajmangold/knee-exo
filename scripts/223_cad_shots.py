@@ -180,5 +180,9 @@ prep(55.0, fair=False, refs=False, cam="tq", focus=["P2a_KneeHingePlate", "P1_Kn
 save("knee_detail", 1500, 1150)
 
 pose(30.0)
+# leave the session usable: the last shot hides the fairings, and leaving them hidden
+# makes it look as though the motor has no cover
+show(ALL, True)
+show(REFS, True)
 doc.recompute()
-print("done")
+print("done -- all parts left visible")

@@ -149,7 +149,12 @@ INNER[0] = (JOIN - 2.0, 0.0, 84.0 - W, 23.0 - W, 115.0)
 
 o_ = need(loft(OUTER), "cap outer")
 cap = need(loft(OUTER), "cap outer").cut(need(loft(INNER), "cap inner"))
-cap = cap.cut(Part.makeBox(400., 130., 40.0, V(-200., JOIN - 4.0, 52.0)))   # open medially
+# Open the medial face only as far as the drive box. P21's convention -- open below
+# Z=92, because that side lies against the limb -- is right for the thigh canopy and
+# wrong over an outrunner: the whole bell rotates, and leaving it open exposed a 5.5 mm
+# band of spinning case at Z 86.5..92 pointing at the leg. From Y=310 the cap closes
+# right round. That makes it a clamshell to assemble, which is noted in the BOM.
+cap = cap.cut(Part.makeBox(400., 310.0 - (JOIN - 4.0), 40.0, V(-200., JOIN - 4.0, 52.0)))
 cap = need(cap.removeSplitter(), "P22_DriveCap")
 
 p22 = O("P22_DriveCap") or doc.addObject("Part::Feature", "P22_DriveCap")
