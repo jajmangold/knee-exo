@@ -55,7 +55,10 @@ OD 36 and grows the carriage body to X 34…80, Z 84…128 so the bore is captur
 caused. Screws stay at **X = ±58**. Swept clean over all 107 poses. The stale `SFU1620`
 labels are corrected too.
 
-**Order SFU1610, RH and LH.**
+**Order SFU1610, RH and LH.** Both from the same supplier in the same batch — mismatched
+lead accuracy or nut preload between the two shows up directly as the differential
+drifting, and there is no adjustment for it. Each screw only needs **162 mm of thread**
+(the nut bodies live at Y 121…283); the rest is bearing seats.
 
 ---
 
@@ -64,7 +67,7 @@ labels are corrected too.
 | # | Part | Qty | Notes | ~USD |
 |---|---|---|---|---|
 | D1 | Ball screw SFU1610, RH, 300 mm, machined ends | 1 | 68.3 mm stroke + nut length + bearing seats. Axis at X = −58 | 45 |
-| D2 | Ball screw SFU1610, **LH**, 300 mm, machined ends | 1 | Left-hand is the whole trick. Confirm with the seller — often a special order | 70 |
+| D2 | Ball screw SFU1610, **LH**, 300 mm, machined ends | 1 | Left-hand is the whole trick, and the build's only special-order part. Confirm with the seller. If the quote or lead time is bad, [`370_no_lh_screw.py`](../scripts/370_no_lh_screw.py) has two ways to use a second RH screw instead | 70 |
 | D3 | SFU1610 **flangeless** ball nut | 2 | Usually supplied with the screw. A flanged nut drives 15 mm into the rail | inc. |
 | D4 | BLDC outrunner C6374, **170 Kv**, 8 mm shaft | 1 | **Owned — 4 of them, $32–40 each.** 24.8 A peak at SFU1610. ~800 g, the heaviest single item | 38 |
 | D5 | Diametric magnet 6 x 2.5 mm | 1 | Glued to the motor shaft end for the drive's onboard AS5047P | 3 |
