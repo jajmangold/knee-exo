@@ -72,7 +72,7 @@ print()
 print("  %-10s %6s %14s %10s %s" % ("face", "Y", "worst gantry", "statics", "verdict"))
 results = {}
 for sgn, face in ((1.0, "posterior"), (-1.0, "anterior")):
-    for ystn in (92.0, 132.0, 172.0):
+    for ystn in (88.0, 124.0, 160.0):
         br = bracket(sgn, ystn)
         worst, wth = 0.0, None
         for th in THETA:
@@ -115,7 +115,7 @@ print("  And 330_frontmount.py already measured fore-aft as the hidden direction
 print("  posterior face is the better one to spend anyway.")
 
 # ---------------------------------------------------------------- build them
-KEEP = [(1.0, y) for y in (92.0, 132.0, 172.0) if results[(1.0, y)]]
+KEEP = [(1.0, y) for y in (88.0, 124.0, 160.0) if results[(1.0, y)]]
 assert KEEP, "no side bracket cleared -- do not build mounts that do not fit"
 for i, (sgn, ystn) in enumerate(KEEP):
     nm = "P23%s_FairingMount" % "abc"[i]

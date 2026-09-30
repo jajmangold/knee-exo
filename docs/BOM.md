@@ -17,7 +17,8 @@ the **square** of that ratio. This is the most important choice in the build:
 | Screw | Ratio | Reflected J | vs. limb's own J | Peak current @170 Kv | Nut OD |
 |---|---|---|---|---|---|
 | SFU1605 | 46.4 | 0.667 kg·m² | **2.22x** | 12.4 A | 28 mm |
-| **SFU1610 — built** | 23.2 | 0.167 kg·m² | **0.56x** | 24.8 A | 36 mm |
+| SFU1610, 1:1 link | 23.2 | 0.167 kg·m² | 0.56x | 24.8 A | 36 mm |
+| **SFU1610 + 1:1.6 overdrive — built** | **14.5** | **0.065 kg·m²** | **0.22x** | **39.7 A** | 36 mm |
 | **SFU1616 — target** | 14.5 | 0.065 kg·m² | **0.22x** | 39.7 A | 36 mm |
 | SFU1620 | 11.6 | 0.042 kg·m² | 0.14x | 49.6 A | 40 mm |
 
@@ -71,8 +72,8 @@ drifting, and there is no adjustment for it. Each screw only needs **162 mm of t
 | D3 | SFU1610 **flangeless** ball nut | 1 | Supplied with the screw. Trapped axially between two end plates in the gantry rather than clamped radially — a 36.4 mm bore through a 40 mm housing severs it, and the load is along Y anyway | inc. |
 | D4 | BLDC outrunner C6374, **170 Kv**, 8 mm shaft | 1 | **Owned — 4 of them, $32–40 each.** 24.8 A peak at SFU1610. ~800 g, the heaviest single item | 38 |
 | D5 | Diametric magnet 6 x 2.5 mm | 1 | Glued to the motor shaft end for the drive's onboard AS5047P | 3 |
-| D6 | HTD-5M belt, 9 mm wide, closed loop | 1 | 1:1 loop from the motor at X = 0 to the screw at X = −62, at Y 384…396 past everything else | 8 |
-| D7 | HTD-5M 20T pulleys, 8 mm bore | 2 | Screw and motor | 10 |
+| D6 | HTD-5M belt, **15 mm** wide, closed loop | 1 | Motor to screw, at Y 302…314. Centre distance 61 mm. 15 mm, not 9: it now carries the overdrive, ~153 N tight side | 10 |
+| D7 | HTD-5M **32T** pulley (motor) + **20T** pulley (screw), 8 mm bore | 1 each | **A 1:1.6 OVERDRIVE, not 1:1.** This is what puts the total ratio at 14.5:1 with the SFU1610 — see [`404_link_ratio.py`](../scripts/404_link_ratio.py). Gearing here is nearly free because this belt sits on the motor side of the screw's advantage and carries 85 N, not the 764 N the capstan loop carries | 14 |
 | D8 | KP08 / KFL08 bearing blocks | 2 | One screw, top and bottom. The upper one lives in the drive bracket's screw boss | 10 |
 | D9 | Rigid shaft coupler 8 to 10 mm | 1 | Only if you mount the motor coaxial with screw A instead of belting it | 8 |
 

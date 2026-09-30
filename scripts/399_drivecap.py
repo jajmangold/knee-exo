@@ -35,8 +35,10 @@ doc = FreeCAD.getDocument("KneeExo_v4")
 
 N_EXP, N_PTS = 5.5, 32
 WALL = 3.0
-Y0 = 204.0
-MOT_R, MOT_Z0 = 31.5, 118.0
+Y0 = 180.0
+MOT_X, MOT_R, MOT_Z0 = -104.0, 31.5, 62.0
+SCR_X, SCR_Z = -62.0, 106.0
+LINK_R_MOT, LINK_R_SCR = 32 * 5.0 / (2 * math.pi) + 2.0, 20 * 5.0 / (2 * math.pi) + 2.0
 
 
 def sell(y, xc, a, b, zc):
@@ -63,16 +65,17 @@ def inside(x, z, xc, a, b, zc):
 
 
 # outer stations: (y, xc, a, b, zc). Y 204 is P21's section verbatim.
-OUT = [(204.0, -19.5, 76.5, 28.0, 110.0),
-       (230.0, -19.0, 74.0, 31.0, 112.0),
-       (270.0, -18.5, 71.0, 34.0, 115.0),
-       (310.0, -18.0, 69.0, 37.0, 118.0),
-       # The full section has to run to Y 398, not 380: the 1:1 link belt sits at
-       # Y 384..396 and reaches X -80, which the taper was cutting into by 0.088 cm3.
-       (398.0, -18.0, 69.0, 37.0, 118.0),
-       (404.0, -18.0, 62.0, 33.0, 118.0),
-       (412.0, -18.0, 44.0, 24.0, 118.0)]
-INN = [(y if 204.0 < y < 412.0 else (202.0 if y == 204.0 else 406.0),
+# The cap no longer has to swell over the motor: with the motor tucked anterior at
+# (X -104, Z 62) it is nowhere near this section, and a convex section reaching both it
+# and the lateral hardware would swallow the leg. The motor gets P25_MotorNacelle instead
+# and this stays close to P21's own profile the whole way.
+OUT = [(180.0, -19.5, 76.5, 28.0, 110.0),
+       (220.0, -21.0, 77.5, 29.0, 110.0),
+       (300.0, -21.5, 78.0, 30.0, 108.0),
+       (318.0, -21.5, 78.0, 30.0, 108.0),
+       (326.0, -21.0, 70.0, 27.0, 108.0),
+       (334.0, -20.0, 52.0, 20.0, 108.0)]
+INN = [(y if 180.0 < y < 334.0 else (178.0 if y == 180.0 else 328.0),
         xc, a - WALL, b - WALL, zc) for y, xc, a, b, zc in OUT]
 
 print("=" * 76)
@@ -81,21 +84,44 @@ xc, a, b, zc = INN[3][1], INN[3][2], INN[3][3], INN[3][4]
 print("  widest inner section (Y 310): centre X %.1f, a %.1f, b %.1f, zc %.0f"
       % (xc, a, b, zc))
 print("     -> spans X %.1f..%.1f, Z %.0f..%.0f" % (xc - a, xc + a, zc - b, zc + b))
-WORST = [("motor, widest point", MOT_R, MOT_Z0),
-         ("motor, top of can", 0.0, MOT_Z0 + MOT_R),
-         ("motor, far side", -MOT_R, MOT_Z0),
-         ("link belt corner", -80.0, 136.0),
+WORST = [("gantry, outboard corner", -84.0, 130.2),
+         ("gantry, far side", 32.0, 123.0),
+         ("A7 yoke corner", 46.5, 130.3),
+         ("A7 end plate corner", -46.5, 88.0),
+         ("belt strand outer", 41.124, 126.0),
          ("ball screw top", -69.9, 113.9),
-         ("A7 top plate corner", 48.0, 134.0)]
+         ("link belt, screw-end pulley", -62.0 - LINK_R_SCR, 106.0 + LINK_R_SCR)]
 for nm, x, z in WORST:
     f = inside(x, z, xc, a, b, zc)
     print("     %-22s X %7.1f Z %6.1f   %.3f %s"
           % (nm, x, z, f, "" if f <= 1.0 else "OUTSIDE -- gets trimmed"))
-print("  (A7's motor-plate corners at X -84 / Z 151.5 are deliberately outside: a section")
-print("   that contained them would be 158 mm wide. They are dead material and get cut.)")
+print("  (A7's motor mount disc and arm sit outside this on purpose -- they are under the")
+print("   nacelle, not the cap.)")
+
+def stadium(r1, r2, y0, y1):
+    """A radius at each pulley and a straight span between. NOT a bounding box: the belt
+    centreline passes 118 mm from the leg axis, but a box's inboard corner would be at 59,
+    i.e. buried in the thigh."""
+    p1 = Part.makeCylinder(r1, y1 - y0, V(MOT_X, y0, MOT_Z0), V(0, 1, 0))
+    p2 = Part.makeCylinder(r2, y1 - y0, V(SCR_X, y0, SCR_Z), V(0, 1, 0))
+    dx, dz = SCR_X - MOT_X, SCR_Z - MOT_Z0
+    L = math.hypot(dx, dz)
+    r = max(r1, r2)
+    mid = Part.makeBox(L, y1 - y0, 2 * r, V(0, y0, -r))
+    mid.rotate(V(0, y0, 0), V(0, 1, 0), -math.degrees(math.atan2(dz, dx)))
+    mid.translate(V(MOT_X, 0, MOT_Z0))
+    return p1.fuse(p2).fuse(mid).removeSplitter()
+
+
+NAC_O = Part.makeCylinder(MOT_R + 3.5, 109.0, V(MOT_X, 211.0, MOT_Z0), V(0, 1, 0))
+NAC_O = NAC_O.fuse(stadium(LINK_R_MOT + 4.0, LINK_R_SCR + 4.0, 296.0, 320.0)).removeSplitter()
+NAC_I = Part.makeCylinder(MOT_R + 0.5, 107.0, V(MOT_X, 213.0, MOT_Z0), V(0, 1, 0))
+NAC_I = NAC_I.fuse(stadium(LINK_R_MOT + 1.0, LINK_R_SCR + 1.0, 298.0, 322.0)).removeSplitter()
 
 lo, li = loft(OUT), loft(INN)
-c = lo.cut(li)
+# The cap and the nacelle interlock: each is trimmed back to the other's OUTER surface, so
+# they meet on a shared face with no overlap and no gap.
+c = lo.cut(li).cut(NAC_O)
 # open underneath where the leg is -- REF_Thigh's surface is Z 85 out to Y 300
 c = c.cut(bx(-110., 70., Y0 - 1., 300., 40., 88.))
 c = c.removeSplitter()
@@ -115,8 +141,20 @@ print("     section. Flush at Y %.0f, no step. The two-screw cap was 190 mm." % 
 # ------------------------------------------------- trim A7 to the cap's inner surface
 a7 = doc.getObject("A7_DriveBox")
 v0 = a7.Shape.Volume / 1000.
-keep = a7.Shape.common(li)
-# everything distal of the cap stays as it is -- the cap only starts at Y 204
+# GUARD: this trim is destructive and not idempotent. Run it twice without rebuilding
+# A7 from 393 in between and the second pass eats what the first one left -- which is
+# how the motor mount disappeared once already, silently, because a missing part is not
+# an interference and no sweep reports it. Fail loudly instead.
+assert a7.Shape.BoundBox.XMin < MOT_X - MOT_R + 1.0, (
+    "A7 has already been trimmed (XMin %.1f, expected < %.1f). Re-run 393_driveend.py "
+    "first -- this script cannot rebuild what it removed."
+    % (a7.Shape.BoundBox.XMin, MOT_X - MOT_R + 1.0))
+# Trim to the cap's inner surface OR the nacelle's -- not the cap alone. A7's motor
+# mount disc and its arm live at (X -104, Z 62), which is under the NACELLE and far
+# outside the cap's section, so trimming to the cap alone deleted them outright and took
+# A7 from 366 g to 222. No sweep catches that: a missing part is an absence, not an
+# interference. It showed up as an implausible mass.
+keep = a7.Shape.common(li.fuse(NAC_I))
 distal = a7.Shape.cut(bx(-200., 200., Y0, 500., 0., 300.))
 t = keep.fuse(distal).removeSplitter()
 assert len(t.Solids) == 1, "A7 solids=%d after trimming" % len(t.Solids)
@@ -128,13 +166,17 @@ bb = t.BoundBox
 print("A7   trimmed %.1f -> %.1f cm3 (%.0f -> %.0f g), now X %.1f..%.1f Z %.1f..%.1f"
       % (v0, t.Volume / 1000., v0 * 2.70, t.Volume / 1000. * 2.70,
          bb.XMin, bb.XMax, bb.ZMin, bb.ZMax))
-print("     The corners the cap cut off were plate that never carried anything --")
-print("     the motor bore is 65 mm across and the plate was 132.")
+print("     What comes off is corner material on the mount plate; what must NOT come off")
+print("     is the motor mount itself, which is why the trim is against the cap fused")
+print("     with the nacelle rather than the cap alone.")
+mnt = t.common(Part.makeCylinder(MOT_R + 1.0, 12.0, V(MOT_X, 289.0, MOT_Z0), V(0, 1, 0)))
+print("     motor mount still present: %.2f cm3" % (0.0 if mnt.isNull() else mnt.Volume / 1000.))
+assert (0.0 if mnt.isNull() else mnt.Volume / 1000.) > 1.0, "the motor mount got trimmed away"
 
 # --------------------------------------------------------------------- checks
 print("=" * 76)
 for nm in ("REF_Thigh", "A3_Motor_6374", "A6_Idler29T", "A2_BallScrew_SFU1620",
-           "A5c_Belt_TakeRun", "A5d_Belt_WrapIdler", "A7b_LinkBelt", "P21_ShellAnterior"):
+           "A5c_Belt_TakeRun", "A5d_Belt_WrapIdler", "P21_ShellAnterior"):
     ob = doc.getObject(nm)
     if ob is None:
         continue
@@ -144,6 +186,33 @@ for nm in ("REF_Thigh", "A3_Motor_6374", "A6_Idler29T", "A2_BallScrew_SFU1620",
     assert v < 0.02, "P22 clashes with %s by %.3f cm3" % (nm, v)
 k = t.common(doc.getObject("A3_Motor_6374").Shape)
 print("  A7  vs A3_Motor                 %.3f cm3" % (0.0 if k.isNull() else k.Volume / 1000.))
+
+# ------------------------------------------------- P25 motor nacelle
+nac = NAC_O.cut(NAC_I).cut(lo).removeSplitter()
+assert nac.isValid(), "P25 invalid"
+o = doc.getObject("P25_MotorNacelle")
+if o is None:
+    o = doc.addObject("Part::Feature", "P25_MotorNacelle")
+    g = doc.getObject("C_Drive")
+    if g is not None:
+        g.addObject(o)
+o.Shape = nac
+o.Label = "P25_MotorNacelle"
+bb = nac.BoundBox
+print("P25  X %6.1f..%5.1f  Y %6.1f..%5.1f  Z %5.1f..%5.1f  %5.1f cm3, %d solids"
+      % (bb.XMin, bb.XMax, bb.YMin, bb.YMax, bb.ZMin, bb.ZMax,
+         nac.Volume / 1000., len(nac.Solids)))
+for nm, sh in (("P25", nac), ("P22", c)):
+    k = sh.common(REF)
+    v = 0.0 if k.isNull() else k.Volume / 1000.
+    print("     %s vs REF_Thigh: %.3f cm3" % (nm, v))
+    assert v < 0.02, "%s is inside the leg by %.3f cm3" % (nm, v)
+for nm in ("A3_Motor_6374", "A7b_LinkBelt", "A7_DriveBox", "P22_DriveCap"):
+    ob = doc.getObject(nm)
+    k = nac.common(ob.Shape)
+    v = 0.0 if k.isNull() else k.Volume / 1000.
+    print("     P25 vs %-22s %.3f cm3" % (ob.Label, v))
+    assert v < 0.02, "P25 clashes with %s by %.3f" % (nm, v)
 
 doc.recompute()
 doc.save()

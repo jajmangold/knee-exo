@@ -228,8 +228,8 @@ these (`enable_brake_resistor` in particular) moved between 0.5.x point releases
 odrv0.axis0.motor.config.motor_type      = MOTOR_TYPE_HIGH_CURRENT
 odrv0.axis0.motor.config.pole_pairs      = 7          # VERIFY: count the magnets, halve it
 odrv0.axis0.motor.config.torque_constant = 9.549/170  # 0.0562 N.m/A -- 170 Kv, measured part
-odrv0.axis0.motor.config.current_lim     = 28         # 24.8 A peak at SFU1610 + margin
-odrv0.axis0.motor.config.current_lim_margin      = 8
+odrv0.axis0.motor.config.current_lim     = 42         # 39.7 A peak at 14.5:1 + margin
+odrv0.axis0.motor.config.current_lim_margin      = 10
 odrv0.axis0.motor.config.requested_current_range = 60 # sets the shunt gain; must exceed the above
 odrv0.axis0.motor.config.calibration_current     = 10
 
@@ -422,7 +422,7 @@ Layered limits, each independent of the others:
 | Layer | Limit | Fails to |
 |---|---|---|
 | Gait code | 10% assist ceiling, hyperextension taper | wrong torque, bounded |
-| ODrive | `current_lim` 28 A, torque ramp rate | current trip, coast |
+| ODrive | `current_lim` 42 A, torque ramp rate | current trip, coast |
 | Watchdog | 50 ms without CAN traffic | idle, coast |
 | Mechanical | hard stops at −2° and +104° | hard stop |
 | E-stop | latching NC at the waist belt, cuts power | dead, coast |
@@ -449,21 +449,31 @@ Likely sources, in the order I would expect them to matter:
 1. **Ball nut recirculation.** Balls entering and leaving the return tube: roughly
    15 balls × 19 rev/s ≈ **290 Hz** and harmonics at peak speed, right where hearing is
    most sensitive. Choosing SFU1610 over 1605 already halved screw speed to 1160 rpm,
-   and recirculation noise rises steeply with rpm.
-2. **The fairings as a soundboard.** Possibly worse than the source. `P21` is a 284 mm
+   and recirculation noise rises steeply with rpm. Note the 1:1.6 overdrive does **not**
+   help here: it slows the *motor* to 725 rpm and leaves the screw at 1160. An SFU1616
+   would halve this, which is the one thing it would still do better than the overdrive.
+2. **The fairings as a soundboard.** Possibly worse than the source. `P21` was a 284 mm
    canopy of ~3 mm PETG on a **rigid spine** straight into the rail's middle slot — a
-   direct structure-borne path into a large thin panel.
+   direct structure-borne path into a large thin panel. **That spine no longer exists**:
+   the one-screw rebuild put the gantry and the idler on the rail's outboard face, leaving
+   nowhere for it, and the canopy now hangs on three grommeted mounts into the posterior
+   side face. The layout forced the mitigation listed below before it was ever chosen.
 3. **Motor** — FOC and 24 kHz PWM are both inaudible, but torque ripple at 6× electrical
    lands near **800 Hz** at peak speed.
 4. **The 1:1 linking belt**, ~390 Hz tooth passage.
-5. **MGN7H blocks** — recirculation again, but slow (200 mm/s) and small. Ticking.
+5. **Mini V-wheels** — Delrin on aluminium, rolling. Quieter than the MGN7H blocks they
+   replaced, but watch for flats: [`401_vwheel_load.py`](../scripts/401_vwheel_load.py)
+   puts the flank contact at 91 MPa against a ~101 MPa yield onset even at the widened
+   70 mm spacing.
+6. **The 1:1.6 link belt**, 20T at 725 rpm ≈ 242 Hz tooth passage — new, and low.
 
 The capstan barely contributes: the HTD-8M belt is anchored at both ends and only lays
 onto and peels off the same 180° wrap, so tooth passage is ~24 Hz. A geared or belted
 reduction at the knee would be far worse.
 
 Mitigations, cheapest first — **isolate the fairings** (rubber grommets instead of the
-rigid spine; highest leverage and it costs grams), **constrained-layer damping** on the
+rigid spine; highest leverage and it costs grams — and as of the one-screw rebuild this is
+no longer optional, it is simply how the canopy mounts), **constrained-layer damping** on the
 inside of the canopy, and **correct screw preload and grease**. The instinct to stiffen
 the fairing mounts against rattle is backwards here.
 

@@ -22,9 +22,8 @@
 3. THE LINK BELT ENVELOPE SWALLOWED THE SCREW. Modelling artefact -- the screw carries one
    of its pulleys. Bored.
 
-4. THE DRIVE CAP WAS A CLOSED BOX. Its distal wall sat across the bracket, the screw and
-   the idler wrap, and its floor at Z 72 was inside the thigh. Open at the distal end,
-   floor up to Z 86, and it starts at Y 300 past REF_Thigh.
+4. (The drive cap used to be rebuilt here as a box. It is a loft now and lives in
+   399_drivecap.py; this file no longer touches it.)
 
 Send with:  python tools/fcsend.py scripts/396_fixes.py
 """
@@ -44,12 +43,6 @@ RZ = (88.0, 108.0)
 SCR_X, SCR_Z, SCR_R = -62.0, 106.0, 7.9
 NUT_R = 18.0
 A0 = 161.0
-MOT_R, MOT_Z0 = 31.5, 118.0
-MOT_Y = (308.0, 382.0)
-MP_Y = (300.0, 308.0)
-MP_Z = (MOT_Z0 - MOT_R - 2.0, MOT_Z0 + MOT_R + 2.0)
-LINK_Y = (384.0, 396.0)
-SCR_Y = (70.0, 398.0)
 WHEEL_Y = 35.0
 # mini V-wheel: OD 15.23, groove minor ~9.5, so the centre stands off the corner by
 # (9.5/2)/sqrt(2) in each of X and Z.
@@ -81,26 +74,6 @@ assert W_CX + W_R < BIN, "wheel fouls the belt"
 assert abs(WEB_A_X[1]) > W_CX + W_R, "web A fouls the wheel (392 builds it)"
 assert abs(WEB_A_X[0]) < BIN, "web A fouls the belt"
 
-# ------------------------------------------------------------------ 1. motor
-m = cy(MOT_R, MOT_Y[0], MOT_Y[1], 0.0, MOT_Z0)
-doc.getObject("A3_Motor_6374").Shape = m
-print("A3 motor Z %.1f..%.1f (thigh surface is Z 85), Y %.0f..%.0f"
-      % (MOT_Z0 - MOT_R, MOT_Z0 + MOT_R, *MOT_Y))
-REF = doc.getObject("REF_Thigh").Shape
-
-
-def vs_leg(shape, who):
-    """The only honest test for 'is it inside the leg' is against REF_Thigh itself.
-    A bounding-box Z test cannot tell a plate at Z 82 beyond the thigh's proximal end
-    from one at Z 82 buried in the middle of it."""
-    c = shape.common(REF)
-    v = 0.0 if c.isNull() else c.Volume / 1000.0
-    print("    %-22s vs REF_Thigh: %.3f cm3" % (who, v))
-    assert v < 0.02, "%s intrudes into the leg by %.3f cm3" % (who, v)
-
-
-vs_leg(m, "A3_Motor")
-
 # ------------------------------------------------------------- 2. the wheels
 rail = doc.getObject("A1_Extrusion_20x60_VSlot").Shape
 for k, (sgn, dy) in enumerate([(-1, -WHEEL_Y), (-1, WHEEL_Y), (1, -WHEEL_Y), (1, WHEEL_Y)]):
@@ -112,51 +85,15 @@ for k, (sgn, dy) in enumerate([(-1, -WHEEL_Y), (-1, WHEEL_Y), (1, -WHEEL_Y), (1,
     o.Shape = wh
     o.Label = "P10%s_VWheel_Mini" % "abcd"[k]
 
-# --------------------------------------------------------------- 3. link belt
-s = cy(SCR_R, SCR_Y[0], SCR_Y[1], SCR_X, SCR_Z)
-doc.getObject("A2_BallScrew_SFU1620").Shape = s
-lk = bx(SCR_X - 18.0, 18.0, LINK_Y[0], LINK_Y[1], MOT_Z0 - 18.0, MOT_Z0 + 18.0)
-lk = lk.cut(cy(SCR_R + 0.3, LINK_Y[0] - 1, LINK_Y[1] + 1, SCR_X, SCR_Z))
-lk = lk.removeSplitter()
-doc.getObject("A7b_LinkBelt").Shape = lk
+# The motor, screw, link belt and motor mount all moved into 393_driveend.py when the
+# motor went anterior (402_motor_anterior.py). This file used to rebuild them here and
+# would now undo that, so those blocks are gone. It keeps the V-wheel geometry and the
+# leg checks.
+vs_leg(doc.getObject('A3_Motor_6374').Shape, 'A3_Motor')
+vs_leg(doc.getObject('A7_DriveBox').Shape, 'A7_DriveBracket')
 
-# -------------------------------------------------- 1b. bracket's motor plate
-a = doc.getObject("A7_DriveBox").Shape
-a = a.cut(bx(-90.0, 54.0, 296.0, 320.0, 70.0, 160.0))            # old motor plate
-mp = bx(-84.0, 48.0, MP_Y[0], MP_Y[1], *MP_Z)
-mp = mp.cut(cy(MOT_R + 1.0, MP_Y[0] - 1, MP_Y[1] + 1, 0.0, MOT_Z0))
-mp = mp.cut(cy(SCR_R + 0.5, MP_Y[0] - 1, MP_Y[1] + 1, SCR_X, SCR_Z))
-for x0, x1 in ((-80.0, -54.0), (36.0, 46.0)):
-    for z0, z1 in ((MP_Z[0] + 2, MP_Z[0] + 14), (MP_Z[1] - 14, MP_Z[1] - 2)):
-        mp = mp.cut(bx(x0, x1, MP_Y[0] - 1, MP_Y[1] + 1, z0, z1))
-# tie the plate back to the bracket body with two webs, outboard of the belt
-for sgn in (-1.0, 1.0):
-    lo, hi = sorted((sgn * 41.5, sgn * 48.0))
-    a = a.fuse(bx(lo, hi, 295.0, MP_Y[0] + 0.1, 88.0, 134.0))  # 295: the cut above
-    # ended the bracket body at Y 296, so the web must start inside it, not at 298
-a = a.fuse(mp)
-a = a.removeSplitter()
-assert len(a.Solids) == 1, "A7 solids=%d" % len(a.Solids)
-doc.getObject("A7_DriveBox").Shape = a
-b = a.BoundBox
-print("A7  X %.1f..%.1f  Y %.1f..%.1f  Z %.1f..%.1f  %.1f cm3 -> %.0f g"
-      % (b.XMin, b.XMax, b.YMin, b.YMax, b.ZMin, b.ZMax,
-         a.Volume / 1000., a.Volume / 1000. * 2.70))
-vs_leg(a, "A7_DriveBracket")
-
-# ------------------------------------------------------------------- 4. cap
-CAP_X = (-90.0, 54.0)
-CAP_Y = (300.0, 406.0)
-CAP_Z = (82.0, 154.0)
-c = bx(CAP_X[0], CAP_X[1], CAP_Y[0], CAP_Y[1], *CAP_Z)
-c = c.cut(bx(CAP_X[0] + 3, CAP_X[1] - 3, CAP_Y[0] - 1, CAP_Y[1] - 3,
-             CAP_Z[0] + 3, CAP_Z[1] - 3))
-c = c.removeSplitter()
-assert len(c.Solids) == 1, "P22 solids=%d" % len(c.Solids)
-vs_leg(c, "P22_DriveCap")
-doc.getObject("P22_DriveCap").Shape = c
-print("P22 cap X %.0f..%.0f (%.0f wide, was 190) Y %.0f..%.0f Z %.0f..%.0f, open distally"
-      % (CAP_X[0], CAP_X[1], CAP_X[1] - CAP_X[0], *CAP_Y, *CAP_Z))
+# P22 is built by 399_drivecap.py as a loft, not here as a box. The box version that
+# used to live here drove 0.485 cm3 into the thigh once the cap's Y range moved.
 
 doc.recompute()
 doc.save()

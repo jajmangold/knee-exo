@@ -23,7 +23,7 @@ R = 29 * 8.0 / (2 * math.pi)
 BOUT = R + 4.2                 # 41.124, belt band outer
 IDL_Y = 255.0
 MOT_R, MOT_L = 31.5, 74.0
-SCR_X, SCR_R = -62.0, 7.9
+SCR_X, SCR_Z, SCR_R = -62.0, 106.0, 7.9
 BRACKET_X = 46.5
 THIGH_R = 84.9                 # REF_Thigh half-width
 GANTRY_Y_MAX = 204.29
@@ -46,7 +46,8 @@ print("   |X_motor - %.0f| >= %.1f + %.1f + 2.5 = %.1f -> X <= %.1f or X >= %.1f
 print("   X >= %.1f is back inside the belt band, so it is X <= %.1f. That is the binding"
       % (SCR_X + need2, SCR_X - need2))
 print("   constraint, not the bracket: a 63 mm can cannot sit 18 mm from a ball screw.")
-MOT_X = -104.0
+MOT_X, MOT_Z = -104.0, 62.0
+LEG_R = 85.0
 print()
 print("   -> motor axis X = %.0f, can spans X %.1f..%.1f" % (MOT_X, MOT_X - MOT_R, MOT_X + MOT_R))
 print("      clear of the screw's outer face (%.1f) by %.1f mm"
@@ -95,6 +96,37 @@ print("   Posteriorly it stays at X +57, which is INSIDE the thigh's %.1f -- so 
       % THIGH_R)
 print("   is still within the limb's silhouette on that side and every millimetre of the")
 print("   growth is on the front, where there is nothing to hit while walking or sitting.")
+
+print("=" * 76)
+print("3b. AND IT SHOULD BE TUCKED IN, NOT LEFT STICKING STRAIGHT OUT")
+print("   Because the motor is BELTED to the screw rather than coaxial with it, its")
+print("   position in the X-Z plane is free. It only has to clear three things: the leg,")
+print("   the screw, and the belt band. So it can follow the thigh instead of jutting out")
+print("   laterally at the device's own Z.")
+print()
+print("   %-24s %8s %9s %10s %11s" % ("motor position", "radius", "leg gap", "to screw", "outermost"))
+for lbl, x, z in (("straight out, Z 118", -104.0, 118.0),
+                  ("tucked, Z 80", -104.0, 80.0),
+                  ("tucked, Z 62  (BUILT)", -104.0, 62.0)):
+    r = math.hypot(x, z)
+    print("   %-24s %6.1f %8.1f %9.1f %10.1f"
+          % (lbl, r, r - (LEG_R + MOT_R), math.hypot(x - SCR_X, z - SCR_Z), r + MOT_R))
+print()
+print("   The device's existing radial envelope, for comparison:")
+print("     P21 canopy corner  X -96 Z 138  -> %.1f from the leg axis" % math.hypot(96, 138))
+print("     gantry corner      X -84 Z 130  -> %.1f" % math.hypot(84, 130.2))
+print()
+print("   At Z 62 the motor's outermost point is %.1f, INSIDE the canopy's %.1f -- it stops"
+      % (math.hypot(104, 62) + MOT_R, math.hypot(96, 138)))
+print("   adding to the device's bulge at all. At Z 118 it reached %.1f, about 20 mm proud"
+      % (math.hypot(104, 118) + MOT_R))
+print("   of everything else, which is the difference between a form that follows the leg")
+print("   and a box hanging off the front of it.")
+print()
+print("   It costs a separate cover. A convex section containing both the lateral hardware")
+print("   and a motor tucked round at Z 62 would also contain the LEG, so P22 cannot just")
+print("   grow: the motor gets P25_MotorNacelle, a stadium shell following the belt run,")
+print("   and the two interlock -- each trimmed back to the other's outer surface.")
 
 print("=" * 76)
 print("4. WHAT THIS DOES NOT FIX, AND WHAT IT BREAKS")

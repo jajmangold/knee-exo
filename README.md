@@ -72,11 +72,17 @@ A **belt capstan** at the knee, driven by **one ball screw** through a closed be
 | **One carriage, clamped to one strand** | move the clamp by *d* and the belt circulates by *d*, turning the knee by *d/R* |
 | **One SFU1610 RH screw at X = −62** | no left-hand thread anywhere in the build |
 | **20×40 V-slot rail, 151 mm** | aluminium V-wheel gantry on mini wheels at the \|X\| 20 corners |
+| **1:1.6 overdrive, motor → screw** | 32T : 20T HTD-5M. This is where the ratio is set, not the idler |
 | **C6374 170 Kv BLDC + MKS XDRIVE MINI** | ODrive v3.6 clone, torque control only, never position |
 
-The ratio is unchanged at **23.2 : 1** — it is still `2πR/lead`, and the idler does not
-gear anything. What the second pulley buys is the *return path* that lets one carriage do
-the work of two. How that came about, and the 725 g it saved, is
+Total ratio **14.5 : 1**. The idler does not gear anything — it carries no torque, and
+`2πR/lead` with the belt loop alone gives 23.2 : 1. The **link belt** supplies the rest,
+and it is the right place to do it: sitting on the motor side of the ball screw's own
+mechanical advantage, it carries 85 N where the capstan loop carries 764, so gearing there
+costs the belt, the nut, the screw and the idler bracket nothing at all. That is what
+finally reached the 14.5 : 1 this design wanted, without an SFU1616 — see
+[`scripts/404_link_ratio.py`](scripts/404_link_ratio.py). What the second pulley buys is
+the *return path* that lets one carriage do the work of two. How that came about, and the 725 g it saved, is
 [further down](#where-this-design-is-weak).
 
 ### Why the differential is exact, not approximate

@@ -18,7 +18,8 @@ STRUCT=["P1_KneeYoke","P2a_KneeHingePlate","P5_ThighCuff",
 FAIR=["P20_KneeShroud","P21_ShellAnterior","P22_DriveCap","P24_FairingShank",
       # posterior side-face mounts; the only thing holding the canopy now that the
       # spine is gone (398_sidemounts.py)
-      "P23a_FairingMount","P23b_FairingMount","P23c_FairingMount"]
+      "P23a_FairingMount","P23b_FairingMount","P23c_FairingMount",
+      "P25_MotorNacelle"]
 MACH=[]   # gibs -> MGN7H blocks (250_mgn7.py) -> mini V-wheels (396_fixes.py)
 ts=tf=0.
 for n in STRUCT+FAIR+MACH:
@@ -34,8 +35,9 @@ for n in STRUCT+FAIR+MACH:
           ("PETG fairing" if n in FAIR else "Delrin")))
 print("\nstructural %.0f cm3 (~%.0f g) + fairings %.0f cm3 (~%.0f g at 2-wall/low infill)"%(
     ts,ts*1.27,tf,tf*0.55))
-print("total ~%.0f g PETG + %.0f g of 2040 rail + %.0f g of aluminium (gantry %.0f,"
-      % (ts * 1.27 + tf * 0.55, 159., 175. + 465., 175.))
-print("      drive bracket %.0f) -- the one-screw build moves the two structural"
-      % 465.)
-print("      carriages out of PETG and into a bought plate. See 390_onescrew_section.py.")
+ALU = [("P3 gantry", 192.), ("A7 drive bracket", 286.)]
+print("total ~%.0f g PETG + %.0f g of 2040 rail + %.0f g of aluminium (%s)"
+      % (ts * 1.27 + tf * 0.55, 164., sum(m for _, m in ALU),
+         ", ".join("%s %.0f" % (n, m) for n, m in ALU)))
+print("      -- the one-screw build moves the two structural carriages out of PETG and")
+print("      into a bought plate. See 390_onescrew_section.py.")

@@ -52,7 +52,11 @@ print("   carriage clamped to one strand. Loop length = 2*pi*R + 2*Y_i, independ
 print("   where the carriage is, so the loop imposes no constraint at all: move the")
 print("   clamp by d and the belt circulates by d, turning both pulleys by d/R.")
 print()
-print("   ratio       2*pi*R/lead = %.1f:1 at SFU1610 -- unchanged" % (2 * math.pi * R / 10.0))
+print("   ratio       2*pi*R/lead = %.1f:1 at SFU1610 for the belt loop alone -- unchanged."
+      % (2 * math.pi * R / 10.0))
+print("               The TOTAL is now %.1f:1: a 1:1.6 overdrive in the motor-to-screw"
+      % (2 * math.pi * R / 10.0 * 20.0 / 32.0))
+print("               belt supplies the rest. 404_link_ratio.py.")
 print("   engagement  180 deg on each pulley = %.1f teeth -- unchanged" % (TEETH / 2.0))
 print("   parts       the idler is the SAME 29T HTD-8M pulley as the knee. One fewer")
 print("               unique part in the build, not one more.")
@@ -211,7 +215,7 @@ OLD = [("2x SFU1610 screw, 300 mm", 900.0), ("2x ball nut", 360.0),
 NEW = [("1x SFU1610 screw, 330 mm", 450.0), ("1x ball nut", 180.0),
        ("P3 gantry, 71.3 cm3 alu", 192.0), ("4x mini V-wheel + eccentrics", 60.0),
        ("A6 29T idler + bearings", 120.0), ("A1 2040 x 156 mm", 164.0),
-       ("A7 bracket, 120.6 cm3 alu", 326.0), ("HTD-8M loop, 742 mm", 96.0)]
+       ("A7 bracket, 106.0 cm3 alu", 286.0), ("HTD-8M loop, 742 mm", 96.0)]
 o = sum(m for _, m in OLD); n = sum(m for _, m in NEW)
 print("   %-34s %7s   %-34s %7s" % ("two-screw", "g", "one-screw", "g"))
 for k in range(max(len(OLD), len(NEW))):
@@ -225,10 +229,11 @@ print("   %.0f g off the limb: %.2f kg -> %.2f kg, %.0f%%."
 print()
 print("   But note WHERE it went. Two line items got much heavier:")
 print("     A7  %4.0f -> %4.0f g   the idler has to be held against up to %.0f N, and the"
-      % (201.0, 326.0, 1828.0))
+      % (201.0, 286.0, 1828.0))
 print("                        bracket is still the heaviest fabricated part. It was 465 g")
 print("                        until 400_bracket_stress.py showed the whole load path at")
-print("                        18 MPa against 240 -- 7.7 mm plates went to 4 mm.")
+print("                        18 MPa against 240 -- 7.7 mm plates went to 4 mm -- and it")
+print("                        now carries the motor mount as well, anterior at X -104.")
 print("     A6     0 -> %4.0f g   a second 29T pulley did not exist before" % 120.0)
 print("   Against that, the printed structural carriages are gone entirely -- one bought")
 print("   aluminium plate at %.0f g replaces %.0f g of printed PETG doing a structural job"

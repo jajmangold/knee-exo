@@ -50,7 +50,10 @@ N_EXP, N_PTS = 5.5, 32
 ZC = 110.0
 B_OUT, B_IN = 28.0, 25.0
 XC_MID, A_MID = -19.5, 76.5          # outer; inner is 3 mm in
-Y_KNEE, Y_FLARE, Y_END = 28.0, 58.0, 204.0
+# P21 hands over at Y 180, not 204: the motor now starts at Y 217 and the cap has to be
+# at full anterior width by then. Ending at 204 left 13 mm to flare from this section out
+# to X -146, which is a shoulder, not a blend. At 180 it has 37 mm.
+Y_KNEE, Y_FLARE, Y_END = 28.0, 58.0, 180.0
 WALL = 3.0
 
 CAP_X = (-90.0, 54.0)
@@ -138,7 +141,7 @@ f = f.cut(bx(-110., 80., 20., 50., 40., 96.))             # fork cheek sweeps to
 # POSTERIOR side face clear at every pose, at three stations -- the anterior one is not,
 # because that is where the gantry's nut structure lives. So P21 gets three internal bosses
 # meeting P23a/b/c, and nothing crosses the section at all.
-for ystn in (92.0, 132.0, 172.0):
+for ystn in (88.0, 124.0, 160.0):
     boss = bx(41.5, 47.0, ystn - 8.0, ystn + 8.0, 127.8, 140.0).common(lo)
     f = f.fuse(boss)
     f = f.cut(cz(2.6, 126.0, 140.0, 44.25, ystn))
