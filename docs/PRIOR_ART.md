@@ -102,12 +102,24 @@ directly comparable, but the direction is clear.
 
 In order of leverage:
 
-1. **Lower the ratio.** 23.2 → 9 would cut reflected inertia by 6.6× (0.167 → 0.025 kg·m²)
-   and put it at QDD-knee values. It costs motor torque: 1.39 → 3.6 N·m, which a 6374 at
-   149 Kv cannot hold (it would need ~56 A). **The field buys this with motor torque
-   density, not with transmission cleverness** — large-diameter, many-pole pancake motors.
-   That is the change that would most improve this design, and it is a motor selection
-   problem, not a mechanism problem.
+1. **Lower the ratio — but not as far as the field does, and not with a bigger motor.**
+   See [`scripts/350_motor_kv.py`](../scripts/350_motor_kv.py). Reflected inertia is
+   `J_rotor × N²`, and the tempting move is to cut N. But the motor then has to make
+   `32.3/N` N·m, and torque goes as `R²L` while inertia goes as `mR²` — so **buying torque
+   with diameter buys inertia straight back**:
+
+   | motor | J_rotor | lowest workable ratio | reflected J | vs. limb |
+   |---|---|---|---|---|
+   | 6374 | 3.97e-4 | 14 : 1 | 0.078 kg·m² | 0.26× |
+   | **6384** | 4.96e-4 | **11.6 : 1** | **0.067 kg·m²** | **0.22×** |
+   | 8085 | 1.44e-3 | 9 : 1 | 0.117 kg·m² | 0.39× |
+   | 8308 pancake | 1.21e-3 | 12 : 1 | 0.162 kg·m² | 0.54× |
+   | 110 mm pancake | 4.54e-3 | 6 : 1 | 0.163 kg·m² | 0.54× |
+
+   The best point is a **longer 6374, not a fatter one**. A 6384 at 11.6 : 1 beats an 8085
+   at 9 : 1 and a 110 mm pancake at 6 : 1. And 11.6 : 1 is exactly **SFU1620, 20 mm lead** —
+   a screw already checked to fit, since `311_nut_belt.py` showed its OD 40 nut clears the
+   belt at X = ±58. Only the carriage bore grows, 36 → 40 mm.
 2. **Keep the actuator on the limb.** It is what the commercial product does, it removes
    the need for any torque sensor, and it avoids a failure mode the literature has spent
    fifteen years managing rather than fixing.

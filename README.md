@@ -732,12 +732,13 @@ python scripts/fc.py run scripts/223_cad_shots.py &&   python scripts/crop_cad.p
   to be modelled directly over the V-slot, where their mounting screws would have had
   nothing to bite.
 - **Reflected inertia is the real weakness**, not mass or torque density. At 23.2 : 1 this
-  design sits at the top of the quasi-direct-drive band the field now uses (8–36 : 1), and
-  0.167 kg·m² costs 5–21 N·m during swing depending on acceleration. The field buys a lower
-  ratio with **motor torque density** — large-diameter, many-pole pancake motors — not with
-  transmission cleverness, which makes it a motor-selection problem rather than a mechanism
-  one. Dropping to 9 : 1 would cut it 6.6× but needs ~3.6 N·m at the motor, which a 6374
-  cannot hold. See [`docs/PRIOR_ART.md`](docs/PRIOR_ART.md).
+  design sits at the top of the quasi-direct-drive band the field uses (8–36 : 1), and
+  0.167 kg·m² costs 5–21 N·m during swing depending on acceleration. The fix is **SFU1620
+  (11.6 : 1) with a 6384 at ~75 Kv** — 0.067 kg·m², 0.22× the limb, at 22 A. Counter-
+  intuitively a *bigger* motor is worse: torque goes as R²L and inertia as mR², so buying
+  torque with diameter buys inertia back, and an 8085 at 9 : 1 lands at 0.117. Not built.
+  See [`docs/PRIOR_ART.md`](docs/PRIOR_ART.md) and
+  [`scripts/350_motor_kv.py`](scripts/350_motor_kv.py).
 - **No firmware yet.** Architecture is specified in `docs/ELECTRONICS.md`; no code written.
 
 ---
