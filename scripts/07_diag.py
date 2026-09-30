@@ -25,7 +25,7 @@ J_LIMB  = 0.29                               # shank+foot about knee, 80 kg
 print("Kt = %.4f N.m/A   force per amp = %.1f N/A   screw lead %.0f mm" % (KT, F_PER_A, LEAD))
 print()
 print("%-22s %9s %9s %9s %9s" % ("", "cont", "peak", "tau@60d", "tau@90d"))
-for nm, ic, ip in (("ODrive S1  (40/80 A)", 40, 80), ("ODrive Pro (60/120 A)", 60, 120)):
+for nm, ic, ip in (("XDRIVE MINI (40/60 A)", 40, 60), ("ODrive S1   (40/80 A)", 40, 80)):
     fc_, fp = F_PER_A*ic, F_PER_A*ip
     print("%-22s %7.0f N %7.0f N %7.1f Nm %7.1f Nm  (peak %.0f Nm @60d)"
           % (nm, fc_, fp, fc_*arm(60)/1000, fc_*arm(90)/1000, fp*arm(60)/1000))

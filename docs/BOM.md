@@ -14,11 +14,17 @@ because changing one assumption moves several lines at once.
 The screw lead sets the total knee-to-motor ratio, and reflected rotor inertia goes as
 the **square** of that ratio. This is the most important choice in the build:
 
-| Screw | Ratio | Reflected J | vs. limb's own J | Peak current | Nut OD |
+| Screw | Ratio | Reflected J | vs. limb's own J | Peak current @170 Kv | Nut OD |
 |---|---|---|---|---|---|
-| SFU1605 | 46.4 | 0.667 kg·m² | **2.22x** | 10.9 A | 28 mm |
-| **SFU1610 — built** | 23.2 | 0.167 kg·m² | **0.56x** | 21.7 A | 36 mm |
-| SFU1620 | 11.6 | 0.042 kg·m² | 0.14x | 43.5 A | 40 mm |
+| SFU1605 | 46.4 | 0.667 kg·m² | **2.22x** | 12.4 A | 28 mm |
+| **SFU1610 — built** | 23.2 | 0.167 kg·m² | **0.56x** | 24.8 A | 36 mm |
+| **SFU1616 — target** | 14.5 | 0.065 kg·m² | **0.22x** | 39.7 A | 36 mm |
+| SFU1620 | 11.6 | 0.042 kg·m² | 0.14x | 49.6 A | 40 mm |
+
+Currents are at the **170 Kv** motors actually on hand — 14% higher than the 149 Kv this
+was first sized for. That costs controller amps and, because copper loss for a given
+torque is independent of Kv, no motor heat at all. See
+[`360_owned_hw.py`](../scripts/360_owned_hw.py).
 
 Reflected inertia is what the patient feels **when the motor is off** — a dead battery, a
 fault trip, or the free-swing phase of every step. At SFU1605 the leg would feel roughly
@@ -60,8 +66,8 @@ labels are corrected too.
 | D1 | Ball screw SFU1610, RH, 300 mm, machined ends | 1 | 68.3 mm stroke + nut length + bearing seats. Axis at X = −58 | 45 |
 | D2 | Ball screw SFU1610, **LH**, 300 mm, machined ends | 1 | Left-hand is the whole trick. Confirm with the seller — often a special order | 70 |
 | D3 | SFU1610 **flangeless** ball nut | 2 | Usually supplied with the screw. A flanged nut drives 15 mm into the rail | inc. |
-| D4 | BLDC outrunner 6374, 149 Kv, 8 mm shaft | 1 | 190 Kv also works (21.7 A becomes 27 A). ~800 g, the heaviest single item | 90 |
-| D5 | Diametric magnet 6 x 2.5 mm | 1 | Glued to the motor shaft end for the ODrive's onboard encoder | 3 |
+| D4 | BLDC outrunner C6374, **170 Kv**, 8 mm shaft | 1 | **Owned — 4 of them, $32–40 each.** 24.8 A peak at SFU1610. ~800 g, the heaviest single item | 38 |
+| D5 | Diametric magnet 6 x 2.5 mm | 1 | Glued to the motor shaft end for the drive's onboard AS5047P | 3 |
 | D6 | HTD-5M belt, 9 mm wide, closed loop | 1 | 1:1 loop linking the two screw tops. Length set by the ±58 mm spacing | 8 |
 | D7 | HTD-5M 20T pulleys, 8 mm bore | 3 | Two screws plus motor. All three turn the **same** way — LH/RH does the opposing | 15 |
 | D8 | KP08 / KFL08 bearing blocks | 4 | Two per screw, top and bottom | 20 |
@@ -110,15 +116,16 @@ Architecture and reasoning in [`ELECTRONICS.md`](ELECTRONICS.md).
 
 | # | Part | Qty | Notes | ~USD |
 |---|---|---|---|---|
-| E1 | ODrive S1 | 1 | 12–50 V, 40 A continuous. One axis is all we need | 169 |
+| E1 | Makerbase MKS XDRIVE MINI | 1 | **Owned — 4 of them, $29.48 each.** ODrive v3.6 clone, 12–56 V, ~40 A, onboard AS5047P. Ships on modified fw **0.5.1** — do not let odrivetool upgrade it | 29 |
+| E1a | ST-Link V2 clone | 1 | Only to back up / recover the MINI's firmware. Buy it before you need it | 5 |
 | E2 | Brake resistor, ~2 Ω 50 W | 1 | **Not optional** — see the regen section | 15 |
 | E3 | ESP32-C3 SuperMini | 2 | One on the leg, one as a pocket remote. You already have these | — |
 | E4 | AS5048A magnetic encoder breakout | 1 | Absolute knee angle over SPI. Removes the power-on homing routine | 12 |
 | E5 | Diametric magnet 6 x 2.5 mm | 1 | Into the flush counterbore in the knee pin head | 3 |
 | E6 | SN65HVD230 CAN transceiver | 1 | ESP32-C3 TWAI to ODrive CAN | 4 |
 | E7 | IMU — BNO085 or ICM-42688-P | 1 | Thigh-mounted, for gait phase | 20 |
-| E8 | XT90-S anti-spark connector pair | 1 | The S1's bus caps will arc a plain XT60 | 5 |
-| E9 | Inline fuse holder + 30 A blade fuse | 1 | At the pack, before anything else | 6 |
+| E8 | XT90-S anti-spark connector pair | 1 | The drive's bus caps will arc a plain XT60 | 5 |
+| E9 | Inline fuse holder + **15 A** blade fuse | 1 | At the pack, before anything else. 15 A, not 30 — peak BUS current is 4.9 A | 6 |
 | E10 | Latching e-stop, 22 mm, NC | 1 | On the waist belt where a hand falls naturally | 10 |
 | E11 | Silicone wire 12 AWG | 4 m | Pack to leg. 0.55 V drop at 22 A over 1.5 m each way | 12 |
 | E12 | Cable gland, strain relief, spiral wrap | 1 set | The tether crosses the hip and must not snag | 10 |
@@ -175,14 +182,25 @@ where it would otherwise add to the very swing inertia the screw-lead decision i
 
 ## Rough total
 
-| Group | ~USD |
-|---|---|
-| Drive | 250 |
-| Knee transmission | 45 |
-| Structure | 70 |
-| Filament | 45 |
-| Electronics | 265 |
-| Power (new ebike pack + backpack) | 250 |
-| **Total** | **~925** |
+| Group | ~USD | Already owned |
+|---|---|---|
+| Drive | 198 | motor ($38) |
+| Knee transmission | 45 | |
+| Structure | 70 | |
+| Filament | 45 | |
+| Electronics | 130 | drive ($29), 2× ESP32-C3 |
+| Power (A123 736 Wh pack + BMS + backpack) | 250 | pack and BMS, purchased |
+| **Total** | **~740** | |
 
-Reusing the hoverboard pack and an existing backpack takes it to roughly **$675**.
+Two things moved this down from the ~$925 first estimated. The controller is a
+**$29 MKS XDRIVE MINI** rather than a $169 ODrive S1 (§5 of
+[`ELECTRONICS.md`](ELECTRONICS.md) is the price of that: an older firmware generation, and
+an API that shares almost no identifiers with the S1's). And the motor is a **$38 C6374 at
+170 Kv** that was already on the shelf.
+
+Net still to spend, given the pack, BMS, motors, drives and ESP32s are already here:
+roughly **$300**, most of it screws, rails, bearings and filament.
+
+There are **4 motors and 4 drives** on hand, so a bilateral pair costs nothing extra in
+electronics — see §2 of [`ELECTRONICS.md`](ELECTRONICS.md) for the CAN node-ID trap that
+comes with running more than one of these boards on one bus.

@@ -53,11 +53,11 @@ for name, lead, nut_od in (("SFU1605", 5.0, 28.0), ("SFU1610", 10.0, 36.0),
     n_p = ratio * W_PEAK * 60 / (2 * math.pi)
     print("  %-10s %7.2f %8.2f %6.2f Nm %7.0f rpm %7.0f rpm   nut OD %.0f"
           % (name, ratio, TRAVEL / lead, tau_s, n_c, n_p, nut_od))
-print("  NOTE the CAD nut is modelled at OD 28 mm (NUT_R=14) -- that is an")
-print("       SFU1605 nut, not the SFU1620 the label claims. 1605 also removes")
-print("       the reduction stage entirely. Build 1605.")
+print("  BUILT: SFU1610, nuts at OD 36 (NUT_R=18), screws at X = +/-58. 1605 was the")
+print("       first answer here and it is wrong -- see the reflected-inertia table")
+print("       below, which is the section that actually decides the lead.")
 
-LEAD = 5.0
+LEAD = 10.0
 RATIO = 2 * math.pi * R / LEAD
 TAU_SCREW = TAU_PEAK / (RATIO * ETA_SCREW)
 N_PEAK = RATIO * W_PEAK * 60 / (2 * math.pi)
@@ -66,21 +66,34 @@ N_CONT = RATIO * W_CONT * 60 / (2 * math.pi)
 # ------------------------------------------------------------------ motor
 print("=" * 68)
 print("MOTOR  (direct 1:1 to the screw shaft, one 1:1 belt links the two screws)")
-VBAT = 36.0                                # 10S nominal; 42.0 V full
+VBAT = 38.4                                # 12S LiFePO4 nominal; 43.8 V full
 print("  shaft torque %.2f N.m peak, %.0f rpm peak, %.0f rpm at stair cadence"
       % (TAU_SCREW / ETA_BELT, N_PEAK, N_CONT))
 print("  %-12s %6s %9s %9s %9s %9s" %
       ("motor", "Kv", "Kt", "I_peak", "no-load", "headroom"))
-for name, kv, mass in (("6374", 190, 800), ("6374", 149, 820),
+for name, kv, mass in (("6374 OWNED", 170, 800), ("6374", 149, 820),
                        ("6354", 190, 560), ("63100", 130, 1100)):
     kt = 9.549 / kv
     i = TAU_SCREW / ETA_BELT / kt
     nl = kv * VBAT
     print("  %-12s %6d %6.4f Nm/A %6.1f A %7.0f rpm %7.1fx"
           % (name, kv, kt, i, nl, nl / N_PEAK))
-print("  -> 6374 149Kv: %.1f A peak at %.1f N.m, %.0f W electrical peak"
-      % (TAU_SCREW / ETA_BELT / (9.549 / 149), TAU_SCREW / ETA_BELT,
-         VBAT * TAU_SCREW / ETA_BELT / (9.549 / 149)))
+_tau_m = TAU_SCREW / ETA_BELT
+_i170, _i149 = _tau_m / (9.549 / 170), _tau_m / (9.549 / 149)
+_p_mech = _tau_m * N_PEAK * 2 * math.pi / 60.0
+_p_cu = 1.5 * _i170 ** 2 * 0.020
+print("  -> the motors we own are 170 Kv: %.1f A phase peak at %.2f N.m"
+      % (_i170, _tau_m))
+print("     was %.1f A at the 149 Kv this was first sized for -- 14%% more current for"
+      % _i149)
+print("     the same torque, and NO extra heat. See 360_owned_hw.py section 0.")
+print("  -> BUS power, which is not V x I_phase: %.0f W mechanical + %.0f W copper"
+      % (_p_mech, _p_cu))
+print("     = %.0f W off a %.1f V bus = %.1f A of PACK current at peak torque."
+      % (_p_mech + _p_cu, VBAT, (_p_mech + _p_cu) / VBAT))
+print("     Phase current is high and bus current is low because back-EMF is only")
+print("     %.1f V at %.0f rpm -- the drive is bucking hard. Fuse for the BUS."
+      % (N_PEAK / 170.0, N_PEAK))
 
 # ------------------------------------------------------- reflected inertia
 # This is the one that decides the lead, not the current draw.
@@ -98,20 +111,22 @@ print("  %-10s %7s %9s %9s %9s %9s %9s" %
       ("screw", "ratio", "J_refl", "vs limb", "I_peak", "nut OD", "at X=56"))
 best = None
 for name, lead, nut_od in (("SFU1605", 5.0, 28.0), ("SFU1610", 10.0, 36.0),
-                           ("SFU1620", 20.0, 40.0)):
+                           ("SFU1616", 16.0, 36.0), ("SFU1620", 20.0, 40.0)):
     ratio = 2 * math.pi * R / lead
     j = J_ROTOR * ratio ** 2
     tau_s = TAU_PEAK / (ratio * ETA_SCREW) / ETA_BELT
-    amps = tau_s / (9.549 / 149)
+    amps = tau_s / (9.549 / 170)
     # NOT a belt-gap column: the nut sits 60 mm proximal of its belt run's end at every
     # pose, so an X-projection comparing their edges is meaningless. See 311_nut_belt.py.
     print("  %-10s %7.2f %6.3f kgm2 %7.2fx %7.1f A %7.0f mm    fits"
           % (name, ratio, j, j / J_LIMB, amps, nut_od))
 print("  A ratio that makes the leg feel 2x heavier with the power off is not")
 print("  acceptable on a patient who already struggles to swing the limb.")
-print("  SFU1610 is the build point: 0.56x the limb's own inertia, 21 A peak,")
-print("  comfortably inside an ODrive S1, and it is what the model now carries --")
-print("  nuts at OD 36, screws at X=+/-58, carriage body grown to X 34..80, Z 84..128.")
+print("  SFU1610 is the BUILD point: 0.56x the limb's own inertia, 25 A peak at 170 Kv,")
+print("  comfortably inside the XDRIVE MINI, and it is what the model carries -- nuts at")
+print("  OD 36, screws at X=+/-58, carriage body X 34..80, Z 84..128.")
+print("  SFU1616 is the TARGET: same OD 36 nut, 0.22x the limb, 40 A peak. See")
+print("  360_owned_hw.py -- it is the largest single improvement left in the design.")
 
 # ------------------------------------------------------------- backdriving
 print("=" * 68)
@@ -120,8 +135,8 @@ eta_back = 2 - 1 / ETA_SCREW
 lead_angle = math.degrees(math.atan(LEAD / (math.pi * 16.0)))
 print("  lead angle %.1f deg, back-drive efficiency ~%.2f" % (lead_angle, eta_back))
 print("  holding %.1f N.m statically costs the full %.1f A -- ~%.0f W continuous."
-      % (TAU_PEAK, TAU_SCREW / ETA_BELT / (9.549 / 149),
-         VBAT * TAU_SCREW / ETA_BELT / (9.549 / 149)))
+      % (TAU_PEAK, TAU_SCREW / ETA_BELT / (9.549 / 170),
+         VBAT * TAU_SCREW / ETA_BELT / (9.549 / 170)))
 print("  So: this is a DYNAMIC assist. For stance-phase support add a brake,")
 print("      do not hold with current.")
 
@@ -141,7 +156,7 @@ for label, rate, duty in (("stair climbing, 1 step/s", 1.0, 1.0),
                           ("level walking", 0.9, 0.35),
                           ("mixed daily use", 0.5, 0.15)):
     p = W_STEP * rate * duty + IDLE
-    for cap, wh in (("hoverboard 36V 10Ah", 360.0), ("ebike 36V 14Ah", 504.0)):
+    for cap, wh in (("hoverboard 36V 10Ah", 360.0), ("A123 12S LiFePO4 736Wh", 736.0)):
         print("  %-24s %5.0f W  ->  %-22s %5.1f h" % (label, p, cap, wh / p))
     label = ""
 print("=" * 68)

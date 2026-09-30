@@ -17,7 +17,8 @@ from the ratio being small, not from a spring, a cable or a clutch.
 |---|---|
 | Soft exosuit, Bowden-driven | ~50 : 1 |
 | QDD hip exo, custom planetary | 36 : 1 |
-| **This design — SFU1610 screw + capstan** | **23.2 : 1** |
+| **This design — SFU1610 screw + capstan, as built** | **23.2 : 1** |
+| **This design — SFU1616, the target** | **14.5 : 1** |
 | QDD knee | 9 : 1 |
 | QDD ankle | 8 : 1 |
 
@@ -110,16 +111,23 @@ In order of leverage:
 
    | motor | J_rotor | lowest workable ratio | reflected J | vs. limb |
    |---|---|---|---|---|
-   | 6374 | 3.97e-4 | 14 : 1 | 0.078 kg·m² | 0.26× |
-   | **6384** | 4.96e-4 | **11.6 : 1** | **0.067 kg·m²** | **0.22×** |
-   | 8085 | 1.44e-3 | 9 : 1 | 0.117 kg·m² | 0.39× |
-   | 8308 pancake | 1.21e-3 | 12 : 1 | 0.162 kg·m² | 0.54× |
-   | 110 mm pancake | 4.54e-3 | 6 : 1 | 0.163 kg·m² | 0.54× |
+   | **6374 — owned ×4** | 3.10e-4 | 14 : 1 | **0.065 kg·m²** | **0.22×** |
+   | 6384 | 3.88e-4 | 11.6 : 1 | 0.052 kg·m² | 0.17× |
+   | 8085 | 1.13e-3 | 14 : 1 | 0.221 kg·m² | 0.74× |
+   | 8308 pancake | 9.5e-4 | 12 : 1 | 0.128 kg·m² | 0.43× |
+   | 110 mm pancake | 3.55e-3 | 6 : 1 | 0.128 kg·m² | 0.43× |
 
-   The best point is a **longer 6374, not a fatter one**. A 6384 at 11.6 : 1 beats an 8085
-   at 9 : 1 and a 110 mm pancake at 6 : 1. And 11.6 : 1 is exactly **SFU1620, 20 mm lead** —
-   a screw already checked to fit, since `311_nut_belt.py` showed its OD 40 nut clears the
-   belt at X = ±58. Only the carriage bore grows, 36 → 40 mm.
+   The best point is a **longer 6374, not a fatter one** — but not even that, once the
+   controller is in the picture. A 6384 at 11.6 : 1 (SFU1620) does reach 0.17×, against
+   0.22× for the owned 6374 at 14.5 : 1 (SFU1616). That advantage is real and it is
+   **0.013 kg·m², 4% of the limb's own inertia** — and it costs 49.6 A against 39.7 A at
+   the 170 Kv motors on hand, which is above any believable continuous rating for the
+   drives on hand. See [`scripts/360_owned_hw.py`](../scripts/360_owned_hw.py).
+
+   So: **don't buy the motor, buy the screw.** SFU1616, 16 mm lead, and the nut is still
+   OD 36 — the same carriage bore the model already carries at `NUT_R = 18`. Verify that
+   on the supplier drawing before ordering, because it is the single fact that decides
+   whether this is a screw swap or a carriage rebuild.
 2. **Keep the actuator on the limb.** It is what the commercial product does, it removes
    the need for any torque sensor, and it avoids a failure mode the literature has spent
    fifteen years managing rather than fixing.

@@ -67,7 +67,7 @@ A **belt capstan** at the knee, driven by **two opposed ball screws**:
 | **Two carriages** | on one 20×60 V-slot rail, one per belt run |
 | **RH and LH screws on a common shaft** | so one carriage rises exactly as the other falls |
 | **MGN7H linear guides** | 2 rails on the 20 mm side faces, 2 blocks per carriage |
-| **6374 BLDC + ODrive S1** | torque control only, never position |
+| **C6374 170 Kv BLDC + MKS XDRIVE MINI** | ODrive v3.6 clone, torque control only, never position |
 
 ### Why the differential is exact, not approximate
 
@@ -202,9 +202,10 @@ the free-swing phase of every single step.
 
 | Screw | Ratio | Screw revs over ROM | Reflected J | **vs. the limb's own J** | Peak current | Nut OD |
 |---|---|---|---|---|---|---|
-| SFU1605 | 46.4 | 13.66 | 0.667 kg·m² | **2.22×** | 10.9 A | 28 mm |
-| **SFU1610 — built** | 23.2 | 6.83 | 0.167 kg·m² | **0.56×** | 21.7 A | 36 mm |
-| SFU1620 | 11.6 | 3.42 | 0.042 kg·m² | 0.14× | 43.5 A | 40 mm |
+| SFU1605 | 46.4 | 13.66 | 0.667 kg·m² | **2.22×** | 12.4 A | 28 mm |
+| **SFU1610 — built** | 23.2 | 6.83 | 0.167 kg·m² | **0.56×** | 24.8 A | 36 mm |
+| **SFU1616 — target** | 14.5 | 4.27 | 0.065 kg·m² | **0.22×** | 39.7 A | 36 mm |
+| SFU1620 | 11.6 | 3.42 | 0.042 kg·m² | 0.14× | 49.6 A | 40 mm |
 
 At **SFU1605 the leg would feel roughly three times as heavy to swing as it does bare.**
 For someone already struggling to walk, that is a worse device than no device at all.
@@ -249,13 +250,14 @@ Swept over all 107 poses: **zero hard-part clashes**, knee standoff unchanged at
 
 | | |
 |---|---|
-| Motor | 6374 outrunner, 149 Kv, 14-pole |
-| Torque constant | 0.0641 N·m/A |
-| Shaft torque | 0.70 N·m at 5 mm lead · 1.39 N·m at 10 mm |
-| Peak current | 10.9 A at 5 mm lead · **21.7 A at 10 mm** |
-| Peak speed | 2320 rpm at 5 mm · 1160 rpm at 10 mm |
-| No-load at 36 V | 5364 rpm — 2.3× headroom |
-| Controller | ODrive S1, 12–50 V, 40 A continuous |
+| Motor | C6374 outrunner, **170 Kv**, 14-pole (verify: count the magnets) |
+| Torque constant | 0.0562 N·m/A |
+| Shaft torque | 1.39 N·m at 10 mm lead · 2.23 N·m at 16 mm |
+| Peak current | **24.8 A at 10 mm** · 39.7 A at 16 mm |
+| Peak speed | 1160 rpm at 10 mm · 725 rpm at 16 mm |
+| No-load at 38.4 V | 6528 rpm — we use 18% of it |
+| Controller | MKS XDRIVE MINI, ODrive v3.6 clone, 12–56 V, ~40 A, fw 0.5.1 |
+| Owned | 4 motors, 4 drives — a bilateral build is a mechanical parts question only |
 
 ### Energy
 
@@ -613,7 +615,7 @@ Numbers: [`scripts/310_guides.py`](scripts/310_guides.py).
 | | |
 |---|---|
 | **Knee angle** | AS5048A, 14-bit absolute, on a 6 mm diametric magnet sunk into the knee pin's flush counterbore. Absolute at power-on, so **no homing routine** — critical, because the screw turns 6.8 revolutions over the ROM and a motor-side encoder cannot tell which one it is on |
-| **Motor** | ODrive's onboard MA732, commutation and velocity |
+| **Motor** | the drive's onboard AS5047P, 14-bit SPI, commutation and velocity |
 | **Tooth-skip detection** | one tooth is 8 mm of belt = **12.9° of knee angle**. Comparing joint angle against motor position makes a skip unmissable — this is the monitor for the failure mode that actually matters, sudden loss of assist mid-stair |
 | **Belt tension** | Hall sensor on the sprung anchor's slide, reading its deflection |
 | **Endstops** | magnet pockets in each carriage side wall — hard limits plus auto-calibration of the screw↔knee map |
@@ -733,12 +735,22 @@ python scripts/fc.py run scripts/223_cad_shots.py &&   python scripts/crop_cad.p
   nothing to bite.
 - **Reflected inertia is the real weakness**, not mass or torque density. At 23.2 : 1 this
   design sits at the top of the quasi-direct-drive band the field uses (8–36 : 1), and
-  0.167 kg·m² costs 5–21 N·m during swing depending on acceleration. The fix is **SFU1620
-  (11.6 : 1) with a 6384 at ~75 Kv** — 0.067 kg·m², 0.22× the limb, at 22 A. Counter-
-  intuitively a *bigger* motor is worse: torque goes as R²L and inertia as mR², so buying
-  torque with diameter buys inertia back, and an 8085 at 9 : 1 lands at 0.117. Not built.
-  See [`docs/PRIOR_ART.md`](docs/PRIOR_ART.md) and
-  [`scripts/350_motor_kv.py`](scripts/350_motor_kv.py).
+  0.167 kg·m² costs 5–21 N·m during swing depending on acceleration. The fix is
+  **SFU1616 — 16 mm lead, 14.5 : 1** — which gives 0.065 kg·m², **0.22× the limb**, on the
+  motors already owned, and keeps the OD 36 nut the carriage is already bored for.
+  Counter-intuitively a *bigger* motor is worse: torque goes as R²L and inertia as mR², so
+  buying torque with diameter buys inertia back. A 6384 on an SFU1620 does reach 0.17×,
+  but that last 4% of the limb's inertia costs 49.6 A against 39.7 A — more than the drives
+  on hand will give. Not built. See [`docs/PRIOR_ART.md`](docs/PRIOR_ART.md),
+  [`scripts/350_motor_kv.py`](scripts/350_motor_kv.py) and
+  [`scripts/360_owned_hw.py`](scripts/360_owned_hw.py).
+- **The electronics were specified for parts that never arrived.** The whole ODrive
+  configuration was written for an S1 on firmware 0.6.x; the drives on hand are ODrive
+  **3.6** clones on modified **0.5.1**, where not one of those identifiers exists. §5 of
+  [`docs/ELECTRONICS.md`](docs/ELECTRONICS.md) is now written for the real board, but none
+  of it has been run. Rescaling for the real 170 Kv motors also caught
+  `dc_max_positive_current` and the pack fuse being sized off *phase* current instead of
+  *bus* current — the fuse was 30 A where peak bus draw is 4.9 A.
 - **No firmware yet.** Architecture is specified in `docs/ELECTRONICS.md`; no code written.
 
 ---

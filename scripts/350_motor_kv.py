@@ -44,18 +44,22 @@ print("   The speed constraint is never binding -- %.0f Kv covers the fastest ca
 print("   So: Kv ~= %.1f x ratio for %d A peak, or %.1f x ratio if you will run %d A."
       % (I_TARGET * 9.549 / (TAU_KNEE / ETA), I_TARGET,
          I_S1_CONT * 9.549 / (TAU_KNEE / ETA), int(I_S1_CONT)))
-print("   At the current 23.2:1 that gives %.0f Kv, which is why 149 Kv was right."
+print("   At the built 23.2:1 that gives %.0f Kv. The motors on hand are 170 Kv -- see"
       % (23.2 * I_TARGET * 9.549 / (TAU_KNEE / ETA)))
+print("   360_owned_hw.py; 13% fast, which costs amps and nothing else.")
 
 print("=" * 72)
 print("2. BUT THE MOTOR HAS TO BE ABLE TO MAKE THE TORQUE")
 print("   T ~ sigma * 2*pi*R^2*L, sigma ~ %.0f kPa air-cooled." % (SIGMA / 1e3))
 print()
 print("   %-18s %7s %7s %9s %10s" % ("motor", "R mm", "stack", "T_cont", "verdict at"))
-MOTORS = [("6374", 31.5, 40.0, 0.40), ("6384", 31.5, 50.0, 0.50),
-          ("8085", 40.0, 45.0, 0.90), ("8308 pancake", 41.5, 30.0, 0.70),
-          ("110 mm pancake", 55.0, 30.0, 1.50)]
-for nm, Rmm, Lmm, m_rotor in MOTORS:
+# J_rotor is taken to match 300_drivetrain.py's 3.10e-4 for the 6374 and scaled from
+# there by bell mass and radius. It is an estimate with maybe +/-25% in it, so the
+# ABSOLUTE reflected-inertia numbers carry that; the comparison between options does not.
+MOTORS = [("6374 OWNED x4", 31.5, 40.0, 3.10e-4), ("6384", 31.5, 50.0, 3.88e-4),
+          ("8085", 40.0, 45.0, 1.13e-3), ("8308 pancake", 41.5, 30.0, 9.5e-4),
+          ("110 mm pancake", 55.0, 30.0, 3.55e-3)]
+for nm, Rmm, Lmm, J in MOTORS:
     R, L = Rmm / 1000.0, Lmm / 1000.0
     T = SIGMA * 2 * math.pi * R ** 2 * L
     best = None
@@ -71,7 +75,7 @@ print("3. THE CATCH NOBODY MENTIONS: A BIGGER MOTOR HAS MORE ROTOR INERTIA")
 print("   reflected J = J_rotor x N^2, and J_rotor ~ m_bell x R^2 grows as you go bigger.")
 print()
 print("   %-18s %9s %7s %11s %10s" % ("motor", "J_rotor", "ratio", "J_reflected", "vs limb"))
-for nm, Rmm, Lmm, m_rotor in MOTORS:
+for nm, Rmm, Lmm, J in MOTORS:
     R = Rmm / 1000.0
     T = SIGMA * 2 * math.pi * R ** 2 * (Lmm / 1000.0)
     N = None
@@ -81,7 +85,6 @@ for nm, Rmm, Lmm, m_rotor in MOTORS:
             break
     if N is None:
         continue
-    J = m_rotor * R ** 2          # thin-ring bell
     Jr = J * N ** 2
     print("   %-18s %.2e %5.0f:1 %8.3f kgm2 %8.2fx" % (nm, J, N, Jr, Jr / J_LIMB))
 print()
@@ -92,21 +95,36 @@ print("=" * 72)
 print("SO, THE ANSWER")
 print("   Kv is not a target, it is what falls out once the ratio is fixed:")
 print("     Kv ~= 6.5 x ratio at 22 A, ~11.8 x ratio at 40 A")
+print("   At the built 23.2:1 that wants ~151 Kv. The motors on hand are 170 Kv, which")
+print("   is 13% fast -- 24.8 A instead of 21.7 for the same torque, and no more heat.")
 print()
-print("   The best point in the table is NOT the biggest motor. A 6384 at 11.6:1 --")
-print("   which is exactly SFU1620, 20 mm lead -- beats an 8085 at 9:1 and a 110 mm")
-print("   pancake at 6:1, because buying torque with diameter buys inertia back.")
-N, Jr = 11.6, 4.96e-4 * 11.6 ** 2
-T = TAU_KNEE / (N * ETA)
+print("   The best point in the table below is NOT the biggest motor: buying torque with")
+print("   diameter buys inertia straight back. A 6384 at 11.6:1 beats an 8085 at 9:1 and")
+print("   a 110 mm pancake at 6:1. BUT -- and this is the conclusion that matters --")
+N, Jr84 = 11.6, 3.88e-4 * 11.6 ** 2
+Jr74 = 3.10e-4 * 14.5 ** 2
+T84 = TAU_KNEE / (N * ETA)
+print("     6384 @ 11.6:1 (SFU1620)   reflected J %.3f kgm2 = %.2fx the limb, %.1f A"
+      % (Jr84, Jr84 / J_LIMB, T84 / (9.549 / 170)))
+print("     6374 @ 14.5:1 (SFU1616)   reflected J %.3f kgm2 = %.2fx the limb, %.1f A"
+      % (Jr74, Jr74 / J_LIMB, TAU_KNEE / (14.5 * ETA) / (9.549 / 170)))
 print()
-print("     SFU1620 + 6384 at %.0f Kv" % (I_TARGET * 9.549 / T))
-print("       ratio            %.1f : 1" % N)
-print("       motor torque     %.2f N.m  (a 6384 makes ~3.12 N.m continuous)" % T)
-print("       peak current     %.0f A     (was 43.5 A at 149 Kv -- the old objection)"
-      % (I_TARGET))
-print("       reflected J      %.3f kg.m2 = %.2fx the limb, against 0.56x today"
-      % (Jr, Jr / J_LIMB))
-print("       screw revs       %.2f over the ROM" % (68.31 / 20.0))
-print("     SFU1620's nut is OD 40 and 311_nut_belt.py already showed it clears the belt")
-print("     at X = +/-58; only the carriage bore grows from 36 to 40.")
+print("   The 6384 does win on inertia -- %.2fx against %.2fx. But read the second"
+      % (Jr84 / J_LIMB, Jr74 / J_LIMB))
+print("   column: it wants %.1f A where the owned 6374 wants %.1f, and %.1f A is above"
+      % (T84 / (9.549 / 170), TAU_KNEE / (14.5 * ETA) / (9.549 / 170),
+         T84 / (9.549 / 170)))
+print("   any believable continuous rating for the drives on hand. So the comparison is:")
+print("     spend $60 and 10 A of headroom you do not have")
+print("     to remove %.3f kgm2 -- %.0f%% of the limb's own inertia."
+      % (Jr74 - Jr84, 100 * (Jr74 - Jr84) / J_LIMB))
+print("   That is a bad trade. The 6384's advantage is real and it is small, and it is")
+print("   bought with the one resource that is actually scarce. Do not buy the 6384.")
+print("   Buy the screw, and keep the amps.")
+print("     SFU1616, 16 mm lead, ratio %.1f:1, nut still OD 36 -- the SAME carriage bore" % 14.5)
+print("     the model already has at NUT_R = 18. Verify on the supplier drawing, because")
+print("     that is the one thing that decides whether this is a screw swap or a rebuild.")
+print()
+print("   Caveat that bounds all of the above: J_rotor is an ESTIMATE, +/-25%. Weigh a")
+print("   bell and measure its radius before betting the design on 0.22x vs 0.26x.")
 print("=" * 72)

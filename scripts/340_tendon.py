@@ -79,7 +79,7 @@ print("=" * 70)
 print("4. WHAT COMES OFF THE LEG")
 off = [("6374 motor", 800.0), ("2x SFU1610 screws", 900.0), ("2x ball nuts", 360.0),
        ("20x60 rail", 351.0), ("2 carriages", 383.0), ("MGN7 rails + blocks", 95.0),
-       ("ODrive S1 + brake R", 120.0), ("drive cap + thigh fairing", 276.0),
+       ("XDRIVE MINI + brake R", 100.0), ("drive cap + thigh fairing", 276.0),
        ("bearings, pulleys, fasteners", 200.0)]
 stay = [("knee yoke", 167.0), ("hub + 29T pulley", 181.0), ("knee cap", 39.0),
         ("shank socket + cuff", 391.0), ("shank fairing", 53.0), ("thigh cuff", 188.0),
