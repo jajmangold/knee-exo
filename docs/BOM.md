@@ -81,7 +81,7 @@ labels are corrected too.
 | # | Part | Qty | Notes | ~USD |
 |---|---|---|---|---|
 | S1 | V-slot extrusion 20x60, **black anodised**, 230 mm | 1 | Cut to Y 58 to 284.7. ~350 g | 15 |
-| S2 | **MGN7 rail, 227 mm** | 2 | One per 20 mm side face, rail centre Z = 98. **MGN7, not MGN9** — an MGN9 rail stands 6.5 mm proud and cuts 0.9 mm into the belt | 24 |
+| S2 | **MGN7 rail** — 165 mm anterior, 145 mm posterior | 2 | Different lengths: cut to what the blocks sweep. Mounted on the **outboard** solid band of the 20 mm side face, rail centre Z = 104.5 — centred on the face its M2 screws would land in the V-slot. **MGN7, not MGN9**: an MGN9 rail stands 6.5 mm proud and cuts 0.9 mm into the belt | 20 |
 | S2a | **MGN7H blocks** | 4 | Two per carriage: a single block would have to react the 18.0 N·m yaw as a moment. See [`scripts/310_guides.py`](../scripts/310_guides.py) | 32 |
 | S3 | M5 T-nuts + button head cap screws | ~40 | Everything mounts to the slots | 12 |
 | S4 | M3 / M4 cap screws, assorted | ~40 | Fairings, cuffs, electronics | 10 |

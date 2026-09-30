@@ -253,12 +253,45 @@ Testing progression, and do not skip steps:
 This is not a certified device and should not be treated as one. Get the physio involved
 before step 3, and keep the assist ceiling under their control rather than the patient's.
 
-## 9. Bring-up order
+## 9. Noise
+
+Not analysed, and it should be, because this is worn in public and a device that whines
+marks the wearer out. Nothing here is measured — it is reasoning from component type.
+
+Likely sources, in the order I would expect them to matter:
+
+1. **Ball nut recirculation.** Balls entering and leaving the return tube: roughly
+   15 balls × 19 rev/s ≈ **290 Hz** and harmonics at peak speed, right where hearing is
+   most sensitive. Choosing SFU1610 over 1605 already halved screw speed to 1160 rpm,
+   and recirculation noise rises steeply with rpm.
+2. **The fairings as a soundboard.** Possibly worse than the source. `P21` is a 284 mm
+   canopy of ~3 mm PETG on a **rigid spine** straight into the rail's middle slot — a
+   direct structure-borne path into a large thin panel.
+3. **Motor** — FOC and 24 kHz PWM are both inaudible, but torque ripple at 6× electrical
+   lands near **800 Hz** at peak speed.
+4. **The 1:1 linking belt**, ~390 Hz tooth passage.
+5. **MGN7H blocks** — recirculation again, but slow (200 mm/s) and small. Ticking.
+
+The capstan barely contributes: the HTD-8M belt is anchored at both ends and only lays
+onto and peels off the same 180° wrap, so tooth passage is ~24 Hz. A geared or belted
+reduction at the knee would be far worse.
+
+Mitigations, cheapest first — **isolate the fairings** (rubber grommets instead of the
+rigid spine; highest leverage and it costs grams), **constrained-layer damping** on the
+inside of the canopy, and **correct screw preload and grease**. The instinct to stiffen
+the fairing mounts against rattle is backwards here.
+
+Treat all of that as provisional until step 2 below.
+
+## 10. Bring-up order
 
 1. ODrive on the bench, motor unloaded, `AXIS_STATE_MOTOR_CALIBRATION` and encoder offset
    calibration. Confirm smooth torque control by hand.
 2. Add the brake resistor. Spin the motor by hand fast and confirm the resistor gets warm
-   rather than the bus voltage spiking.
+   rather than the bus voltage spiking. **While the drivetrain is on the bench, run it
+   unloaded through the speed range and measure the noise** — even a phone SPL app will
+   do. The fairing mounting design depends on the answer and is cheap to change now and
+   expensive later.
 3. Regen test on the actual pack (section 6, item 3). Set `dc_max_negative_current` from
    what you measure.
 4. ESP32 on CAN — heartbeat in, `Set_Input_Torque` out, watchdog kicking. Verify the drive

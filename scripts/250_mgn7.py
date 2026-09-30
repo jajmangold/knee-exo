@@ -39,8 +39,14 @@ Three further things the posterior side needs, none of which apply to the anteri
 Block spacing drops to 34 mm as a result, so the 18.0 N.m yaw becomes 529 N per block
 against MGN7H's ~1.0 kN dynamic rating -- a 1.9x margin on a peak, not a continuous, load.
 
-Z = 98 for the rail centre puts the block at Z 89.5..106.5, between the cuff (tops out at
-88) and the extrusion's lateral face (108), inside the existing envelope.
+The rail centre is Z = 104.5, not 98. Z = 98 is straight over the extrusion's V-slot
+(cut at Z 95..101), so the rail's M2 screws would have nothing to bite -- a mounting
+question no interference sweep can ask. The face's outboard solid band, Z 101..108, takes
+the rail and puts the block at Z 96..113.
+
+Rail lengths are cut to what the blocks sweep rather than to the extrusion: 165 mm
+anterior, 145 mm posterior. They differ because the carriages sit at different heights
+and B's blocks were pushed distal of the anchor.
 
 This keeps the lateral 60 mm face completely free, which matters if the screws ever move
 round to the front.
@@ -103,8 +109,16 @@ SCR_Z = K["screw"]["z"]
 RAIL_W, RAIL_H = 7.0, 4.8        # MGN7: across the face (Z), proud of the face (X)
 BLK_W, BLK_H = 17.0, 8.0         # MGN7H: 17 across, 8 total assembly height
 FACE_X = 30.0                    # the extrusion's 20 mm side faces
-ZC = 98.0                        # rail centre: block spans Z 88..108, flush both ends
-RAIL_Y = (58.0, 284.7)           # full length of the extrusion
+# Rail centre. It cannot be 98 -- that is straight over the V-slot, which 194_layout.py
+# cuts at Z 95..101, so every M2 mounting screw would drop into the slot with nothing to
+# grip and M2 T-nuts do not exist for a 6 mm slot. The face leaves two solid bands, Z
+# 88..95 and Z 101..108, each 6.9 mm against the rail's 7. The inboard band puts the block
+# at Z 83..100, back into the thigh cuff on the posterior side, so: the outboard band.
+ZC = 104.5                       # rail Z 101..108, block Z 96..113
+# Rail length: only what the blocks actually sweep, plus margin. They differ because the
+# carriages sit at different heights and B's blocks were pushed distal of the anchor.
+RAIL_Y_A = (62.0, 227.0)         # blocks sweep Y 67.0..220.8
+RAIL_Y_B = (140.0, 284.7)        # blocks sweep Y 146.7..280.5
 BLK_Y_A = ((6.0, 37.5), (60.0, 91.5))    # carriage A: free of the anchor, 54 mm apart
 BLK_Y_B = ((34.0, 65.5), (68.0, 99.5))   # carriage B: distal of the anchor, 34 mm apart
 
@@ -124,8 +138,8 @@ def need(sh, label, solids=1):
 
 
 # --------------------------------------------------------------- the rails
-for nm, lab, g in (("A9_RailMGN9_A", "A9_RailMGN7H_A", -1.0),
-                   ("A9b_RailMGN9_B", "A9b_RailMGN7H_B", 1.0)):
+for nm, lab, g, RAIL_Y in (("A9_RailMGN9_A", "A9_RailMGN7H_A", -1.0, RAIL_Y_A),
+                           ("A9b_RailMGN9_B", "A9b_RailMGN7H_B", 1.0, RAIL_Y_B)):
     r = bx(*rng(g * FACE_X, g * (FACE_X + RAIL_H)), RAIL_Y[0], RAIL_Y[1],
            ZC - RAIL_W / 2, ZC + RAIL_W / 2)
     o = O(nm) or doc.addObject("Part::Feature", nm)
@@ -133,8 +147,8 @@ for nm, lab, g in (("A9_RailMGN9_A", "A9_RailMGN7H_A", -1.0),
     o.Label = lab
     o.ViewObject.Visibility = True
     b = r.BoundBox
-    print("%-16s X %+6.1f..%+6.1f  Y %+6.1f..%+6.1f  Z %+6.1f..%+6.1f"
-          % (lab, b.XMin, b.XMax, b.YMin, b.YMax, b.ZMin, b.ZMax))
+    print("%-16s X %+6.1f..%+6.1f  Y %+6.1f..%+6.1f = %5.1f mm  Z %+6.1f..%+6.1f"
+          % (lab, b.XMin, b.XMax, b.YMin, b.YMax, b.YLength, b.ZMin, b.ZMax))
 
 # ------------------------------------------------- blocks and the carriages
 SPEC = (("A", -1., C0, "P3_Carriage", ("P10a_Slider_Delrin", "P10b_Slider_Delrin"), False, BLK_Y_A),
@@ -174,7 +188,7 @@ for tag, g, C, cname, blocks, sprung, BLK_Y in SPEC:
     ca = ca.cut(bx(-31., 31., Y0 - 1, Y1 + 1, 86., PLATE[0]))     # clear the extrusion
     if sprung:
         ca = ca.cut(bx(*rng(g * (BIN + 0.0), g * (BOUT + 3.2)), Y0 - 1., Y0 + 34., 94., 128.))
-        ca = ca.cut(cy(5.5, Y0 + 30., Y0 + 40., g * (BIN + BOUT) / 2, 113.))
+        ca = ca.cut(cy(5.5, Y0 + 30., Y0 + 40., g * (BIN + BOUT) / 2, 119.))
         ca = ca.cut(bx(*rng(g * (BOUT + 2.), g * (BOUT + 8.)), Y0 + 6., Y0 + 22., 104., 116.))
     else:
         ca = ca.cut(bx(*rng(g * BIN, g * BOUT), Y0 + 6., Y0 + 13., *BZ))
@@ -200,9 +214,11 @@ blk = need(blk.removeSplitter(), "P11_SprungAnchor")
 O("P11_SprungAnchor").Shape = blk
 b = blk.BoundBox
 print("P11_SprungAnchor X %+.1f..%+.1f (rail reaches %+.1f)" % (b.XMin, b.XMax, 30. + RAIL_H))
-sp = cy(5.0, Y0 + 32., Y0 + 39., (BIN + BOUT) / 2, 113.)
+# the block now reaches Z 113, so the spring has to clear it: axis 119 -> Z 114..124,
+# still well inside the belt's Z 96..126 band
+sp = cy(5.0, Y0 + 32., Y0 + 39., (BIN + BOUT) / 2, 119.)
 O("A8_TensionSpring").Shape = sp
-print("A8_TensionSpring axis raised to Z 113 (was 111) so the block passes under it")
+print("A8_TensionSpring axis Z 119 (was 111) so the block at Z 96..113 passes under it")
 
 # the anchor moved outboard into the Hall board, so that moves too -- it still sits
 # inside the carriage's existing pocket at X 43.1..49.1

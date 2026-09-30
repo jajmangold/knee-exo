@@ -556,6 +556,19 @@ Z 113 so the block passes under it. Block spacing on B drops to 34 mm as a resul
 18.0 N·m yaw becomes **529 N per block** against MGN7H's ~1.0 kN dynamic rating — 1.9× on
 a peak, not a continuous, load. Carriage A keeps 54 mm and 333 N.
 
+**And a question no interference sweep can ask: can it be bolted on?** The first build
+centred the rail on the face at Z = 98 — straight over the V-slot, which `194_layout.py`
+cuts at Z 95…101. Every M2 mounting screw would drop into the slot with nothing to grip,
+and M2 T-nuts do not exist for a 6 mm slot. The face leaves two solid bands, Z 88…95 and
+Z 101…108, each 6.9 mm against the rail's 7 mm. The inboard one puts the block back into
+the thigh cuff, so the rail sits on the **outboard** band, centre Z = 104.5, block at
+Z 96…113 — which in turn pushed the tension spring up to Z 119 to stay clear of it.
+
+Rail length is cut to what the blocks actually sweep rather than to the extrusion:
+**165 mm anterior** (blocks sweep Y 67.0…220.8) and **145 mm posterior** (Y 146.7…280.5).
+They differ because the carriages sit at different heights and B's blocks were pushed
+distal of the anchor.
+
 This placement also leaves the lateral 60 mm face completely free, which is what the
 front-mounted screw layout below would need.
 
@@ -697,6 +710,18 @@ python scripts/fc.py run scripts/223_cad_shots.py &&   python scripts/crop_cad.p
 - **Belt tooth-shear figures come from continuous-duty power ratings**, which carry fatigue
   derating for high-speed running. A slow capstan can run closer to the cord limit — check
   against the actual belt's data before committing.
+- **Acoustics are unmeasured.** Ball nut recirculation (~290 Hz) is the likely dominant
+  source and the fairing is the likely radiator, since it hangs off a rigid spine into the
+  rail. Analysis and mitigations in [`docs/ELECTRONICS.md`](docs/ELECTRONICS.md) §9; bench
+  measurement is now step 2 of bring-up. V-wheels were considered as a quieter guide and
+  rejected — they ride the extrusion's outer corner V, which on a 20×60 fouls the belt by
+  2.1 mm even for a mini wheel, and the 20×40 that would fit is a rebuild of the spine for
+  a source that is not the loudest one. See [`scripts/320_rail_section.py`](scripts/320_rail_section.py).
+- **Nothing checks assembly.** Every verification in this repository is interference —
+  "do two solids overlap". Nothing asks whether a part can be *fastened*, whether a tool
+  can reach a screw, or what order things go together in. That gap is how the rails came
+  to be modelled directly over the V-slot, where their mounting screws would have had
+  nothing to bite.
 - **No firmware yet.** Architecture is specified in `docs/ELECTRONICS.md`; no code written.
 
 ---
