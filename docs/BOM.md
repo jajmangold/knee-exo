@@ -86,10 +86,10 @@ All 16 in [`stl/`](../stl). Blue PETG as rendered, 0.2 mm layers.
 | `P10a`–`P10d_Slider_Delrin` | 1 each | Print in PETG to fit-check, then machine from acetal |
 | `P11_SprungAnchor` | 1 | 5 perimeters, 60% |
 | `P5_ThighCuff`, `P7_ShankCuff`, `P6_ShankSocket` | 1 each | 4 perimeters, 30% |
-| `P20_KneeCap` | 1 | 3 perimeters, 20%. Carries the lateral cheek, so it is ~220 mm across |
+| `P20_KneeCap` | 1 | 3 perimeters, 15%, cosmetic |
 | `P21_FairingThigh`, `P22_DriveCap`, `P24_FairingShank` | 1 each | 3 perimeters, 15%, cosmetic |
 
-Roughly 1.8–2.2 kg of filament including supports.
+Roughly 1.7–2.1 kg of filament including supports.
 
 ## 6. Electronics
 

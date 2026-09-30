@@ -295,10 +295,10 @@ X = ±30 side. So the mounts are never swept.
 
 | Part | Covers |
 |---|---|
-| `P20_KneeCap` | an inverted-U channel — walls at X ±50, roof at Z 132 — enclosing both belt runs and both in-running nips. Now also carries the lateral cheek, r 40…108 |
+| `P20_KneeCap` | an inverted-U channel — walls at X ±50, roof at Z 132 — enclosing both belt runs and both in-running nips |
 | `P21_FairingThigh` | one canopy, Y 28…**290**, over screws, nuts, carriages, both belt runs and the coupling |
 | `P22_DriveCap` | Y 290…399 over the drive box and the motor, section centre walking to xc = −20 to follow the motor |
-| `P24_FairingShank` | the shank member below the knee |
+| `P24_FairingShank` | the shank member, Y −208…**−66** — the proximal tip tapers in width and height to duck under the knee shroud through the swing |
 
 `P20` looks like a small nose piece in the renders and is easy to write off. The material
 map at Y=0 shows what it actually is:
@@ -321,9 +321,9 @@ Honest limits, because they are the parts a photo hides:
 
 - The fairing is **open below Z = 92**. The thigh cuff tops out at 88 and the carriage
   bottom is at 90 — there is no room for a wall between them. That underside faces the limb.
-- **Y −100…−45 is a moving gap** — 55 mm of bare hinge plate and two exposed joint-bolt
-  heads. A rigid shell here has to sweep past the static thigh fairing, so some of it can
-  never be closed. See below: less of it is forced than this repository used to claim.
+- **Y −66…−46 is a moving gap** — 20 mm of bare hinge plate, down from 55. A rigid shell
+  here has to sweep past the static thigh fairing, so the remainder can never be closed
+  and wants a fabric gaiter. See below.
 - The motor at the hip is uncovered.
 
 ### Why the shank looks bare, and how much of that is necessary
@@ -365,7 +365,7 @@ parts at 1° steps:
 So **34 of the 55 mm can be closed** by tapering the proximal tip in both width and height
 so it ducks under the knee shroud as it swings, leaving a 21 mm gap.
 
-### Better: cover the fan from the static side — built
+### A static cheek covers the whole fan — and was the wrong answer anyway
 
 All of the above treats the cover as **shank-mounted**, which is why it is constrained at
 all — a shank-mounted shell has to sweep past the static thigh fairing. A **thigh-mounted**
@@ -392,12 +392,23 @@ Z = 149.5, past the thigh fairing's 138. A cap of X ±95, Y 310…394, Z 86…15
 against everything that moves, overlapping only `P21_ShellAnterior` by 1.22 cm³ — again, a
 merge.
 
-Both are now in the model, and the full 107-pose sweep re-run with them in place returns
-**zero hard-part clashes** — the only overlaps remain the reference limb cones and
-0.836 cm³ of thigh-cuff foam compression. The knee standoff is unchanged at 86 mm,
-because the cheek sits at Z 132, under `P21`'s 138.
+Both were built and both swept clean. **The cheek is not in the model**, because
+geometry was never the problem with it: it is a 216 mm flat plate standing off the side
+of the knee. That is ugly, and — the part that actually matters — it is a snag hazard in
+its own right, sticking out laterally at exactly the height that catches a door frame.
+The device is supposed to stop the patient catching on things.
 
-Building them turned up two things the envelope study had not:
+And what it was covering is bare *structural plate*, not mechanism. There is no pinch
+hazard out in the fan; the nips are at the capstan and `P20` already closes over both.
+Trading a cosmetic gap for a plate that catches door frames is a bad deal.
+
+So the shank tip does the work instead, tapered in both width and height so it ducks
+under the knee shroud as it swings, reaching **Y = −66**. `P20` already reaches −46, so
+the moving gap is **20 mm**, down from 55, and a fabric gaiter covers it. The drive cap
+stays — nothing swings at the hip, so it costs nothing and the motor is a spinning bell
+that genuinely wants enclosing.
+
+Building the cap turned up two things the envelope study had not:
 
 - **The cap could not simply butt onto `P21`.** `P21` runs at a constant a=84, b=23,
   zc=115 and then closes from Y=300, while the motor starts at Y=314 already needing
@@ -431,7 +442,7 @@ limb cones intersecting each other, and 0.84 cm³ of thigh-cuff foam compression
 
 ---
 
-## Five traps that cost real time
+## Six traps that cost real time
 
 Recorded because each one produced a *plausible* result that was wrong, which is the
 expensive kind of bug.
@@ -457,6 +468,87 @@ end wall. Setting the shank fairing's inner to start at Y = −102, distal of th
 −100, produced a wall that A4 passed straight through — a constant **0.441 cm³ at every
 pose**. A constant overlap across a sweep is the signature of a static modelling error, not
 a kinematic one. Read the constant; it tells you where to look.
+
+
+**6. `Shape.BoundBox` overshoots on lofted surfaces.** The drive cap reports a bounding
+box of Y 288…399, Z 82.4…159.5 while its actual material is Y 290…399, Z 92…159.5 — the
+box comes from B-spline control points, not the surface. It is exact on prisms and
+cylinders, which is why it can be trusted for the ball-nut-to-belt clearances, and loose
+on anything lofted. Never quote a clearance off a bounding box without confirming it with
+a boolean.
+
+---
+
+## Guides, and why the layout spends the axis it does
+
+The carriage guides are Delrin L-gibs running in the extrusion's slots. The load case is
+not the interesting part: the 914 N of belt pull goes straight into the ball screw, and
+the guide only takes the couple from the 19.7 mm offset between the belt line and the nut
+axis — **176 N at each end of the carriage**. Every linear guide on the market is ten
+times overspecified for that.
+
+Friction is the interesting part, and specifically that sliding friction is *unstable*:
+
+| | Friction | Mass | Load capacity |
+|---|---|---|---|
+| Delrin L-gibs | **70 N** — 7.7% of belt pull | 29 g | ~0.07 MPa contact, fine |
+| MGN9H | 1.4 N | 150 g | 1.86 kN |
+| **MGN12H** | **1.4 N** | **248 g** | 2.94 kN |
+| HGR15 | 1.4 N | 616 g | 7.84 kN |
+
+Beyond the 7.6% recovered, the real argument is stick-slip: a breakaway force different
+from the running force, and a μ that wanders with wear and temperature. The whole control
+plan is to start at 10% assist and creep up under a physio's supervision, and notchy
+low-level torque makes that hard to tune and unpleasant to wear.
+
+**HGR15 is the wrong size** — 616 g for capacity nobody needs. MGN12H is the right one.
+
+### Where a rail can actually go
+
+The obvious idea is to put rails on the 20 mm sides of the extrusion and move the screws
+round to the lateral face, collapsing the fore-aft spread. Measured against the model,
+with an MGN12H envelope (rail 12×8, block 27×13) over the carriage band:
+
+| Mounting face | Result |
+|---|---|
+| 20 mm side, X = −30 | **clash**, 2.4 cm³ into the drive belt run |
+| 20 mm side, X = +30 | **clash**, 1.2 cm³ into the take belt run |
+| lateral 60 mm face, X = ±18 | **clear** — envelope X ±31.5, Z 108…121 |
+
+The blocker is not adjustable: the belt runs sit at |X| 35.6…41.1 because they are
+tangent to the 29T pulley, and that radius *is* the 36.92 mm moment arm. That leaves
+5.6 mm beside the 20 mm faces and a block needs 13.
+
+But the lateral face is free. X ±31.5 is inboard of the belt, and Z 121 is under the
+carriages' existing 130 ceiling, so **rails there cost nothing in either dimension**.
+
+### Why the screws stay at X = ±58
+
+Moving them to the lateral face looks like it saves a lot of width, and it does — but it
+spends the wrong axis. Measured against the reference limb:
+
+| Y | Limb radius | Device fore-aft | Proud laterally |
+|---|---|---|---|
+| 140 | ±72.1 | ±84 | 65.9 mm |
+| 200 | ±76.9 | ±84 | 61.1 mm |
+| 260 | ±81.8 | ±84 | 56.2 mm |
+
+Fore-aft the fairing clears the limb's own silhouette by only **2–12 mm**; laterally it
+stands 56–66 mm proud at the thigh and 86 mm at the knee. Lateral protrusion is what
+catches door frames, chair arms and the other leg. Fore-aft is nearly free, because the
+thigh is already that wide.
+
+Put the screws on the lateral face and the ball nut has to clear the rail's Z=108 face,
+so its axis sits at Z ≥ 122 (SFU1605) or ≥ 126 (SFU1610); the nut reaches Z 136 or 144,
+the carriage has to wrap it, and the fairing follows to ~148 or ~156. **Knee protrusion
+goes 86 → 96 mm, or 104 mm on 1610.** The return is ~32 mm per side of fore-aft, of
+which only ~12 mm was ever outside the limb.
+
+So the current layout is already spending the cheap axis. The mass of the rails lands on
+the thigh, which does not swing about the knee, so it costs hip effort rather than the
+reflected inertia the screw-lead decision is fighting — the cheap place to spend 219 g.
+
+Numbers: [`scripts/310_guides.py`](scripts/310_guides.py).
 
 ---
 
@@ -562,11 +654,7 @@ python scripts/fc.py run scripts/223_cad_shots.py &&   python scripts/crop_cad.p
   `P6` (165 cm³) and `P1` (131 cm³) are the structural candidates for a diet. The 239 cm³ of
   shrouds should print at two walls and low infill — nearer 130 g than 303 g, since they
   carry no load.
-- **Carriage guides are sliding, not rolling.** The Delrin L-gibs cost ~70 N of
-  friction, 7.7% of the belt pull, and worse, it is *sliding* friction — stick-slip and a
-  breakaway that differs from the running force, on a device that has to deliver 10%
-  assist smoothly. An MGN12H rail drops that to 1.4 N for +219 g. See
-  [`scripts/310_guides.py`](scripts/310_guides.py). Not changed yet.
+- **Carriage guides are sliding, not rolling** — see below. Not changed yet.
 - **The motor sits at the hip**, where the reference limb model ends (Y = 300). Its 100 mm
   clearance is measured against nothing and needs a fitting check on the patient.
 - **Belt tooth-shear figures come from continuous-duty power ratings**, which carry fatigue
