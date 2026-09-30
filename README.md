@@ -515,9 +515,9 @@ Friction is the interesting part, and specifically that sliding friction is *uns
 
 | | Friction | Mass | Load capacity |
 |---|---|---|---|
-| Delrin L-gibs | **70 N** — 7.7% of belt pull | 29 g | ~0.07 MPa contact, fine |
+| Delrin L-gibs | **70 N** — 7.7% of belt pull | 29 g | fine on contact pressure |
+| **MGN7H — built** | **1.4 N** | **95 g** (2 rails, 4 blocks) | 1.00 kN |
 | MGN9H | 1.4 N | 150 g | 1.86 kN |
-| **MGN12H** | **1.4 N** | **248 g** | 2.94 kN |
 | HGR15 | 1.4 N | 616 g | 7.84 kN |
 
 Beyond the 7.6% recovered, the real argument is stick-slip: a breakaway force different
@@ -525,26 +525,39 @@ from the running force, and a μ that wanders with wear and temperature. The who
 plan is to start at 10% assist and creep up under a physio's supervision, and notchy
 low-level torque makes that hard to tune and unpleasant to wear.
 
-**HGR15 is the wrong size** — 616 g for capacity nobody needs. MGN12H is the right one.
+**HGR15 is the wrong size** — 616 g for capacity nobody needs.
 
-### Where a rail can actually go
+### Where the rails go, and the 0.9 mm that picked the size
 
-The obvious idea is to put rails on the 20 mm sides of the extrusion and move the screws
-round to the lateral face, collapsing the fore-aft spread. Measured against the model,
-with an MGN12H envelope (rail 12×8, block 27×13) over the carriage band:
+They go on the **20 mm side faces**, rail centre Z = 98, which puts the block at
+Z 89.5…106.5 — between the thigh cuff (tops out at 88) and the extrusion's lateral face
+(108), entirely inside the carriages' existing envelope. **No dimensional cost at all.**
 
-| Mounting face | Result |
-|---|---|
-| 20 mm side, X = −30 | **clash**, 2.4 cm³ into the drive belt run |
-| 20 mm side, X = +30 | **clash**, 1.2 cm³ into the take belt run |
-| lateral 60 mm face, X = ±18 | **clear** — envelope X ±31.5, Z 108…121 |
+Getting there took two wrong answers, both from checks that were too small, and both
+worth recording because they are the same mistake in different clothes.
 
-The blocker is not adjustable: the belt runs sit at |X| 35.6…41.1 because they are
-tangent to the 29T pulley, and that radius *is* the 36.92 mm moment arm. That leaves
-5.6 mm beside the 20 mm faces and a block needs 13.
+**"The side faces clash with the belt."** Wrong for the *blocks*: run A spans
+Y 0…`carrA−24` and carriage A's first block starts later, so there is a constant gap at
+every pose — the same construction that keeps the ball nut clear. Swept over all 107
+poses, block-to-belt overlap is 0.00 cm³ at every rail height tried. But it is right for
+the **rail**, which is continuous and therefore does share length with the belt. There is
+5.6 mm between the side face at |X| 30 and the belt's inner face at 35.6:
 
-But the lateral face is free. X ±31.5 is inboard of the belt, and Z 121 is under the
-carriages' existing 130 ceiling, so **rails there cost nothing in either dimension**.
+| | Proud of the face | Reaches | vs. the belt |
+|---|---|---|---|
+| MGN9 rail | 6.5 mm | 36.5 | **0.9 mm into it** |
+| **MGN7 rail** | 4.8 mm | 34.8 | clear by 0.8 mm |
+
+**"It clears the cuff."** That test was run on the *anterior* block only. The posterior
+side is tighter, because carriage B carries the sprung belt anchor in exactly that corner.
+Three changes were needed there and none on the anterior side: the blocks move distal of
+the anchor, the anchor moves outboard to X 35.6…44.2, and the tension spring rises to
+Z 113 so the block passes under it. Block spacing on B drops to 34 mm as a result, so the
+18.0 N·m yaw becomes **529 N per block** against MGN7H's ~1.0 kN dynamic rating — 1.9× on
+a peak, not a continuous, load. Carriage A keeps 54 mm and 333 N.
+
+This placement also leaves the lateral 60 mm face completely free, which is what the
+front-mounted screw layout below would need.
 
 ### Why the screws stay at X = ±58
 

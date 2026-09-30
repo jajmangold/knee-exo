@@ -58,7 +58,8 @@ for n in ("P1_KneeYoke", "P2a_KneeHingePlate", "P3_Carriage", "P3b_CarriageB",
     COL[n] = (0.13, 0.31, 0.72)
 for n in ("P20_KneeShroud", "P21_ShellAnterior", "P22_DriveCap", "P24_FairingShank"):
     COL[n] = (0.22, 0.44, 0.85)
-for n in ("A2_BallScrew_SFU1620", "A2c_BallScrew_LH", "HW_PinB_10", "HW_JointBolts"):
+for n in ("A2_BallScrew_SFU1620", "A2c_BallScrew_LH", "HW_PinB_10", "HW_JointBolts",
+          "A9_RailMGN9_A", "A9b_RailMGN9_B"):
     COL[n] = (0.72, 0.74, 0.78)
 for n in ("A2b_BallNut_SFU1620", "A2d_BallNut_LH", "A8_TensionSpring"):
     COL[n] = (0.45, 0.47, 0.50)
@@ -66,7 +67,7 @@ for n in ("A5_Belt_HTD8M", "A5b_Belt_DriveRun", "A5c_Belt_TakeRun"):
     COL[n] = (0.10, 0.10, 0.11)
 for n in ("P10a_Slider_Delrin", "P10b_Slider_Delrin",
           "P10c_Slider_Delrin", "P10d_Slider_Delrin"):
-    COL[n] = (0.88, 0.87, 0.83)
+    COL[n] = (0.45, 0.47, 0.50)   # MGN9H blocks, bought steel
 COL["A3_Motor_6374"] = (0.20, 0.20, 0.22)
 COL["A7_DriveBox"] = (0.25, 0.25, 0.27)
 COL["P13_HallTension"] = (0.10, 0.45, 0.30)

@@ -37,7 +37,8 @@ CB = ["P3b_CarriageB", "A2d_BallNut_LH", "P10c_Slider_Delrin", "P10d_Slider_Delr
       "P11_SprungAnchor", "A8_TensionSpring", "P13_HallTension"]
 STAT = ["A1_Extrusion_20x60_VSlot", "P1_KneeYoke", "P5_ThighCuff", "A2_BallScrew_SFU1620",
         "A2c_BallScrew_LH", "A3_Motor_6374", "A7_DriveBox", "HW_PinB_10", "A5_Belt_HTD8M",
-        "P20_KneeShroud", "P21_ShellAnterior", "P22_DriveCap"]
+        "P20_KneeShroud", "P21_ShellAnterior", "P22_DriveCap",
+        "A9_RailMGN9_A", "A9b_RailMGN9_B"]
 RUN = ["A5b_Belt_DriveRun", "A5c_Belt_TakeRun"]
 
 MAT = {}
@@ -48,7 +49,8 @@ for n in ("P1_KneeYoke", "P2a_KneeHingePlate", "P3_Carriage", "P3b_CarriageB",
     MAT[n] = "PETG"
 for n in ("P20_KneeShroud", "P21_ShellAnterior", "P22_DriveCap", "P24_FairingShank"):
     MAT[n] = "FAIR"
-for n in ("A2_BallScrew_SFU1620", "A2c_BallScrew_LH", "HW_PinB_10", "HW_JointBolts"):
+for n in ("A2_BallScrew_SFU1620", "A2c_BallScrew_LH", "HW_PinB_10", "HW_JointBolts",
+          "A9_RailMGN9_A", "A9b_RailMGN9_B"):
     MAT[n] = "STEEL"
 for n in ("A2b_BallNut_SFU1620", "A2d_BallNut_LH", "A8_TensionSpring"):
     MAT[n] = "NUT"
@@ -56,7 +58,7 @@ for n in ("A5_Belt_HTD8M", "A5b_Belt_DriveRun", "A5c_Belt_TakeRun"):
     MAT[n] = "BELT"
 for n in ("P10a_Slider_Delrin", "P10b_Slider_Delrin",
           "P10c_Slider_Delrin", "P10d_Slider_Delrin"):
-    MAT[n] = "DELRIN"
+    MAT[n] = "NUT"
 MAT["A3_Motor_6374"] = "MOTOR"
 MAT["A7_DriveBox"] = "DARK"
 MAT["P13_HallTension"] = "PCB"

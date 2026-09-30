@@ -65,7 +65,8 @@ MU_ROLL = 0.004
 RAIL_L = 230.0          # A1 spans Y 58..284.7
 print("  %-10s %8s %8s %9s %9s %9s %8s" %
       ("guide", "C_dyn", "rail h", "block h", "rail g/m", "block g", "total g"))
-opts = [("MGN9H",  1.86, 6.5, 10.0, 350.0,  35.0),
+opts = [("MGN7H",  1.00, 4.8,  8.0, 220.0,  22.0),
+        ("MGN9H",  1.86, 6.5, 10.0, 350.0,  35.0),
         ("MGN12H", 2.94, 8.0, 13.0, 600.0,  55.0),
         ("MGN15H", 4.51, 10.0, 16.0, 900.0, 100.0),
         ("HGR15",  7.84, 15.0, 24.0, 1200.0, 170.0)]
@@ -75,6 +76,14 @@ for name, cdyn, rh, bh, rg, bg in opts:
           % (name, cdyn, rh, bh, rg, bg, tot))
 print("  friction at %.0f N reaction, mu = %.3f: %.1f N  (%.2f%% of the belt pull)"
       % (R, MU_ROLL, MU_ROLL * 2 * R, 100 * MU_ROLL * 2 * R / F))
+print()
+print("  TWO blocks per carriage, not one. A single block would have to react the")
+print("  %.1f N.m yaw as a MOMENT, and a miniature block is rated under 10 N.m." % Mz)
+for SPACING, who in ((54.0, "carriage A"), (34.0, "carriage B, shortened by the anchor")):
+    print("    %-38s %2.0f mm apart -> %4.0f N per block"
+          % (who, SPACING, Mz * 1000.0 / SPACING))
+print("  So 2 rails and 4 blocks: %.0f g of MGN7, against %.0f g of acetal."
+      % (2 * (RAIL_L / 1000.0 * 220.0) + 4 * 22.0, 4 * 5.1 * 1.41))
 print("  every one of these is 10x+ overspecified on load: we need %.2f kN, "
       "the smallest offers %.2f" % (R / 1000.0, opts[0][1]))
 
@@ -83,28 +92,35 @@ print("=" * 70)
 print("VERDICT")
 d = MU_ACETAL * 2 * R
 r = MU_ROLL * 2 * R
-mgn12 = RAIL_L / 1000.0 * 600.0 + 2 * 55.0
+mgn7 = 2 * (RAIL_L / 1000.0 * 220.0) + 4 * 22.0
 print("  friction saved        %.0f N -> %.1f N   (%.1f%% of belt pull recovered)"
       % (d, r, 100 * (d - r) / F))
-print("  mass added (MGN12H)   %.0f g rail+blocks, less ~%.0f g of acetal = +%.0f g"
-      % (mgn12, 4 * 5.1 * 1.41, mgn12 - 4 * 5.1 * 1.41))
-print("  stack height added    8 + 13 = 21 mm on whichever face carries the rail")
-print("  HGR15 is the wrong size: %.0f g for load we do not need." % (RAIL_L/1000.*1200 + 340))
-print("  MGN12H is the right size, and MGN9H would also do.")
+print("  mass added (MGN7H)    %.0f g of rail and blocks, less ~%.0f g of acetal = +%.0f g"
+      % (mgn7, 4 * 5.1 * 1.41, mgn7 - 4 * 5.1 * 1.41))
+print("  dimensional cost      none: the rail sits in the 5.6 mm between the side face")
+print("                        and the belt, the block inside the carriage's own envelope")
+print("  HGR15 is the wrong size: %.0f g for load nobody needs." % (RAIL_L/1000.*1200 + 340))
+print("  MGN7H is what fits. MGN9 is 0.9 mm too tall for the belt.")
 print("=" * 70)
 print("WHERE IT GOES  (measured against the model, see the rails section in the README)")
 print("  MGN12H envelope is rail 12x8 + block 27x13, so 13 mm proud of its mounting face")
 print("  and 27 mm across. Three candidate faces on the 20x60:")
-print("    20 mm side, X = -30   CLASH 2.4 cm3 into the drive belt run")
-print("    20 mm side, X = +30   CLASH 1.2 cm3 into the take belt run")
-print("    lateral face, X = +/-18   CLEAR -- X +/-31.5, Z 108..121")
-print("  The belt runs sit at |X| 35.6..41.1 because they are tangent to the 29T pulley,")
-print("  and that radius IS the 36.92 mm moment arm, so they cannot move. That leaves")
-print("  5.6 mm beside the 20 mm faces, and a block needs 13.")
-print("  The lateral face is free: X +/-31.5 is inboard of the belt, Z 121 is under the")
-print("  carriages' existing 130 ceiling. The rails cost nothing in either dimension.")
+print("  BLOCKS never share length with the belt: run A ends at carrA-24 and carriage A's")
+print("  first block starts later, the same construction that keeps the ball nut clear.")
+print("  The RAIL is continuous, so it does. The belt's inner face is at |X| 35.6 and the")
+print("  side face at |X| 30 -- 5.6 mm:")
+print("    MGN9 rail stands 6.5 proud -> reaches 36.5, 0.9 mm INTO the belt")
+print("    MGN7 rail stands 4.8 proud -> reaches 34.8, clear by 0.8 mm")
+print("  Swept over all 107 poses, MGN7 at rail centre Z = 98 is clear on both sides, with")
+print("  three changes the posterior needs: blocks distal of the sprung anchor, the anchor")
+print("  outboard to X 35.6..44.2, and the spring up to Z 113.")
+print("  Block spacing then drops to 34 mm on carriage B, so the yaw becomes %.0f N per"
+      % (Mz * 1000.0 / 34.0))
+print("  block against MGN7H's ~1.0 kN dynamic rating -- 1.9x on a peak load.")
+print("  This keeps the LATERAL face free, which the front-mounted screw layout needs.")
+print("  BUILT: 250_mgn7.py.")
 print("=" * 70)
 print("  The mass lands on the THIGH, which does not swing about the knee, so it")
 print("  costs hip effort -- not the reflected inertia that 300_drivetrain.py is")
-print("  fighting. That is the cheap place to spend %.0f g." % (mgn12 - 29))
+print("  fighting. That is the cheap place to spend %.0f g." % (mgn7 - 29))
 print("=" * 70)

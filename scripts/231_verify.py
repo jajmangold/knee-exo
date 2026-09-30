@@ -15,7 +15,8 @@ CB=["P3b_CarriageB","A2d_BallNut_LH","P10c_Slider_Delrin","P10d_Slider_Delrin",
 STAT=["A1_Extrusion_20x60_VSlot","P1_KneeYoke","P5_ThighCuff","REF_Thigh","REF_Knee",
       "A2_BallScrew_SFU1620","A2c_BallScrew_LH","A3_Motor_6374","A7_DriveBox",
       "HW_PinB_10","A5_Belt_HTD8M","A5b_Belt_DriveRun","A5c_Belt_TakeRun",
-      "P20_KneeShroud","P21_ShellAnterior","P22_DriveCap"]
+      "P20_KneeShroud","P21_ShellAnterior","P22_DriveCap",
+      "A9_RailMGN9_A","A9b_RailMGN9_B"]
 O=lambda n: doc.getObject(n)
 ALL=[n for n in SHANK+CA+CB+STAT if O(n)]
 def pose(s):
