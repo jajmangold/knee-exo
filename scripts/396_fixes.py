@@ -50,7 +50,7 @@ MP_Y = (300.0, 308.0)
 MP_Z = (MOT_Z0 - MOT_R - 2.0, MOT_Z0 + MOT_R + 2.0)
 LINK_Y = (384.0, 396.0)
 SCR_Y = (70.0, 398.0)
-WHEEL_Y = 25.0
+WHEEL_Y = 35.0
 # mini V-wheel: OD 15.23, groove minor ~9.5, so the centre stands off the corner by
 # (9.5/2)/sqrt(2) in each of X and Z.
 W_OD, W_GROOVE = 15.23, 9.5

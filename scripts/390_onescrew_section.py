@@ -209,9 +209,9 @@ OLD = [("2x SFU1610 screw, 300 mm", 900.0), ("2x ball nut", 360.0),
        ("A1 2060 x 227 mm", 352.0), ("A7 drive box", 201.0),
        ("HTD-8M strip, ~360 mm", 47.0)]
 NEW = [("1x SFU1610 screw, 330 mm", 450.0), ("1x ball nut", 180.0),
-       ("P3 gantry, 65.0 cm3 alu", 175.0), ("4x mini V-wheel + eccentrics", 60.0),
-       ("A6 29T idler + bearings", 120.0), ("A1 2040 x 151 mm", 159.0),
-       ("A7 bracket, 172.2 cm3 alu", 465.0), ("HTD-8M loop, 742 mm", 96.0)]
+       ("P3 gantry, 71.3 cm3 alu", 192.0), ("4x mini V-wheel + eccentrics", 60.0),
+       ("A6 29T idler + bearings", 120.0), ("A1 2040 x 156 mm", 164.0),
+       ("A7 bracket, 120.6 cm3 alu", 326.0), ("HTD-8M loop, 742 mm", 96.0)]
 o = sum(m for _, m in OLD); n = sum(m for _, m in NEW)
 print("   %-34s %7s   %-34s %7s" % ("two-screw", "g", "one-screw", "g"))
 for k in range(max(len(OLD), len(NEW))):
@@ -224,30 +224,49 @@ print("   %.0f g off the limb: %.2f kg -> %.2f kg, %.0f%%."
       % (o - n, 4.66, 4.66 - (o - n) / 1000.0, 100 * (o - n) / 4660.0))
 print()
 print("   But note WHERE it went. Two line items got much heavier:")
-print("     A7  %4.0f -> %4.0f g   the idler has to be held against up to %.0f N and the"
-      % (201.0, 465.0, 1828.0))
-print("                        bracket is now the heaviest fabricated part in the build")
+print("     A7  %4.0f -> %4.0f g   the idler has to be held against up to %.0f N, and the"
+      % (201.0, 326.0, 1828.0))
+print("                        bracket is still the heaviest fabricated part. It was 465 g")
+print("                        until 400_bracket_stress.py showed the whole load path at")
+print("                        18 MPa against 240 -- 7.7 mm plates went to 4 mm.")
 print("     A6     0 -> %4.0f g   a second 29T pulley did not exist before" % 120.0)
 print("   Against that, the printed structural carriages are gone entirely -- one bought")
 print("   aluminium plate at %.0f g replaces %.0f g of printed PETG doing a structural job"
-      % (175.0, 383.0))
+      % (192.0, 383.0))
 print("   it was never well suited to.")
 print()
-print("   The drive bracket is where the remaining work is. %.0f g of aluminium to react"
-      % 465.0)
-print("   %.0f N is not obviously wrong, but nothing here is FEA and the 2*T_b winding" % 1828.0)
-print("   trick in 394 is the cheapest way to make the number smaller.")
+print("   The bracket is now sized by hand calculation rather than by what was convenient")
+print("   to draw -- 400_bracket_stress.py. It is still not FEA, and fatigue over a million")
+print("   gait cycles and shock loading if the belt jumps are both uncovered.")
 print("=" * 78)
 print("7. THE LAYOUT TO BUILD")
 print("   extrusion    20x40 V-slot, X +/-20, Z 88..108, Y 58..258  (200 mm, was 227)")
 print("   gantry       aluminium V-wheel plate on the Z=108 face, wheels on the |X| 20")
-print("                corners, ~100 mm wheel spacing, reaching out to X -84")
+print("                corners, 70 mm wheel spacing (401_vwheel_load.py), out to X -84")
 print("   screw        ONE SFU1610 RH, X = -%.0f, Z = 106, nut OD %.0f" % (SCR_X, 2 * NUT_R))
 print("   idler        29T HTD-8M, X = 0, Y = %.0f, Z 96..126, on a slotted carrier" % Y_I)
 print("   belt         closed HTD-8M loop, strands at X = +/-%.2f, clamped to the" % R)
 print("                gantry on the -X strand")
 print("   motor        belted 1:1 to the screw and sat at X = 0 proximal of the idler,")
 print("                which pulls the drive cap in from X -106..84 to about +/-47")
+print()
+print()
+print("   HOW FAR UP THE THIGH IT REACHES -- the constraint nobody had written down.")
+print("   REF_Thigh in the model is a truncated phantom, Y 15..300, so it is NOT the hip and")
+print("   the sweep cannot test this. A real thigh, greater trochanter to knee centre, is")
+print("   about 0.245 x stature:")
+print("   %-14s %10s %12s %14s" % ("stature", "thigh", "cap ends at", "margin to hip"))
+CAP_END = 412.0
+for h in (1.65, 1.72, 1.78, 1.85):
+    thigh = 0.245 * h * 1000.0
+    print("   %10.2f m %8.0f mm %10.0f mm %11.0f mm %s"
+          % (h, thigh, CAP_END, thigh - CAP_END, "" if thigh - CAP_END > 0 else "<-- PAST THE HIP"))
+print("   The device must end DISTAL of the hip joint: at 90 deg of hip flexion -- sitting --")
+print("   anything proximal of it swings into the pelvis. At %.0f mm there is roughly" % CAP_END)
+print("   20-25 mm of margin on a 1.78 m adult and NONE on a short one. So the drive end")
+print("   has no room left to grow proximally, and that is now a hard constraint on any")
+print("   future change to the motor or idler placement. It wants checking on the actual")
+print("   patient with a tape measure before anything is cut.")
 print()
 print("   Deletes: A2c, A2d, P3b, A9, A9b, P10a-d, P11, P13, A7. Rebuilds: A1, A2, A2b,")
 print("   A5/A5b/A5c, P3, A3, A7, P22. Then 231_verify.py over all 107 poses.")

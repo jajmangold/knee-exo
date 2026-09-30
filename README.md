@@ -41,8 +41,12 @@ rendered in **Cycles**. Left: the mechanism. Right: the same cycle with the fair
 <img src="renders/anim/hero_open.gif" width="330"> <img src="renders/anim/hero_clad.gif" width="330">
 </div>
 
-Watch the two carriages in the left animation. They move in **opposite directions**, and
-that is the whole idea.
+Watch the carriage in the left animation. Moving it one way winds the belt onto the knee
+capstan and off the idler; moving it back does the reverse. That is the whole idea.
+
+> **These animations and renders are the earlier two-screw build.** The mechanism is now
+> one screw, one carriage and a closed belt loop — see *The second screw is gone* below.
+> The FreeCAD viewport images are current; the Blender ones are not yet regenerated.
 
 <div align="center">
 <img src="renders/anim/knee_open.gif" width="620">
@@ -57,17 +61,23 @@ that is the whole idea.
 <br><sub>FreeCAD viewport · mechanism, and the same thing clad on the reference limb</sub>
 </div>
 
-A **belt capstan** at the knee, driven by **two opposed ball screws**:
+A **belt capstan** at the knee, driven by **one ball screw** through a closed belt loop:
 
 | | |
 |---|---|
 | **Axes** | +Y proximal, **Z is the knee axis** so Z is medial-lateral, +X posterior. This is a **lateral upright** — the whole device hangs off the outside of the leg |
 | **29T HTD-8M pulley** | concentric with the knee pin, integral with the shank hinge fork |
-| **180° belt wrap** | both runs parallel to the thigh rail, at X = ±36.9 mm |
-| **Two carriages** | on one 20×60 V-slot rail, one per belt run |
-| **RH and LH screws on a common shaft** | so one carriage rises exactly as the other falls |
-| **MGN7H linear guides** | 2 rails on the 20 mm side faces, 2 blocks per carriage |
+| **A second, identical 29T pulley** | an idler on the centreline at Y 255. Equal pulleys are what put both belt strands at exactly X = ±36.9 |
+| **Closed HTD-8M loop, 742 mm** | over those two pulleys. Loop length is `2πR + 2·Y_idler`, independent of carriage position |
+| **One carriage, clamped to one strand** | move the clamp by *d* and the belt circulates by *d*, turning the knee by *d/R* |
+| **One SFU1610 RH screw at X = −62** | no left-hand thread anywhere in the build |
+| **20×40 V-slot rail, 151 mm** | aluminium V-wheel gantry on mini wheels at the \|X\| 20 corners |
 | **C6374 170 Kv BLDC + MKS XDRIVE MINI** | ODrive v3.6 clone, torque control only, never position |
+
+The ratio is unchanged at **23.2 : 1** — it is still `2πR/lead`, and the idler does not
+gear anything. What the second pulley buys is the *return path* that lets one carriage do
+the work of two. How that came about, and the 725 g it saved, is
+[further down](#where-this-design-is-weak).
 
 ### Why the differential is exact, not approximate
 
@@ -282,8 +292,9 @@ chosen for its *mount*, not its capacity — see [`docs/BOM.md`](docs/BOM.md) §
 <br><sub>FreeCAD orthographic coronal and sagittal · then the same coronal profile as a Cycles render</sub>
 </div>
 
-The device sits **86 mm proud of the knee** clad, 80 mm bare. That left-hand orthographic
-sagittal view is the one that matters — that thin edge is the number deciding whether it
+The device sits **86 mm proud of the knee** clad, 80 mm bare — unchanged by the one-screw
+rebuild, which was the main thing to confirm when the rail narrowed. That left-hand
+orthographic sagittal view is the one that matters — that thin edge is the number deciding whether it
 fits under trousers.
 
 ### The enabling observation
@@ -363,9 +374,8 @@ A fair question to ask of the renders. Measured coverage along the limb axis:
 
 30% sounds bad and mostly is not, for three separate reasons that are worth keeping apart:
 
-**Most of the shank has nothing to fair.** Every moving part of the transmission — two ball
-screws, two ball nuts, two carriages, both belt runs, the motor and the coupling — is on
-the thigh. Below the knee there is a rail, a hinge plate, a socket and a cuff, and relative
+**Most of the shank has nothing to fair.** Every moving part of the transmission — the ball
+screw, the nut, the gantry, both belt strands, the idler and the motor — is on the thigh. Below the knee there is a rail, a hinge plate, a socket and a cuff, and relative
 to the shank *nothing moves at all*. The one genuine pinch hazard down there is the belt
 entering the capstan, and `P20_KneeShroud` already closes over both nip points. So the
 shank is 30% covered by length but close to 100% covered by hazard.
@@ -617,8 +627,8 @@ Numbers: [`scripts/310_guides.py`](scripts/310_guides.py).
 | **Knee angle** | AS5048A, 14-bit absolute, on a 6 mm diametric magnet sunk into the knee pin's flush counterbore. Absolute at power-on, so **no homing routine** — critical, because the screw turns 6.8 revolutions over the ROM and a motor-side encoder cannot tell which one it is on |
 | **Motor** | the drive's onboard AS5047P, 14-bit SPI, commutation and velocity |
 | **Tooth-skip detection** | one tooth is 8 mm of belt = **12.9° of knee angle**. Comparing joint angle against motor position makes a skip unmissable — this is the monitor for the failure mode that actually matters, sudden loss of assist mid-stair |
-| **Belt tension** | Hall sensor on the sprung anchor's slide, reading its deflection |
-| **Endstops** | magnet pockets in each carriage side wall — hard limits plus auto-calibration of the screw↔knee map |
+| **Belt tension** | Hall sensor on the **idler carrier's** slotted mount, reading its deflection. A closed loop is tensioned by moving the idler, which retires the sprung belt-end anchor entirely |
+| **Endstops** | magnet pockets in the gantry's side wall — hard limits plus auto-calibration of the screw↔knee map |
 
 Full architecture, ODrive configuration, control strategy, regen handling and the bring-up
 order: [`docs/ELECTRONICS.md`](docs/ELECTRONICS.md).
@@ -732,7 +742,14 @@ python scripts/fc.py run scripts/223_cad_shots.py &&   python scripts/crop_cad.p
   corrected there and in [`396_fixes.py`](scripts/396_fixes.py). The open question is the
   mini wheel's load rating against the 362 N per wheel the yaw couple puts on it — if that
   is tight, MGN7 on the same 20×40's side faces has 7.6 mm of clearance and 2.8× margin,
-  where on the 20×60 it had 0.8 mm.
+  where on the 20×60 it had 0.8 mm. **OpenBuilds publishes no load rating at all** — only
+  Delrin's 63 MPa compressive strength — so
+  [`401_vwheel_load.py`](scripts/401_vwheel_load.py) computes it: at the 50 mm wheel
+  spacing first built, the Hertzian contact on each 45° flank peaks at **107 MPa against a
+  ~101 MPa yield onset**, meaning the wheel flattens and the gantry develops play at every
+  torque reversal. Widening to **70 mm** brings it to 91 MPa — an 11% margin, thin but the
+  most available, since 80 mm would push the idler proximal and proximal length is the one
+  budget with nothing left in it. Costs 5 mm of rail and ~24 g.
 - **Nothing checks assembly.** Every verification in this repository is interference —
   "do two solids overlap". Nothing asks whether a part can be *fastened*, whether a tool
   can reach a screw, or what order things go together in. That gap is how the rails came
@@ -768,13 +785,13 @@ python scripts/fc.py run scripts/223_cad_shots.py &&   python scripts/crop_cad.p
   | | two-screw | one-screw |
   |---|---|---|
   | Ball screws | 2, one **left-hand** | **1, right-hand** |
-  | Carriages | 2 printed, 383 g | 1 aluminium V-wheel gantry, 175 g |
-  | Extrusion | 20×60, 227 mm, 352 g | **20×40, 151 mm, 159 g** |
+  | Carriages | 2 printed, 383 g | 1 aluminium V-wheel gantry, 192 g |
+  | Extrusion | 20×60, 227 mm, 352 g | **20×40, 156 mm, 164 g** |
   | Guides | 2 MGN7 rails + 4 blocks | 4 mini V-wheels |
   | Belt | strip, two anchored ends | closed loop, 742 mm |
-  | Drive-end mass | 2430 g | **1705 g** |
+  | Drive-end mass | 2430 g | **1588 g** |
 
-  **725 g off the limb — 4.66 kg → 3.94 kg, 16%** — and the left-hand screw, the build's
+  **842 g off the limb — 4.66 kg → 3.82 kg, 18%** — and the left-hand screw, the build's
   only special-order part, disappears along with the requirement that two screws be
   manufactured to matching lead. Peak screw column load drops 914 → 764 N because the two
   strands now oppose on one carriage.
@@ -782,10 +799,15 @@ python scripts/fc.py run scripts/223_cad_shots.py &&   python scripts/crop_cad.p
   Verified: **107 poses, zero hard-part clashes**, knee standoff unchanged at 86 mm proud —
   the narrower rail cost nothing laterally. The five remaining flags are all cladding.
 
-  It is not free. The **idler bracket is the new cost centre at 465 g**, because the idler
+  It is not free. The **idler bracket is the new cost centre at 326 g**, because the idler
   reaction is `2·T_b` — up to **1828 N, the largest single load in the machine**. Wind the
   loop so *extension* assist loads the strand that leaves the idler lightly and it sees
   300 N in the direction that matters; that choice is free and worth making deliberately.
+  The bracket was 465 g until [`400_bracket_stress.py`](scripts/400_bracket_stress.py) put
+  numbers on it: the whole load path runs at **18 MPa against 240 MPa yield** and deflects
+  0.0005 mm, so it was sized by what was convenient to draw rather than by any load. 7.7 mm
+  plates went to 4 mm. Still not FEA — it does not cover fatigue over a million gait cycles
+  or shock loading if the belt jumps.
   Added lost motion is only **+0.14°**, not the 1–3° first estimated: both strands join the
   carriage to the capstan, so they are springs in **parallel** and the short direct strand
   dominates.

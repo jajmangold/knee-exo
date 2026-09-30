@@ -43,7 +43,7 @@ SCR_X, SCR_Z, SCR_R = -62.0, 106.0, 7.9
 NUT_R = 18.0
 NUT_HALF = 21.0
 A0 = 161.0
-PLATE_HALF = 35.0
+PLATE_HALF = 42.0
 OUT_HALF = 29.0
 C = 0.2                                   # clearance everywhere things merely touch
 

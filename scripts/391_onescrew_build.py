@@ -37,7 +37,7 @@ RZ = (88.0, 108.0)
 # The idler is a 71 mm pulley on the centreline, so the rail CANNOT run under it: at
 # X +/-20, Z 96..108 the extrusion would be inside the pulley. The rail therefore ends
 # just short of it, and the idler hangs off the drive bracket instead (393).
-RY = (56.0, 207.0)
+RY = (51.0, 207.0)
 OUT_SLOT = (-10.0, 10.0)                   # a 2040's 40 mm face has slots at +/-10
 SIDE_Z = (95.0, 101.0)
 
@@ -49,10 +49,18 @@ NUT_R = 18.0
 NUT_HALF = 21.0
 
 A0 = 161.0
-PLATE_HALF = 35.0
-WHEEL_Y = 25.0                             # wheel centres at clamp +/- 25
-WHEEL_R = 23.89 / 2.0
-WHEEL_Z = (103.0, 113.0)
+PLATE_HALF = 42.0
+# 70 mm apart, not 50: at 50 the Hertzian contact pressure on a Delrin mini
+# V-wheel is 107 MPa against a ~101 MPa yield onset (401_vwheel_load.py), so the
+# wheel flattens and the gantry develops play at every torque reversal. 70 mm
+# costs 5 mm off the distal end of the rail and keeps the idler at Y 255.
+WHEEL_Y = 35.0
+# MINI V-wheel, not solid: 396_fixes.py shows a solid wheel's groove puts its outer edge
+# at |X| 37.6 and into the belt. This is the placeholder geometry; 396 rebuilds them with
+# the bisector offset and the rail cut out. The radius here has to match, or the
+# rail-length assert below checks the wrong footprint.
+WHEEL_R = 15.23 / 2.0
+WHEEL_Z = (106.0, 117.0)
 DECK_Z = (113.0, 131.0)
 ARM_X = (-84.0, -45.0)
 GAP_X = (-45.0, -33.0)                     # belt passes through here

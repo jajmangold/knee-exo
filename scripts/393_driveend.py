@@ -6,12 +6,12 @@ inside the pulley), and it cannot be held from inboard either, for the same reas
 hangs in a yoke that reaches it from OUTBOARD of the belt band and from above and below
 it: the only three places that are free at Z 96..126 are |X| > 41.124, Z < 96 and Z > 126.
 
-  end plate  X +/-48   Y 207..217  Z  88..108  bolts to the rail's proximal end,
+  end plate  X +/-46.5 Y 207..217  Z  88..108  bolts to the rail's proximal end,
                                                slotted for the two belt strands
-  bottom     X +/-48   Y 217..298  Z  88..95.7 under the belt; lower idler bearing
-  top        X +/-48   Y 217..298  Z 126.3..134 over the belt; upper idler bearing
-  cheeks     |X| 41.5..48          Z  88..134  outboard of the belt, ties them together
-  screw boss X -84..-41.5 Y 280..298 Z 88..124  upper screw bearing
+  bottom     X +/-46.5 Y 217..298  Z  88..92    under the belt; lower idler bearing
+  top        X +/-46.5 Y 217..298  Z 126.3..130.3 over the belt; upper idler bearing
+  cheeks     |X| 41.5..46.5        Z  88..130.3 outboard of the belt, ties them together
+  screw boss X -84..-41.5 Y 286..298 Z 88..124  upper screw bearing
   motorplate X -84..48  Y 298..306  Z  78..144  bored for the motor and the screw
 
 The motor faces PROXIMALLY with its shaft out the far end, so the 1:1 link belt sits at
@@ -36,16 +36,20 @@ SCR_X, SCR_Z, SCR_R = -62.0, 106.0, 7.9
 NUT_R = 18.0
 IDL_Y = 255.0
 
-BR_X = 48.0
+# Plate and cheek thicknesses come from 400_bracket_stress.py, not from what was
+# convenient to fuse. The first version used 7.7 mm plates and 6.5 mm cheeks and ran at
+# 18 MPa against 240 -- about 50x overbuilt. At 4 mm plates and 5 mm cheeks the worst
+# stress is 28.6 MPa (axle bearing) and the worst deflection 0.0009 mm.
+BR_X = 46.5
 CHEEK = 41.5
 END_Y = (207.0, 217.0)
 BODY_Y = (217.0, 298.0)
-BOT_Z = (88.0, 95.7)
-TOP_Z = (126.3, 134.0)
+BOT_Z = (88.0, 92.0)
+TOP_Z = (126.3, 130.3)
 MP_Y = (298.0, 306.0)
 MP_Z = (78.0, 144.0)
 BOSS_X = (-84.0, -CHEEK)
-BOSS_Y = (280.0, 298.0)
+BOSS_Y = (286.0, 298.0)
 MOT_R, MOT_Z0 = 31.5, 111.0
 MOT_Y = (306.0, 380.0)
 LINK_Y = (382.0, 394.0)

@@ -89,13 +89,13 @@ drifting, and there is no adjustment for it. Each screw only needs **162 mm of t
 
 | # | Part | Qty | Notes | ~USD |
 |---|---|---|---|---|
-| S1 | V-slot extrusion **20x40**, **black anodised**, 155 mm | 1 | Cut to Y 56…207. **~159 g, against 352 g for the 20×60 × 227 mm.** It ends short of the idler because a 71 mm pulley on the centreline would otherwise contain the extrusion. **Its 40 mm face has slots at X = ±10, not X = 0** — the fairing spine has to move | 12 |
-| S2 | **Mini V-wheel**, Delrin, OD 15.23 | 4 | On the |X| 20 corners of the 20×40, wheels 50 mm apart in Y. **Mini, not solid**: a V groove seats the corner apex at the bottom of the groove, so the centre stands off along the 45° bisector — a solid wheel reaches |X| 37.6 and fouls the belt at 35.55, a mini reaches 31.0. **Check its load rating against 362 N per wheel**; if tight, MGN7 on the same 20×40's side faces has 7.6 mm clearance and 2.8× margin | 12 |
+| S1 | V-slot extrusion **20x40**, **black anodised**, 160 mm | 1 | Cut to Y 51…207. **~159 g, against 352 g for the 20×60 × 227 mm.** It ends short of the idler because a 71 mm pulley on the centreline would otherwise contain the extrusion. **Its 40 mm face has slots at X = ±10, not X = 0** — the fairing spine has to move | 12 |
+| S2 | **Mini V-wheel**, Delrin, OD 15.23 | 4 | On the |X| 20 corners of the 20×40, wheels 50 mm apart in Y. **Mini, not solid**: a V groove seats the corner apex at the bottom of the groove, so the centre stands off along the 45° bisector — a solid wheel reaches |X| 37.6 and fouls the belt at 35.55, a mini reaches 31.0. Spaced **70 mm apart**, not 50: OpenBuilds publishes no load rating, and a Hertz calculation ([`401_vwheel_load.py`](../scripts/401_vwheel_load.py)) puts the flank contact at 107 MPa against a ~101 MPa yield onset at 50 mm, versus 91 MPa at 70. Bench-test for play at reversal; MGN7 on the same side faces is the fallback | 12 |
 | S2a | Eccentric spacers + wheel bolts | 4 | Two eccentric, two fixed, the usual V-slot gantry arrangement | 10 |
 | S2b | **29T HTD-8M idler pulley**, 30 mm wide | 1 | **The same part as the knee capstan.** On the centreline at X = 0, Y 255, which is what makes the two strands land at exactly ±36.92 | 25 |
 | S2c | Idler axle + 2 bearings | 1 | Supported top and bottom by the drive bracket. Reaction is 2·T_b, **up to 1828 N — the largest single load in the machine** | 10 |
-| S2d | Aluminium gantry plate, 6 mm, ~116 × 70 | 1 | 65 cm³, 175 g, replacing 383 g of printed twin carriages. Crosses **over** the belt at Z 126.3, not under it — the 2.9 mm corridor between the nut and the belt is not a place for structure. Owned | 15 |
-| S2e | Aluminium drive bracket | 1 | Holds the idler, the screw's top bearing and the motor. 172 cm³, **465 g — the heaviest fabricated part in the build**, and the one piece here with no FEA behind it | 30 |
+| S2d | Aluminium gantry plate, 6 mm, ~116 × 84 | 1 | 71 cm³, 192 g, replacing 383 g of printed twin carriages. Crosses **over** the belt at Z 126.3, not under it — the 2.9 mm corridor between the nut and the belt is not a place for structure. Owned | 15 |
+| S2e | Aluminium drive bracket | 1 | Holds the idler, the screw's top bearing and the motor. 121 cm³, **326 g — still the heaviest fabricated part.** 4 mm plates and 5 mm cheeks, sized by [`400_bracket_stress.py`](../scripts/400_bracket_stress.py) at 18 MPa against 240 MPa yield; it was 465 g when it was sized by eye | 25 |
 | S3 | M5 T-nuts + button head cap screws | ~40 | Everything mounts to the slots | 12 |
 | S4 | M3 / M4 cap screws, assorted | ~40 | Fairings, cuffs, electronics | 10 |
 | S4a | **Rubber grommets, M5**, + shoulder screws | 3 | The fairing's only mounts. Isolating rather than rigid — `ELECTRONICS.md` §9 names the rigid spine as the likely structure-borne noise path | 6 |
@@ -203,7 +203,7 @@ where it would otherwise add to the very swing inertia the screw-lead decision i
 The one-screw rebuild moved money around more than it saved it: the left-hand screw (−$70)
 and the MGN7 rails and blocks (−$52) come off, and a second 29T pulley, its axle and
 bearings, and an aluminium drive bracket (+$65) go on. What it bought is not price — it is
-**725 g off the limb, one screw instead of two, and no special-order part anywhere.**
+**842 g off the limb, one screw instead of two, and no special-order part anywhere.**
 
 Two things moved this down from the ~$925 first estimated. The controller is a
 **$29 MKS XDRIVE MINI** rather than a $169 ODrive S1 (§5 of

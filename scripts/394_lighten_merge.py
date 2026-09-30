@@ -5,7 +5,9 @@ Two corrections to stages 1-3.
 
 1. A7 came out 230 cm3, which in aluminium is 622 g and swallows most of the saving. The
    bracket does carry the largest single load in the machine -- the idler reaction is
-   2*T_b, up to 1828 N -- but it does not need to be solid to do it. Windows out.
+   2*T_b, up to 1828 N -- but it does not need to be solid to do it. Windows out. (The sections themselves
+   were then thinned in 393 once 400_bracket_stress.py showed the whole load path
+   running at 18 MPa against 240 MPa yield -- about 50x overbuilt.)
 
 2. The belt is a CLOSED LOOP, so both straight strands are geometrically STATIC: the
    clamp slides along the -X strand, the strand itself never moves. 391 split it into a
@@ -50,12 +52,12 @@ if doc.getObject("A5e_Belt_Return") is not None:
 a = doc.getObject("A7_DriveBox").Shape
 v0 = a.Volume / 1000.0
 # top and bottom plates: keep a band around the idler axle, window out the rest
-for z0, z1 in ((87.0, 96.7), (125.3, 135.0)):
+for z0, z1 in ((87.0, 93.0), (125.3, 131.3)):        # bands follow 393's 4 mm plates
     for y0, y1 in ((219.0, 236.0), (274.0, 296.0)):
         a = a.cut(bx(-30.0, 30.0, y0, y1, z0, z1))
 # cheeks: two windows each
 for sgn in (-1.0, 1.0):
-    lo, hi = sorted((sgn * 40.5, sgn * 49.0))
+    lo, hi = sorted((sgn * 40.5, sgn * 47.5))
     for y0, y1 in ((226.0, 244.0), (266.0, 292.0)):
         a = a.cut(bx(lo, hi, y0, y1, 100.0, 122.0))
 # motor plate: corner windows, clear of the motor bore and the screw
