@@ -731,6 +731,13 @@ python scripts/fc.py run scripts/223_cad_shots.py &&   python scripts/crop_cad.p
   can reach a screw, or what order things go together in. That gap is how the rails came
   to be modelled directly over the V-slot, where their mounting screws would have had
   nothing to bite.
+- **Reflected inertia is the real weakness**, not mass or torque density. At 23.2 : 1 this
+  design sits at the top of the quasi-direct-drive band the field now uses (8–36 : 1), and
+  0.167 kg·m² costs 5–21 N·m during swing depending on acceleration. The field buys a lower
+  ratio with **motor torque density** — large-diameter, many-pole pancake motors — not with
+  transmission cleverness, which makes it a motor-selection problem rather than a mechanism
+  one. Dropping to 9 : 1 would cut it 6.6× but needs ~3.6 N·m at the motor, which a 6374
+  cannot hold. See [`docs/PRIOR_ART.md`](docs/PRIOR_ART.md).
 - **No firmware yet.** Architecture is specified in `docs/ELECTRONICS.md`; no code written.
 
 ---
