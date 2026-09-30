@@ -14,11 +14,11 @@ because changing one assumption moves several lines at once.
 The screw lead sets the total knee-to-motor ratio, and reflected rotor inertia goes as
 the **square** of that ratio. This is the most important choice in the build:
 
-| Screw | Ratio | Reflected J | vs. limb's own J | Peak current | Nut OD | Fits at X = ±58? |
-|---|---|---|---|---|---|---|
-| SFU1605 | 46.4 | 0.667 kg·m² | **2.22x** | 10.9 A | 28 mm | yes |
-| **SFU1610** | 23.2 | 0.167 kg·m² | **0.56x** | 21.7 A | 36 mm | **yes** |
-| SFU1620 | 11.6 | 0.042 kg·m² | 0.14x | 43.5 A | 40 mm | yes (but 43.5 A) |
+| Screw | Ratio | Reflected J | vs. limb's own J | Peak current | Nut OD |
+|---|---|---|---|---|---|
+| SFU1605 | 46.4 | 0.667 kg·m² | **2.22x** | 10.9 A | 28 mm |
+| **SFU1610 — built** | 23.2 | 0.167 kg·m² | **0.56x** | 21.7 A | 36 mm |
+| SFU1620 | 11.6 | 0.042 kg·m² | 0.14x | 43.5 A | 40 mm |
 
 Reflected inertia is what the patient feels **when the motor is off** — a dead battery, a
 fault trip, or the free-swing phase of every step. At SFU1605 the leg would feel roughly
@@ -43,9 +43,13 @@ until |X| < 49. So there is roughly 8 mm per side of inboard slack available if 
 the pack narrower — for 1610 the binding limit becomes the nut against the extrusion
 (|X| ≥ 30 + 18 = 48), so about X = ±50. Not modelled; the current ±58 is what is drawn.
 
-One real labelling bug remains: the CAD nut is `NUT_R = 14.0`, i.e. OD 28 — an SFU1605
-nut — despite the part being *labelled* `SFU1620`. The label is wrong. Ordering 1610 means
-redrawing that nut at OD 36, which changes nothing else.
+**This is now built.** [`240_nut1610.py`](../scripts/240_nut1610.py) draws the nuts at
+OD 36 and grows the carriage body to X 34…80, Z 84…128 so the bore is captured with a
+3.8 mm wall; [`241_fixups.py`](../scripts/241_fixups.py) clears the two clashes that
+caused. Screws stay at **X = ±58**. Swept clean over all 107 poses. The stale `SFU1620`
+labels are corrected too.
+
+**Order SFU1610, RH and LH.**
 
 ---
 
@@ -53,7 +57,7 @@ redrawing that nut at OD 36, which changes nothing else.
 
 | # | Part | Qty | Notes | ~USD |
 |---|---|---|---|---|
-| D1 | Ball screw SFU1610, RH, 300 mm, machined ends | 1 | 68.3 mm stroke + nut length + bearing seats | 45 |
+| D1 | Ball screw SFU1610, RH, 300 mm, machined ends | 1 | 68.3 mm stroke + nut length + bearing seats. Axis at X = −58 | 45 |
 | D2 | Ball screw SFU1610, **LH**, 300 mm, machined ends | 1 | Left-hand is the whole trick. Confirm with the seller — often a special order | 70 |
 | D3 | SFU1610 **flangeless** ball nut | 2 | Usually supplied with the screw. A flanged nut drives 15 mm into the rail | inc. |
 | D4 | BLDC outrunner 6374, 149 Kv, 8 mm shaft | 1 | 190 Kv also works (21.7 A becomes 27 A). ~800 g, the heaviest single item | 90 |
@@ -98,7 +102,7 @@ All 16 in [`stl/`](../stl). Blue PETG as rendered, 0.2 mm layers.
 | `P20_KneeCap` | 1 | 3 perimeters, 15%, cosmetic |
 | `P21_FairingThigh`, `P22_DriveCap`, `P24_FairingShank` | 1 each | 3 perimeters, 15%, cosmetic |
 
-Roughly 1.7–2.1 kg of filament including supports.
+Roughly 1.8–2.2 kg of filament including supports.
 
 ## 6. Electronics
 

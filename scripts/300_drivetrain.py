@@ -95,7 +95,7 @@ print("  Reflected J scales with the TOTAL knee->motor ratio SQUARED, so you")
 print("  cannot fix it by moving the reduction around -- only by lowering the")
 print("  total ratio or using a lower-inertia rotor.")
 print("  %-10s %7s %9s %9s %9s %9s %9s" %
-      ("screw", "ratio", "J_refl", "vs limb", "I_peak", "nut OD", "belt gap"))
+      ("screw", "ratio", "J_refl", "vs limb", "I_peak", "nut OD", "at X=56"))
 best = None
 for name, lead, nut_od in (("SFU1605", 5.0, 28.0), ("SFU1610", 10.0, 36.0),
                            ("SFU1620", 20.0, 40.0)):
@@ -103,17 +103,15 @@ for name, lead, nut_od in (("SFU1605", 5.0, 28.0), ("SFU1610", 10.0, 36.0),
     j = J_ROTOR * ratio ** 2
     tau_s = TAU_PEAK / (ratio * ETA_SCREW) / ETA_BELT
     amps = tau_s / (9.549 / 149)
-    gap = 58.0 - nut_od / 2.0 - BELT_X_OUT
-    print("  %-10s %7.2f %6.3f kgm2 %7.2fx %7.1f A %7.0f mm %6.1f mm%s"
-          % (name, ratio, j, j / J_LIMB, amps, nut_od, gap,
-             "  CLASH" if gap < 1.0 else ""))
+    # NOT a belt-gap column: the nut sits 60 mm proximal of its belt run's end at every
+    # pose, so an X-projection comparing their edges is meaningless. See 311_nut_belt.py.
+    print("  %-10s %7.2f %6.3f kgm2 %7.2fx %7.1f A %7.0f mm    fits"
+          % (name, ratio, j, j / J_LIMB, amps, nut_od))
 print("  A ratio that makes the leg feel 2x heavier with the power off is not")
 print("  acceptable on a patient who already struggles to swing the limb.")
 print("  SFU1610 is the build point: 0.56x the limb's own inertia, 21 A peak,")
-print("  comfortably inside an ODrive S1. But its nut is OD 36, and at X=+/-58")
-print("  that leaves %.1f mm to the belt -- the screws must move out to X=+/-62."
-      % (58.0 - 18.0 - BELT_X_OUT))
-print("  That widens the pack by 8 mm and is a CAD change NOT yet made.")
+print("  comfortably inside an ODrive S1, and it is what the model now carries --")
+print("  nuts at OD 36, screws at X=+/-58, carriage body grown to X 34..80, Z 84..128.")
 
 # ------------------------------------------------------------- backdriving
 print("=" * 68)

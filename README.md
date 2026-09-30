@@ -200,11 +200,11 @@ Reflected rotor inertia scales with the **square** of the total knee→motor rat
 what the patient feels whenever the motor is off: a dead battery, a fault trip, or simply
 the free-swing phase of every single step.
 
-| Screw | Ratio | Screw revs over ROM | Reflected J | **vs. the limb's own J** | Peak current | Nut OD | Fits at X=±58? |
-|---|---|---|---|---|---|---|---|
-| SFU1605 | 46.4 | 13.66 | 0.667 kg·m² | **2.22×** | 10.9 A | 28 mm | yes |
-| **SFU1610** | 23.2 | 6.83 | 0.167 kg·m² | **0.56×** | 21.7 A | 36 mm | **yes** |
-| SFU1620 | 11.6 | 3.42 | 0.042 kg·m² | 0.14× | 43.5 A | 40 mm | yes, but 43.5 A |
+| Screw | Ratio | Screw revs over ROM | Reflected J | **vs. the limb's own J** | Peak current | Nut OD |
+|---|---|---|---|---|---|---|
+| SFU1605 | 46.4 | 13.66 | 0.667 kg·m² | **2.22×** | 10.9 A | 28 mm |
+| **SFU1610 — built** | 23.2 | 6.83 | 0.167 kg·m² | **0.56×** | 21.7 A | 36 mm |
+| SFU1620 | 11.6 | 3.42 | 0.042 kg·m² | 0.14× | 43.5 A | 40 mm |
 
 At **SFU1605 the leg would feel roughly three times as heavy to swing as it does bare.**
 For someone already struggling to walk, that is a worse device than no device at all.
@@ -213,7 +213,7 @@ And you cannot gear your way out of it. Only the **total** ratio matters, so "SF
 a 4:1 reduction" is inertially identical to SFU1605 direct. The only levers are a lower
 total ratio (which costs motor current) or a lower-inertia rotor.
 
-**SFU1610 is the right answer, and it fits as drawn.**
+**SFU1610 is the right answer, and it is what the model now carries.**
 
 This used to carry a caveat that the 1610 nut fouled the belt by 1.1 mm and the screws had
 to move out to ±62. That was wrong, and wrong in an instructive way: it compared the nut
@@ -224,11 +224,26 @@ pose, by construction**. Swept over all 107 poses the overlap is **0.000 cm³ fo
 OD 36 and OD 40 alike**.
 
 What *does* run alongside the belt is the screw shaft, and at r = 7.9 it stays clear until
-|X| < 49 — so there is ~8 mm per side of inboard slack if a narrower pack is wanted.
+|X| < 49.
 
-> One real bug remains from that episode: the CAD nut is drawn at OD 28 — an SFU1605 nut —
-> while the part is *labelled* `SFU1620`. The label is wrong. Choosing 1610 means redrawing
-> that nut at OD 36 and nothing else.
+Building it ([`240_nut1610.py`](scripts/240_nut1610.py) and
+[`241_fixups.py`](scripts/241_fixups.py)) took three changes, two of which only the sweep
+found:
+
+- **The carriage body** has to grow to X 34…80, Z 84…128 to capture a 36 mm bore with a
+  3.8 mm wall on all three faces.
+- **Its top-outboard corner then clipped `P21` by 0.495 cm³** — *trap 2 again*: a
+  superellipse is not 84 wide everywhere, and by Z = 128 its half-width has fallen to 83.3
+  and its inner wall to ~80.3. Rather than guess a chamfer, the carriage is simply **cut by
+  `P21`**. The fairing's section is constant over Y 58…300, which covers the whole travel
+  band, so one cut clears every pose and the chamfer matches the fairing exactly.
+- **Carriage B then hit the thigh cuff, 8.67 cm³** at X 34…70, Z 84…88. The body had to
+  drop to Z = 84 for the nut and the cuff tops out at 88 — but only on the +X side, where
+  it wraps further round the limb, which is why carriage A was clean and only B clashed.
+  The cuff bolts to the rail's medial face at |X| < 30, so the wrap-around material out at
+  X 32…82 gets a corridor cut through it.
+
+Swept over all 107 poses: **zero hard-part clashes**, knee standoff unchanged at 86 mm.
 
 ### Motor
 
@@ -658,7 +673,7 @@ python scripts/fc.py run scripts/223_cad_shots.py &&   python scripts/crop_cad.p
 - **No FEA.** Hand calculations only.
 - **Screw lead unsettled** — see the drivetrain table. 10 mm is the right answer and it
   fits at X = ±58 as drawn; only the CAD nut needs redrawing from OD 28 to OD 36.
-- **Printed mass 1.81 kg** (up from 1.63 with the two new covers) is the largest
+- **Printed mass 1.93 kg** (up from 1.63 with the two new covers) is the largest
   unresolved issue. `P2a` (145 cm³), `P5` (167 cm³),
   `P6` (165 cm³) and `P1` (131 cm³) are the structural candidates for a diet. The 239 cm³ of
   shrouds should print at two walls and low infill — nearer 130 g than 303 g, since they
