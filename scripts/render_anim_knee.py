@@ -357,11 +357,6 @@ TQ = (0.60, -0.76, 0.28)
 cam_d.dof.aperture_fstop = 18.0        # motion + shallow DOF at GIF size is mush
 
 VIEWS = [
-    # name        direction   target  frame       lens   res          fairings
-    ("hero_open",  HERO,      ORIGIN, 1.11 * D,   85.0,  (600, 800),  False),
-    ("hero_clad",  TQ,        ORIGIN, 1.11 * D,   85.0,  (600, 800),  True),
-    # target stays in the capstan's Z plane: we look nearly down the knee axis, so a Z
-    # offset in the target translates almost entirely into screen displacement
     ("knee_open",  (-0.52, -0.80, 0.18), fcw((0.0, -40.0, 110.0)), 0.52, 105.0,
      (800, 600), False),
 ]
