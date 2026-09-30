@@ -751,6 +751,15 @@ python scripts/fc.py run scripts/223_cad_shots.py &&   python scripts/crop_cad.p
   of it has been run. Rescaling for the real 170 Kv motors also caught
   `dc_max_positive_current` and the pack fuse being sized off *phase* current instead of
   *bus* current — the fuse was 30 A where peak bus draw is 4.9 A.
+- **The second screw may not be needed at all**, and this is the largest open question in
+  the mechanism. Route belt run 2 past the carriage to an idler at the proximal end and
+  back down to the *same* carriage, and the kinematics close identically —
+  `Y_c = const − R·φ` falls out of both runs independently. That deletes one screw, one
+  nut, one carriage, one MGN7 pair, the 1:1 linking belt and two pulleys: **793 g, 17% of
+  the limb-mounted mass**, the left-hand thread gone entirely, and the matched-lead
+  tolerance stack gone with it. The bill is 1–3° more lost motion from ~231 mm of extra
+  belt, a 1.8 kN idler bracket, and one more place the belt can skip teeth. Worth building;
+  not built, and not swept. See [`scripts/380_one_screw.py`](scripts/380_one_screw.py).
 - **No firmware yet.** Architecture is specified in `docs/ELECTRONICS.md`; no code written.
 
 ---
