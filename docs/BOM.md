@@ -98,6 +98,7 @@ drifting, and there is no adjustment for it. Each screw only needs **162 mm of t
 | S2e | Aluminium drive bracket | 1 | Holds the idler, the screw's top bearing and the motor. 172 cm³, **465 g — the heaviest fabricated part in the build**, and the one piece here with no FEA behind it | 30 |
 | S3 | M5 T-nuts + button head cap screws | ~40 | Everything mounts to the slots | 12 |
 | S4 | M3 / M4 cap screws, assorted | ~40 | Fairings, cuffs, electronics | 10 |
+| S4a | **Rubber grommets, M5**, + shoulder screws | 3 | The fairing's only mounts. Isolating rather than rigid — `ELECTRONICS.md` §9 names the rigid spine as the likely structure-borne noise path | 6 |
 | S5 | Padding — 6 mm EVA + hook-and-loop straps | 1 set | Cuff liners. Do not skip: the whole load path ends at skin | 20 |
 
 ## 5. Printed parts

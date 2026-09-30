@@ -789,16 +789,40 @@ python scripts/fc.py run scripts/223_cad_shots.py &&   python scripts/crop_cad.p
   Added lost motion is only **+0.14°**, not the 1–3° first estimated: both strands join the
   carriage to the capstan, so they are springs in **parallel** and the short direct strand
   dominates.
-- **The published STLs and renders are the two-screw build.** The CAD is the one-screw
-  build and sweeps clean, but `219_stl.py`, `221_render_export.py`, `222_anim_export.py` and
-  `223_cad_shots.py` still carry two-screw part lists, so every image and mesh in this
-  repository is one architecture behind. Flagged in each file; not regenerated.
-- **The cladding has not been re-lofted for it.** `P21_FairingThigh` and `P22_DriveCap`
-  were shaped around the twin-screw spine. The sweep still flags the gantry, the idler and
-  the bracket against `P21`, and — the buildability one — a 20×40's 40 mm face has slots at
-  **X = ±10, not X = 0**, so the fairing spine that bolted into the 20×60's middle slot now
-  lands on solid aluminium. `320_rail_section.py` claimed a 20×40 kept that slot; it was
-  wrong, and the sweep caught it as 0.63 cm³ of overlap.
+- **The cladding is re-lofted and the whole assembly now sweeps clean.** 34 parts, 107
+  poses, **zero hard-part clashes and zero cladding clashes** — the only remaining overlaps
+  are the reference limb's own solids and the cuff gripping the limb, both intentional.
+  Knee standoff unchanged at 86 mm proud.
+
+  | | two-screw | one-screw |
+  |---|---|---|
+  | Thigh fairing | ±84, 168 mm, 5-post spine into the rail's middle slot | **−96…58, 154 mm**, three posterior side mounts |
+  | Drive cap | −106…84, 190 mm | **−90…54, 144 mm**, now covers the idler too |
+
+  The **spine had to move, and not to where I first said.** A 20×40's 40 mm face has slots
+  at X = ±10 rather than X = 0 — but that is the smaller problem. The gantry deck sweeps
+  X −32.5…32 over Y 59…197 and the idler spans X ±35.55 over Y 213…291, so between them
+  they own the rail's whole **outboard** face. I concluded from that there was no mid-span
+  mount left at all and fell back to two end flanges, which was wrong twice over: it
+  generalised from one face of four, and a rib spanning the section is an obstruction
+  rather than a mount — it cut through the extrusion, both belt strands and the gantry.
+  [`398_sidemounts.py`](scripts/398_sidemounts.py) measured the alternative instead of
+  arguing it: the **posterior side face is clear at three stations across all 107 poses**,
+  the anterior one is blocked at every station, because everything that had to reach
+  outboard to the ball nut lives on that side. Three grommeted M5 there give real mid-span
+  support *and* `ELECTRONICS.md` §9's top noise mitigation — isolate the canopy instead of
+  bolting it rigidly into the rail.
+
+  The section also went **asymmetric**: the gantry reaches X −84 while nothing on the +X
+  side passes 48, so a symmetric shell would need ±93 (186 mm, wider than today). Offsetting
+  the superellipse centre to X −19.5 covers −93…54 and comes out **14 mm narrower** than
+  what it replaces.
+- **STLs, screenshots and the committed CAD are current.** 12 meshes regenerated, the
+  FreeCAD screenshots rebuilt for one moving group instead of two, and
+  `model/KneeExo_v6.FCStd` now matches the live file by checksum — it had gone stale again,
+  the same failure an earlier audit caught. The **Blender renders are still the two-screw
+  build**; `221_render_export.py` and `222_anim_export.py` carry stale part lists, flagged
+  in-file and not regenerated.
 
 - **No firmware yet.** Architecture is specified in `docs/ELECTRONICS.md`; no code written.
 
