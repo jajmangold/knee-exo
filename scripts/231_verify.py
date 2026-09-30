@@ -1,4 +1,7 @@
 # -*- coding: utf-8 -*-
+# SUPERSEDED by 395_verify1.py, which sweeps the one-screw build. This file sweeps the
+# TWO-screw build and will fail on the current model: A2c, A2d, P3b, A9, A9b and the
+# Delrin/MGN sliders are gone. Kept as the record of what was verified at that stage.
 import math, json, itertools, os, FreeCAD, Part
 from FreeCAD import Vector as V
 I0=__I0__; I1=__I1__

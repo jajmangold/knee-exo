@@ -11,10 +11,12 @@ doc.recompute()
 OUT=r"C:/Users/Josh/KneeExo_v6_STL"
 for f in os.listdir(OUT):
     if f.endswith(".stl"): os.remove(os.path.join(OUT,f))
-STRUCT=["P1_KneeYoke","P2a_KneeHingePlate","P3_Carriage","P3b_CarriageB","P5_ThighCuff",
-        "P6_ShankSocket","P7_ShankCuff","P11_SprungAnchor"]
+# P3 is no longer printed -- it is a bought aluminium V-wheel gantry (392_gantry.py) --
+# and P3b, P11 are deleted with the second screw. See 390_onescrew_section.py.
+STRUCT=["P1_KneeYoke","P2a_KneeHingePlate","P5_ThighCuff",
+        "P6_ShankSocket","P7_ShankCuff"]
 FAIR=["P20_KneeShroud","P21_ShellAnterior","P22_DriveCap","P24_FairingShank"]
-MACH=[]   # the Delrin gibs became bought MGN9H blocks (250_mgn9.py)
+MACH=[]   # gibs -> MGN7H blocks (250_mgn7.py) -> mini V-wheels (396_fixes.py)
 ts=tf=0.
 for n in STRUCT+FAIR+MACH:
     o=doc.getObject(n)

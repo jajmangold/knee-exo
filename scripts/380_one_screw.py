@@ -10,6 +10,20 @@ anywhere in the build.
 be RH. It never asked the next question: if both anchors move together, why are they on
 two different carriages?
 
+SUPERSEDED IN TWO PLACES by 390_onescrew_section.py, both because this file models the
+belt as a STRIP with two clamped ends rather than the closed LOOP it wants to be:
+
+  * Section 4's 86 mm idler exists only because the idler was assumed to sit somewhere
+    other than the centreline. Put a second 29T pulley -- the same part as the knee
+    capstan -- at X = 0 and the return strand lands at exactly X = -36.92, inside the
+    band the belt already occupies. The belt envelope does not change at all.
+
+  * Section 5's 0.8-2.2 deg of added lost motion is WRONG. Both strands connect the
+    carriage to the capstan, so they are springs in PARALLEL, not in series with the
+    load, and the short direct strand dominates the stiffness. The real figure is about
+    +0.14 deg. That was the main objection raised here and it was an arithmetic error,
+    not a finding.
+
 Run:  python scripts/380_one_screw.py
 """
 import math

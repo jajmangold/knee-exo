@@ -66,32 +66,36 @@ drifting, and there is no adjustment for it. Each screw only needs **162 mm of t
 
 | # | Part | Qty | Notes | ~USD |
 |---|---|---|---|---|
-| D1 | Ball screw SFU1610, RH, 300 mm, machined ends | 1 | 68.3 mm stroke + nut length + bearing seats. Axis at X = −58 | 45 |
-| D2 | Ball screw SFU1610, **LH**, 300 mm, machined ends | 1 | Left-hand is the whole trick, and the build's only special-order part. Confirm with the seller. If the quote or lead time is bad, [`370_no_lh_screw.py`](../scripts/370_no_lh_screw.py) has two ways to use a second RH screw instead — and [`380_one_screw.py`](../scripts/380_one_screw.py) argues the second screw should not exist | 70 |
-| D3 | SFU1610 **flangeless** ball nut | 2 | Usually supplied with the screw. A flanged nut drives 15 mm into the rail | inc. |
+| D1 | Ball screw SFU1610, **RH**, 330 mm, machined ends | 1 | The only screw. 68.3 mm stroke; the nut sweeps Y 73…183 so 110 mm of thread is used, the rest is bearing seats. Axis at **X = −62**, moved 4 mm outboard of the old −58 so the nut clears the return strand | 45 |
+| ~~D2~~ | ~~Ball screw SFU1610, **LH**~~ | **0** | **Deleted.** The closed-loop belt over two 29T pulleys makes one carriage do both jobs, so there is no left-hand thread and no special order anywhere in the build. [`390_onescrew_section.py`](../scripts/390_onescrew_section.py) | −70 |
+| D3 | SFU1610 **flangeless** ball nut | 1 | Supplied with the screw. Trapped axially between two end plates in the gantry rather than clamped radially — a 36.4 mm bore through a 40 mm housing severs it, and the load is along Y anyway | inc. |
 | D4 | BLDC outrunner C6374, **170 Kv**, 8 mm shaft | 1 | **Owned — 4 of them, $32–40 each.** 24.8 A peak at SFU1610. ~800 g, the heaviest single item | 38 |
 | D5 | Diametric magnet 6 x 2.5 mm | 1 | Glued to the motor shaft end for the drive's onboard AS5047P | 3 |
-| D6 | HTD-5M belt, 9 mm wide, closed loop | 1 | 1:1 loop linking the two screw tops. Length set by the ±58 mm spacing | 8 |
-| D7 | HTD-5M 20T pulleys, 8 mm bore | 3 | Two screws plus motor. All three turn the **same** way — LH/RH does the opposing | 15 |
-| D8 | KP08 / KFL08 bearing blocks | 4 | Two per screw, top and bottom | 20 |
+| D6 | HTD-5M belt, 9 mm wide, closed loop | 1 | 1:1 loop from the motor at X = 0 to the screw at X = −62, at Y 384…396 past everything else | 8 |
+| D7 | HTD-5M 20T pulleys, 8 mm bore | 2 | Screw and motor | 10 |
+| D8 | KP08 / KFL08 bearing blocks | 2 | One screw, top and bottom. The upper one lives in the drive bracket's screw boss | 10 |
 | D9 | Rigid shaft coupler 8 to 10 mm | 1 | Only if you mount the motor coaxial with screw A instead of belting it | 8 |
 
 ## 3. Knee transmission
 
 | # | Part | Qty | Notes | ~USD |
 |---|---|---|---|---|
-| K1 | HTD-8M open-ended belt, 30 mm wide | ~0.6 m | The capstan run. 764 N differential over 30 mm = 25.5 N/mm, well inside spec | 20 |
+| K1 | HTD-8M **closed-loop** belt, 30 mm wide, **742 mm** | 1 | 2πR + 2·Y_idler. A closed loop, not an open strip: no end terminations, and it is tensioned by sliding the idler instead. 764 N differential over 30 mm = 25.5 N/mm | 25 |
 | K2 | M12 x 70 shoulder bolt or hardened dowel | 1 | The knee pin, in the flush counterbore. SF 5.9 | 10 |
 | K3 | M12 flanged bronze or igus bushing | 2 | One each side of the hub | 8 |
-| K4 | Compression spring, ~500 N/mm, 3 mm working travel | 1 | Sprung anchor on carriage B. Takes up belt bedding-in, not pretension | 5 |
+| K4 | Compression spring, ~500 N/mm, 3 mm working travel | 1 | Now acts on the **idler carrier's slotted mount**, not a belt end. Same job — takes up belt bedding-in — one fewer printed part | 5 |
 
 ## 4. Structure
 
 | # | Part | Qty | Notes | ~USD |
 |---|---|---|---|---|
-| S1 | V-slot extrusion 20x60, **black anodised**, 230 mm | 1 | Cut to Y 58 to 284.7. ~350 g | 15 |
-| S2 | **MGN7 rail** — 165 mm anterior, 145 mm posterior | 2 | Different lengths: cut to what the blocks sweep. Mounted on the **outboard** solid band of the 20 mm side face, rail centre Z = 104.5 — centred on the face its M2 screws would land in the V-slot. **MGN7, not MGN9**: an MGN9 rail stands 6.5 mm proud and cuts 0.9 mm into the belt | 20 |
-| S2a | **MGN7H blocks** | 4 | Two per carriage: a single block would have to react the 18.0 N·m yaw as a moment. See [`scripts/310_guides.py`](../scripts/310_guides.py) | 32 |
+| S1 | V-slot extrusion **20x40**, **black anodised**, 155 mm | 1 | Cut to Y 56…207. **~159 g, against 352 g for the 20×60 × 227 mm.** It ends short of the idler because a 71 mm pulley on the centreline would otherwise contain the extrusion. **Its 40 mm face has slots at X = ±10, not X = 0** — the fairing spine has to move | 12 |
+| S2 | **Mini V-wheel**, Delrin, OD 15.23 | 4 | On the |X| 20 corners of the 20×40, wheels 50 mm apart in Y. **Mini, not solid**: a V groove seats the corner apex at the bottom of the groove, so the centre stands off along the 45° bisector — a solid wheel reaches |X| 37.6 and fouls the belt at 35.55, a mini reaches 31.0. **Check its load rating against 362 N per wheel**; if tight, MGN7 on the same 20×40's side faces has 7.6 mm clearance and 2.8× margin | 12 |
+| S2a | Eccentric spacers + wheel bolts | 4 | Two eccentric, two fixed, the usual V-slot gantry arrangement | 10 |
+| S2b | **29T HTD-8M idler pulley**, 30 mm wide | 1 | **The same part as the knee capstan.** On the centreline at X = 0, Y 255, which is what makes the two strands land at exactly ±36.92 | 25 |
+| S2c | Idler axle + 2 bearings | 1 | Supported top and bottom by the drive bracket. Reaction is 2·T_b, **up to 1828 N — the largest single load in the machine** | 10 |
+| S2d | Aluminium gantry plate, 6 mm, ~116 × 70 | 1 | 65 cm³, 175 g, replacing 383 g of printed twin carriages. Crosses **over** the belt at Z 126.3, not under it — the 2.9 mm corridor between the nut and the belt is not a place for structure. Owned | 15 |
+| S2e | Aluminium drive bracket | 1 | Holds the idler, the screw's top bearing and the motor. 172 cm³, **465 g — the heaviest fabricated part in the build**, and the one piece here with no FEA behind it | 30 |
 | S3 | M5 T-nuts + button head cap screws | ~40 | Everything mounts to the slots | 12 |
 | S4 | M3 / M4 cap screws, assorted | ~40 | Fairings, cuffs, electronics | 10 |
 | S5 | Padding — 6 mm EVA + hook-and-loop straps | 1 set | Cuff liners. Do not skip: the whole load path ends at skin | 20 |
@@ -187,13 +191,18 @@ where it would otherwise add to the very swing inertia the screw-lead decision i
 
 | Group | ~USD | Already owned |
 |---|---|---|
-| Drive | 198 | motor ($38) |
-| Knee transmission | 45 | |
-| Structure | 70 | |
-| Filament | 45 | |
+| Drive | 128 | motor ($38) |
+| Knee transmission | 50 | |
+| Structure | 110 | gantry plate, V-wheels |
+| Filament | 40 | |
 | Electronics | 130 | drive ($29), 2× ESP32-C3 |
 | Power (A123 736 Wh pack + BMS + backpack) | 250 | pack and BMS, purchased |
-| **Total** | **~740** | |
+| **Total** | **~710** | |
+
+The one-screw rebuild moved money around more than it saved it: the left-hand screw (−$70)
+and the MGN7 rails and blocks (−$52) come off, and a second 29T pulley, its axle and
+bearings, and an aluminium drive bracket (+$65) go on. What it bought is not price — it is
+**725 g off the limb, one screw instead of two, and no special-order part anywhere.**
 
 Two things moved this down from the ~$925 first estimated. The controller is a
 **$29 MKS XDRIVE MINI** rather than a $169 ODrive S1 (§5 of

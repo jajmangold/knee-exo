@@ -41,6 +41,15 @@ BIN, BOUT = K["belt_x"][0] + 0.05, K["belt_x"][1]
 
 SHANK = ["A4_Shank2020_VSlot", "P2a_KneeHingePlate", "P6_ShankSocket", "P7_ShankCuff",
          "P24_FairingShank", "HW_JointBolts", "REF_Shank"]
+# ---------------------------------------------------------------------------------------
+# PART LISTS BELOW ARE THE TWO-SCREW BUILD AND ARE STALE.
+# The model in KneeExo_v4 is now the ONE-SCREW build (391-396): A2c, A2d, P3b, A9, A9b,
+# P10a-d_Slider_Delrin, P11, A8 and P13 no longer exist, and A6_Idler29T, A7b_LinkBelt,
+# A5d_Belt_WrapIdler and P10a-d_VWheel do. The lists are kept verbatim so the render and
+# screenshot pipeline still reproduces the published two-screw images; regenerating any of
+# them for the new build means updating these lists first. Nothing here has been re-run
+# against the one-screw model.
+# ---------------------------------------------------------------------------------------
 CA = ["P3_Carriage", "A2b_BallNut_SFU1620", "P10a_Slider_Delrin", "P10b_Slider_Delrin"]
 CB = ["P3b_CarriageB", "A2d_BallNut_LH", "P10c_Slider_Delrin", "P10d_Slider_Delrin",
       "P11_SprungAnchor", "A8_TensionSpring", "P13_HallTension"]

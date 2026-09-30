@@ -1,10 +1,20 @@
 # -*- coding: utf-8 -*-
 """Can the thigh rail drop from 20x60 to 20x40?
 
-V-wheels ride the extrusion's outer corner V -- the land between two 20-series slots is
-about 10 mm of flat and a wheel groove bottoms out on it before its 45 deg flanks engage.
-So the wheel centre sits at the corner, |X| = half the profile width, and the wheel
-reaches half its OD beyond that. On a 2060 the corners are at |X| 30 and the belt runs
+V-wheels ride the extrusion's outer corner V.
+
+WARNING -- THE WHEEL MODEL BELOW IS WRONG, AND OPTIMISTIC. It puts the wheel centre ON
+the corner, |X| = half the profile width, reaching half its OD beyond. A V groove does not
+work like that: the corner apex seats at the BOTTOM of the groove, so the centre stands off
+along the 45 deg bisector by groove_minor/2, and the outer edge goes further out than this
+says. Corrected in 396_fixes.py, where it changes the answer:
+
+                              this file    bisector model    belt inner is 35.55
+    solid V, OD 23.89           31.95         37.5           FOULS by 1.9
+    mini  V, OD 15.23           27.62         30.97          clears by 4.6
+
+So on a 2040 only the MINI wheel fits, not both. The table further down is kept as-is
+because it is what was used at the time, not because it is right. On a 2060 the corners are at |X| 30 and the belt runs
 start at |X| 35.55, so even a mini wheel fouls. Narrowing the profile is the only way to
 make wheels fit without moving the belt, and the belt cannot move: it is tangent to the
 29T pulley and that radius IS the 36.92 mm moment arm.
@@ -56,7 +66,10 @@ print("  NOT what should decide the profile.")
 print("=" * 68)
 print("WHAT NARROWING ACTUALLY COSTS")
 print("  * every carriage, slider pocket and fairing spine references |X| = 30")
-print("  * the fairing spine uses the middle outboard slot at X = 0; a 20x40 keeps it")
+print("  * WRONG, and the one-screw sweep caught it: a 2040's 40 mm face has slots at")
+print("    X = +/-10, NOT at X = 0. The 2060 had three (X -20, 0, +20) and the fairing")
+print("    spine used the middle one. On a 2040 the spine lands on solid aluminium --")
+print("    0.63 cm3 of A1-vs-P21 overlap in 395_verify1.py. The spine moves to X +/-10.")
 print("  * the belt-to-rail gap grows from %.1f to %.1f mm, which is what buys the wheels"
       % (BIN - 30.0, BIN - 20.0))
 print("  * fore-aft, the rail itself narrows by 20 mm, though the carriages and nuts")

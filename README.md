@@ -724,10 +724,15 @@ python scripts/fc.py run scripts/223_cad_shots.py &&   python scripts/crop_cad.p
 - **Acoustics are unmeasured.** Ball nut recirculation (~290 Hz) is the likely dominant
   source and the fairing is the likely radiator, since it hangs off a rigid spine into the
   rail. Analysis and mitigations in [`docs/ELECTRONICS.md`](docs/ELECTRONICS.md) §9; bench
-  measurement is now step 2 of bring-up. V-wheels were considered as a quieter guide and
-  rejected — they ride the extrusion's outer corner V, which on a 20×60 fouls the belt by
-  2.1 mm even for a mini wheel, and the 20×40 that would fit is a rebuild of the spine for
-  a source that is not the loudest one. See [`scripts/320_rail_section.py`](scripts/320_rail_section.py).
+  measurement is now step 2 of bring-up. The one-screw rebuild changed the guide answer: a
+  20×60 fouls the belt with any wheel, but the 20×40 it now uses clears a **mini** V-wheel
+  by 4.6 mm. Not a solid one — a V groove seats the corner apex at the bottom of the groove,
+  so the wheel centre stands off along the 45° bisector and a solid wheel still fouls by
+  2.0 mm. `320_rail_section.py` put the centre *on* the corner and so claimed both fit;
+  corrected there and in [`396_fixes.py`](scripts/396_fixes.py). The open question is the
+  mini wheel's load rating against the 362 N per wheel the yaw couple puts on it — if that
+  is tight, MGN7 on the same 20×40's side faces has 7.6 mm of clearance and 2.8× margin,
+  where on the 20×60 it had 0.8 mm.
 - **Nothing checks assembly.** Every verification in this repository is interference —
   "do two solids overlap". Nothing asks whether a part can be *fastened*, whether a tool
   can reach a screw, or what order things go together in. That gap is how the rails came
@@ -751,15 +756,50 @@ python scripts/fc.py run scripts/223_cad_shots.py &&   python scripts/crop_cad.p
   of it has been run. Rescaling for the real 170 Kv motors also caught
   `dc_max_positive_current` and the pack fuse being sized off *phase* current instead of
   *bus* current — the fuse was 30 A where peak bus draw is 4.9 A.
-- **The second screw may not be needed at all**, and this is the largest open question in
-  the mechanism. Route belt run 2 past the carriage to an idler at the proximal end and
-  back down to the *same* carriage, and the kinematics close identically —
-  `Y_c = const − R·φ` falls out of both runs independently. That deletes one screw, one
-  nut, one carriage, one MGN7 pair, the 1:1 linking belt and two pulleys: **793 g, 17% of
-  the limb-mounted mass**, the left-hand thread gone entirely, and the matched-lead
-  tolerance stack gone with it. The bill is 1–3° more lost motion from ~231 mm of extra
-  belt, a 1.8 kN idler bracket, and one more place the belt can skip teeth. Worth building;
-  not built, and not swept. See [`scripts/380_one_screw.py`](scripts/380_one_screw.py).
+- **The second screw is gone — one screw, one carriage, one idler.** Route the belt as a
+  **closed loop over two identical 29T pulleys** — the knee capstan and a second copy of it
+  on the centreline — and clamp the single carriage to one strand. The kinematics close
+  from either strand independently (`Y_c = const − R·φ`), the loop length is
+  `2πR + 2·Y_idler` and therefore independent of carriage position, and the 23.2 : 1 ratio
+  is untouched. Built and swept: [`390_onescrew_section.py`](scripts/390_onescrew_section.py)
+  through [`396_fixes.py`](scripts/396_fixes.py), verified by
+  [`395_verify1.py`](scripts/395_verify1.py).
+
+  | | two-screw | one-screw |
+  |---|---|---|
+  | Ball screws | 2, one **left-hand** | **1, right-hand** |
+  | Carriages | 2 printed, 383 g | 1 aluminium V-wheel gantry, 175 g |
+  | Extrusion | 20×60, 227 mm, 352 g | **20×40, 151 mm, 159 g** |
+  | Guides | 2 MGN7 rails + 4 blocks | 4 mini V-wheels |
+  | Belt | strip, two anchored ends | closed loop, 742 mm |
+  | Drive-end mass | 2430 g | **1705 g** |
+
+  **725 g off the limb — 4.66 kg → 3.94 kg, 16%** — and the left-hand screw, the build's
+  only special-order part, disappears along with the requirement that two screws be
+  manufactured to matching lead. Peak screw column load drops 914 → 764 N because the two
+  strands now oppose on one carriage.
+
+  Verified: **107 poses, zero hard-part clashes**, knee standoff unchanged at 86 mm proud —
+  the narrower rail cost nothing laterally. The five remaining flags are all cladding.
+
+  It is not free. The **idler bracket is the new cost centre at 465 g**, because the idler
+  reaction is `2·T_b` — up to **1828 N, the largest single load in the machine**. Wind the
+  loop so *extension* assist loads the strand that leaves the idler lightly and it sees
+  300 N in the direction that matters; that choice is free and worth making deliberately.
+  Added lost motion is only **+0.14°**, not the 1–3° first estimated: both strands join the
+  carriage to the capstan, so they are springs in **parallel** and the short direct strand
+  dominates.
+- **The published STLs and renders are the two-screw build.** The CAD is the one-screw
+  build and sweeps clean, but `219_stl.py`, `221_render_export.py`, `222_anim_export.py` and
+  `223_cad_shots.py` still carry two-screw part lists, so every image and mesh in this
+  repository is one architecture behind. Flagged in each file; not regenerated.
+- **The cladding has not been re-lofted for it.** `P21_FairingThigh` and `P22_DriveCap`
+  were shaped around the twin-screw spine. The sweep still flags the gantry, the idler and
+  the bracket against `P21`, and — the buildability one — a 20×40's 40 mm face has slots at
+  **X = ±10, not X = 0**, so the fairing spine that bolted into the 20×60's middle slot now
+  lands on solid aluminium. `320_rail_section.py` claimed a 20×40 kept that slot; it was
+  wrong, and the sweep caught it as 0.63 cm³ of overlap.
+
 - **No firmware yet.** Architecture is specified in `docs/ELECTRONICS.md`; no code written.
 
 ---
