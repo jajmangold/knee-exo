@@ -43,8 +43,10 @@ for n in ("A5_Belt_HTD8M","A5b_Belt_DriveRun","A5c_Belt_TakeRun",
           "A5d_Belt_WrapIdler","A7b_LinkBelt"): MAT[n]="BELT"
 for n in ("P10a_VWheel","P10b_VWheel","P10c_VWheel","P10d_VWheel"): MAT[n]="DELRIN"
 MAT["A3_Motor_6374"]="MOTOR"
-MAT["A7_DriveBox"]="ALU"        # the bracket is aluminium now, not a dark printed box
-MAT["P3_Carriage"]="ALU"        # and so is the gantry
+# ALUM, not ALU: ALU is the extrusion's black anodising. These are machined 6061 and
+# should read as bought metal, not as more extrusion.
+MAT["A7_DriveBox"]="ALUM"
+MAT["P3_Carriage"]="ALUM"
 O=lambda n: doc.getObject(n)
 def pose(th):
     r=FreeCAD.Rotation(V(0,0,1),th)

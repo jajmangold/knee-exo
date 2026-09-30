@@ -122,6 +122,17 @@ noise_rough(nt, b, 90.0, 0.17, 0.27)
 bump(nt, b, 300.0, 0.05)
 MATS['FAIR'] = m
 
+# bought aluminium: the V-wheel gantry plate and the drive bracket. Deliberately NOT the
+# same material as the extrusion -- that is black anodised, these are machined 6061.
+m, nt, b = newmat('ALUM')
+S(b, 'Base Color', (0.42, 0.435, 0.45, 1))
+S(b, 'Metallic', 1.0)
+S(b, 'Roughness', 0.38)
+S(b, 'Anisotropic', 0.35)
+noise_rough(nt, b, 320.0, 0.14, 0.44)
+bump(nt, b, 900.0, 0.04)
+MATS['ALUM'] = m
+
 m, nt, b = newmat('STEEL')
 S(b, 'Base Color', (0.58, 0.60, 0.63, 1))
 S(b, 'Metallic', 1.0)

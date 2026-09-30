@@ -41,12 +41,10 @@ rendered in **Cycles**. Left: the mechanism. Right: the same cycle with the fair
 <img src="renders/anim/hero_open.gif" width="330"> <img src="renders/anim/hero_clad.gif" width="330">
 </div>
 
-Watch the carriage in the left animation. Moving it one way winds the belt onto the knee
-capstan and off the idler; moving it back does the reverse. That is the whole idea.
-
-> **These animations and renders are the earlier two-screw build.** The mechanism is now
-> one screw, one carriage and a closed belt loop — see *The second screw is gone* below.
-> The FreeCAD viewport images are current; the Blender ones are not yet regenerated.
+Watch the single carriage in the left animation. It is clamped to one strand of a closed
+belt loop running over two identical 29T pulleys — the knee capstan and an idler. Move the
+clamp by *d* and the belt circulates by *d*, turning the knee by *d/R*. That is the whole
+idea, and it is why one screw does what two opposed ones used to.
 
 <div align="center">
 <img src="renders/anim/knee_open.gif" width="620">
@@ -197,9 +195,9 @@ Worse, the differential is **too stiff to hold pretension**. 150 N is only 0.27�
 belt stretch, while a new HTD belt beds in by 0.7–1.8 mm — so the pretension would simply
 vanish during break-in, with nothing able to take it up.
 
-Hence the **sprung anchor** on carriage B: 3 mm of travel at ~500 N/mm, which absorbs
-bedding-in in one twentieth of the travel the abandoned constant-force drum needed. Cost:
-1.58 mm of lost motion, **2.45° of knee angle**. Bonus: a Hall sensor on that slide reads
+Hence the **sprung anchor**: 3 mm of travel at ~500 N/mm, which absorbs bedding-in in one
+twentieth of the travel the abandoned constant-force drum needed. Cost: 1.58 mm of lost
+motion, **2.45° of knee angle**. Bonus: a Hall sensor on that slide reads
 its deflection as **live belt tension**, which is the only tension measurement the machine
 can make.
 
@@ -568,7 +566,11 @@ the **rail**, which is continuous and therefore does share length with the belt.
 | **MGN7 rail** | 4.8 mm | 34.8 | clear by 0.8 mm |
 
 **"It clears the cuff."** That test was run on the *anterior* block only. The posterior
-side is tighter, because carriage B carries the sprung belt anchor in exactly that corner.
+side is tighter, because carriage B carried the sprung belt anchor in exactly that corner.
+*(This whole guide section is the two-screw history. Both carriages, both MGN7 rails and
+the sprung belt anchor are gone — the belt is a closed loop tensioned at the idler now,
+and the single gantry runs on mini V-wheels. Kept because the reasoning about mounting
+faces and what an interference sweep cannot ask is what led to the current layout.)*
 Three changes were needed there and none on the anterior side: the blocks move distal of
 the anchor, the anchor moves outboard to X 35.6…44.2, and the tension spring rises to
 Z 113 so the block passes under it. Block spacing on B drops to 34 mm as a result, so the
@@ -625,7 +627,7 @@ Numbers: [`scripts/310_guides.py`](scripts/310_guides.py).
 
 <div align="center">
 <img src="renders/flexed_40deg/07_drive_open.png" width="560">
-<br><sub>Cycles render · the drive head and both carriages</sub>
+<br><sub>Cycles render · the drive head — idler, gantry and the anterior motor</sub>
 </div>
 
 | | |

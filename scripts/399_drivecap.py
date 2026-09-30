@@ -115,8 +115,14 @@ def stadium(r1, r2, y0, y1):
 
 NAC_O = Part.makeCylinder(MOT_R + 3.5, 109.0, V(MOT_X, 211.0, MOT_Z0), V(0, 1, 0))
 NAC_O = NAC_O.fuse(stadium(LINK_R_MOT + 4.0, LINK_R_SCR + 4.0, 296.0, 320.0)).removeSplitter()
-NAC_I = Part.makeCylinder(MOT_R + 0.5, 107.0, V(MOT_X, 213.0, MOT_Z0), V(0, 1, 0))
-NAC_I = NAC_I.fuse(stadium(LINK_R_MOT + 1.0, LINK_R_SCR + 1.0, 298.0, 322.0)).removeSplitter()
+# The inner stops 3 mm SHORT of the outer at BOTH ends, so the nacelle is capped at each
+# end rather than being an open tube. The first version ran the inner out to Y 320 to match
+# the outer and left the proximal end open -- the Cycles render showed daylight straight
+# down the bore, past a spinning outrunner, which is the one thing this cover exists to
+# stop. Nothing has to pass through either end: the motor ends at Y 291 and the screw at
+# 314, both inside.
+NAC_I = Part.makeCylinder(MOT_R + 0.5, 104.0, V(MOT_X, 213.0, MOT_Z0), V(0, 1, 0))
+NAC_I = NAC_I.fuse(stadium(LINK_R_MOT + 1.0, LINK_R_SCR + 1.0, 298.0, 317.0)).removeSplitter()
 
 lo, li = loft(OUT), loft(INN)
 # The cap and the nacelle interlock: each is trimmed back to the other's OUTER surface, so
