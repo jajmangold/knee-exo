@@ -14,11 +14,11 @@ because changing one assumption moves several lines at once.
 The screw lead sets the total knee-to-motor ratio, and reflected rotor inertia goes as
 the **square** of that ratio. This is the most important choice in the build:
 
-| Screw | Ratio | Reflected J | vs. limb's own J | Peak current | Nut OD | Belt gap at X=+/-58 |
+| Screw | Ratio | Reflected J | vs. limb's own J | Peak current | Nut OD | Fits at X = ±58? |
 |---|---|---|---|---|---|---|
-| SFU1605 | 46.4 | 0.667 kg·m² | **2.22x** | 10.9 A | 28 mm | 2.9 mm, clear |
-| SFU1610 | 23.2 | 0.167 kg·m² | 0.56x | 21.7 A | 36 mm | −1.1 mm, CLASH |
-| SFU1620 | 11.6 | 0.042 kg·m² | 0.14x | 43.5 A | 40 mm | −3.1 mm, CLASH |
+| SFU1605 | 46.4 | 0.667 kg·m² | **2.22x** | 10.9 A | 28 mm | yes |
+| **SFU1610** | 23.2 | 0.167 kg·m² | **0.56x** | 21.7 A | 36 mm | **yes** |
+| SFU1620 | 11.6 | 0.042 kg·m² | 0.14x | 43.5 A | 40 mm | yes (but 43.5 A) |
 
 Reflected inertia is what the patient feels **when the motor is off** — a dead battery, a
 fault trip, or the free-swing phase of every step. At SFU1605 the leg would feel roughly
@@ -28,15 +28,24 @@ that is a worse device than no device.
 You cannot fix this by moving the reduction around: only the *total* ratio matters, so
 "SFU1620 plus a 4:1 belt" is inertially identical to SFU1605 direct.
 
-**Recommendation: SFU1610.** It is the only row that is both comfortable to backdrive and
-comfortably inside an ODrive S1. The cost: its nut is OD 36 mm, which at the current screw
-position of X = ±58 mm fouls the belt by 1.1 mm. **The screws have to move out to
-X = ±62 mm, widening the pack by 8 mm. That CAD change has not been made yet.**
+**Recommendation: SFU1610, and it fits as drawn.**
 
-The model as it stands is drawn for the SFU1605 nut — the CAD nut is `NUT_R = 14.0`,
-i.e. OD 28 mm, despite the part being *labelled* `SFU1620`. The label is wrong; the
-geometry is 1605. So: build 1605 and accept a heavy-feeling swing, or spend an hour on the
-CAD and build 1610. Everything below assumes **1610 after the reposition**.
+This repository previously said the 1610 nut fouled the belt by 1.1 mm and the screws
+would have to move out to X = ±62, widening the pack by 8 mm. **That was wrong.** It came
+from projecting the nut and the belt onto the X axis and comparing edges — 58 − 18 = 40
+against the belt's outer face at 41.1 — while ignoring Y. The nut sits at `carrA + 36` and
+its belt run ends at `carrA − 24`, so they are a constant **60 mm apart along the limb at
+every pose, by construction**. Swept over all 107 poses, the nut/belt overlap is
+**0.000 cm³ for OD 28, OD 36 and OD 40 alike**.
+
+What does share length with the belt is the screw *shaft*, and at r = 7.9 it is clear
+until |X| < 49. So there is roughly 8 mm per side of inboard slack available if you want
+the pack narrower — for 1610 the binding limit becomes the nut against the extrusion
+(|X| ≥ 30 + 18 = 48), so about X = ±50. Not modelled; the current ±58 is what is drawn.
+
+One real labelling bug remains: the CAD nut is `NUT_R = 14.0`, i.e. OD 28 — an SFU1605
+nut — despite the part being *labelled* `SFU1620`. The label is wrong. Ordering 1610 means
+redrawing that nut at OD 36, which changes nothing else.
 
 ---
 
@@ -49,7 +58,7 @@ CAD and build 1610. Everything below assumes **1610 after the reposition**.
 | D3 | SFU1610 **flangeless** ball nut | 2 | Usually supplied with the screw. A flanged nut drives 15 mm into the rail | inc. |
 | D4 | BLDC outrunner 6374, 149 Kv, 8 mm shaft | 1 | 190 Kv also works (21.7 A becomes 27 A). ~800 g, the heaviest single item | 90 |
 | D5 | Diametric magnet 6 x 2.5 mm | 1 | Glued to the motor shaft end for the ODrive's onboard encoder | 3 |
-| D6 | HTD-5M belt, 9 mm wide, closed loop | 1 | 1:1 loop linking the two screw tops. Length set by the ±62 mm spacing | 8 |
+| D6 | HTD-5M belt, 9 mm wide, closed loop | 1 | 1:1 loop linking the two screw tops. Length set by the ±58 mm spacing | 8 |
 | D7 | HTD-5M 20T pulleys, 8 mm bore | 3 | Two screws plus motor. All three turn the **same** way — LH/RH does the opposing | 15 |
 | D8 | KP08 / KFL08 bearing blocks | 4 | Two per screw, top and bottom | 20 |
 | D9 | Rigid shaft coupler 8 to 10 mm | 1 | Only if you mount the motor coaxial with screw A instead of belting it | 8 |

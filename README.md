@@ -200,11 +200,11 @@ Reflected rotor inertia scales with the **square** of the total knee→motor rat
 what the patient feels whenever the motor is off: a dead battery, a fault trip, or simply
 the free-swing phase of every single step.
 
-| Screw | Ratio | Screw revs over ROM | Reflected J | **vs. the limb's own J** | Peak current | Nut OD | Belt gap at X=±58 |
+| Screw | Ratio | Screw revs over ROM | Reflected J | **vs. the limb's own J** | Peak current | Nut OD | Fits at X=±58? |
 |---|---|---|---|---|---|---|---|
-| SFU1605 | 46.4 | 13.66 | 0.667 kg·m² | **2.22×** | 10.9 A | 28 mm | 2.9 mm ✅ |
-| SFU1610 | 23.2 | 6.83 | 0.167 kg·m² | 0.56× | 21.7 A | 36 mm | −1.1 mm ❌ |
-| SFU1620 | 11.6 | 3.42 | 0.042 kg·m² | 0.14× | 43.5 A | 40 mm | −3.1 mm ❌ |
+| SFU1605 | 46.4 | 13.66 | 0.667 kg·m² | **2.22×** | 10.9 A | 28 mm | yes |
+| **SFU1610** | 23.2 | 6.83 | 0.167 kg·m² | **0.56×** | 21.7 A | 36 mm | **yes** |
+| SFU1620 | 11.6 | 3.42 | 0.042 kg·m² | 0.14× | 43.5 A | 40 mm | yes, but 43.5 A |
 
 At **SFU1605 the leg would feel roughly three times as heavy to swing as it does bare.**
 For someone already struggling to walk, that is a worse device than no device at all.
@@ -213,13 +213,22 @@ And you cannot gear your way out of it. Only the **total** ratio matters, so "SF
 a 4:1 reduction" is inertially identical to SFU1605 direct. The only levers are a lower
 total ratio (which costs motor current) or a lower-inertia rotor.
 
-**SFU1610 is the right answer** — 0.56× the limb's own inertia, and 21.7 A is half an
-ODrive S1's continuous rating. The catch: its ball nut is OD 36 mm, which at the current
-screw position of X = ±58 mm fouls the belt by 1.1 mm. **The screws must move out to
-X = ±62 mm, widening the pack by 8 mm. That CAD change has not been made yet.**
+**SFU1610 is the right answer, and it fits as drawn.**
 
-> A related bug this uncovered: the CAD ball nut is drawn at OD 28 mm — an SFU1605 nut —
-> while the part is *labelled* `SFU1620`. The label is wrong; the geometry is 1605.
+This used to carry a caveat that the 1610 nut fouled the belt by 1.1 mm and the screws had
+to move out to ±62. That was wrong, and wrong in an instructive way: it compared the nut
+and the belt *projected onto the X axis* — 58 − 18 = 40 against the belt's outer face at
+41.1 — and never checked whether they share any length. They do not. The nut sits at
+`carrA + 36` and its belt run ends at `carrA − 24`, a constant **60 mm apart at every
+pose, by construction**. Swept over all 107 poses the overlap is **0.000 cm³ for OD 28,
+OD 36 and OD 40 alike**.
+
+What *does* run alongside the belt is the screw shaft, and at r = 7.9 it stays clear until
+|X| < 49 — so there is ~8 mm per side of inboard slack if a narrower pack is wanted.
+
+> One real bug remains from that episode: the CAD nut is drawn at OD 28 — an SFU1605 nut —
+> while the part is *labelled* `SFU1620`. The label is wrong. Choosing 1610 means redrawing
+> that nut at OD 36 and nothing else.
 
 ### Motor
 
@@ -647,8 +656,8 @@ python scripts/fc.py run scripts/223_cad_shots.py &&   python scripts/crop_cad.p
 ## Open items
 
 - **No FEA.** Hand calculations only.
-- **Screw lead unsettled** — see the drivetrain table. 10 mm is right but needs the screws
-  moved to X = ±62, which has not been modelled.
+- **Screw lead unsettled** — see the drivetrain table. 10 mm is the right answer and it
+  fits at X = ±58 as drawn; only the CAD nut needs redrawing from OD 28 to OD 36.
 - **Printed mass 1.81 kg** (up from 1.63 with the two new covers) is the largest
   unresolved issue. `P2a` (145 cm³), `P5` (167 cm³),
   `P6` (165 cm³) and `P1` (131 cm³) are the structural candidates for a diet. The 239 cm³ of
