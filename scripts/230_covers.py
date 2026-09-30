@@ -1,5 +1,12 @@
 # -*- coding: utf-8 -*-
-"""Close the two remaining holes in the cladding, both from the STATIC side.
+"""SUPERSEDED by 232_covers.py -- kept as history.
+
+This is the pass that grew a lateral cheek off P20 to cover the whole swept fan. It
+verified clean, but the cheek is a 216 mm flat plate standing off the side of the knee:
+ugly, and a snag hazard in its own right on a device meant to stop the patient catching
+on things. 232_covers.py drops it and extends the shank fairing instead.
+
+Close the two remaining holes in the cladding, both from the STATIC side.
 
 The shank-side gap was never a reach problem, it was a sweep problem: a shank-mounted
 shell has to swing past the static thigh fairing, which caps it at 34 of the 55 mm. A

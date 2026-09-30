@@ -66,7 +66,7 @@ A **belt capstan** at the knee, driven by **two opposed ball screws**:
 | **180° belt wrap** | both runs parallel to the thigh rail, at X = ±36.9 mm |
 | **Two carriages** | on one 20×60 V-slot rail, one per belt run |
 | **RH and LH screws on a common shaft** | so one carriage rises exactly as the other falls |
-| **Delrin L-gib sliders** | one tongue in the rail's outboard slot, one in the side slot |
+| **MGN7H linear guides** | 2 rails on the 20 mm side faces, 2 blocks per carriage |
 | **6374 BLDC + ODrive S1** | torque control only, never position |
 
 ### Why the differential is exact, not approximate
@@ -452,9 +452,9 @@ cover lives in*, which is a question the original analysis never posed.
 
 ## Verification
 
-[`scripts/vlow.py`](scripts/vlow.py) runs a **full pairwise interference sweep with no skip
-list** — 107 poses, every part against every other part, in six chunks (the sweep exceeds
-FreeCAD's 90 s GUI dispatch limit in a single call).
+[`scripts/231_verify.py`](scripts/231_verify.py) runs a **full pairwise interference sweep
+with no skip list** — 107 poses, every part against every other part, in twelve chunks of
+nine (the sweep exceeds FreeCAD's 90 s GUI dispatch limit in a single call).
 
 **Current state: zero hard-part clashes.** The only remaining overlaps are the reference
 limb cones intersecting each other, and 0.84 cm³ of thigh-cuff foam compression.
@@ -505,7 +505,8 @@ a boolean.
 
 ## Guides, and why the layout spends the axis it does
 
-The carriage guides are Delrin L-gibs running in the extrusion's slots. The load case is
+The carriage guides were Delrin L-gibs running in the extrusion's slots, and are now
+MGN7H recirculating blocks. The load case is
 not the interesting part: the 914 N of belt pull goes straight into the ball screw, and
 the guide only takes the couple from the 19.7 mm offset between the belt line and the nut
 axis — **176 N at each end of the carriage**. Every linear guide on the market is ten
@@ -606,7 +607,7 @@ Numbers: [`scripts/310_guides.py`](scripts/310_guides.py).
 
 <div align="center">
 <img src="renders/flexed_40deg/07_drive_open.png" width="560">
-<br><sub>Cycles render · the drive head, both carriages and their Delrin gibs</sub>
+<br><sub>Cycles render · the drive head and both carriages</sub>
 </div>
 
 | | |
@@ -633,7 +634,7 @@ leaves a free-swinging passive brace, not a locked leg. That property is worth p
 docs/        BOM.md — build list and the screw-lead decision
              ELECTRONICS.md — ODrive, ESP32, control, safety, bring-up
 model/       FreeCAD source (internal document name is KneeExo_v4)
-stl/         15 printed parts (PETG) and Delrin slider stock
+stl/         12 printed parts (PETG)
 kinematics/  kin_low.json — current pose law; legacy slider-crank kept for reference
 renders/     cad/ FreeCAD viewport captures; Cycles stills and animation GIFs
 scripts/     chronological build and verification scripts, over FreeCAD's XML-RPC
@@ -642,13 +643,21 @@ scripts/     chronological build and verification scripts, over FreeCAD's XML-RP
 Scripts are numbered in the order they were run. The live chain for the current design is:
 
 ```
-194_layout  →  195_knee  →  196_carr  →  197_belt  →  203_makeroom
-            →  206_fix   →  210_flush →  217_fairing
+194_layout → 195_knee → 196_carr → 197_belt → 203_makeroom → 206_fix
+           → 210_flush → 217_fairing → 232_covers → 240_nut1610
+           → 241_fixups → 250_mgn7
 ```
 
-then `vlow.py` to verify, `219_stl.py` to export, `221_render_export.py` for the stills and
-`222_anim_export.py` for the animation frames. Earlier numbers are the design history,
+then [`231_verify.py`](scripts/231_verify.py) to sweep, `219_stl.py` to export,
+`223_cad_shots.py` for the CAD screenshots, `221_render_export.py` for the Cycles stills
+and `222_anim_export.py` for the animation frames. Earlier numbers are the design history,
 including all four rejected architectures above.
+
+`231_verify.py` supersedes `vlow.py`: same sweep, but it also carries the fairings, the
+drive cap and the guide rails. It runs in **twelve chunks of nine poses** — eighteen no
+longer fits inside FreeCAD's 90 s GUI dispatch limit now that the model carries the
+covers and guides, and when a chunk times out the RPC returns an error *while the work
+carries on in the background*, which silently corrupts the accumulator.
 
 [`scripts/fc.py`](scripts/fc.py) is the FreeCAD client (XML-RPC, `PORT = 9880`).
 
@@ -699,11 +708,11 @@ python scripts/fc.py run scripts/223_cad_shots.py &&   python scripts/crop_cad.p
 - **No FEA.** Hand calculations only.
 - **Screw lead unsettled** — see the drivetrain table. 10 mm is the right answer and it
   fits at X = ±58 as drawn; only the CAD nut needs redrawing from OD 28 to OD 36.
-- **Printed mass 1.93 kg** (up from 1.63 with the two new covers) is the largest
-  unresolved issue. `P2a` (145 cm³), `P5` (167 cm³),
-  `P6` (165 cm³) and `P1` (131 cm³) are the structural candidates for a diet. The 239 cm³ of
-  shrouds should print at two walls and low infill — nearer 130 g than 303 g, since they
-  carry no load.
+- **Printed mass ~1.59 kg** is the largest unresolved issue: 1038 cm³ structural at
+  1319 g, plus 395 cm³ of fairings which at two walls and low infill come to ~276 g rather
+  than the 501 g they would weigh solid. The structural candidates for a diet are
+  `P6_ShankSocket` (165 cm³), `P3_Carriage` (156 cm³), `P5_ThighCuff` (148 cm³),
+  `P3b_CarriageB` (146 cm³), `P2a_KneeHub` (143 cm³) and `P1_KneeYoke` (131 cm³).
 - **Carriage guides are sliding, not rolling** — see below. Not changed yet.
 - **The motor sits at the hip**, where the reference limb model ends (Y = 300). Its 100 mm
   clearance is measured against nothing and needs a fitting check on the patient.
