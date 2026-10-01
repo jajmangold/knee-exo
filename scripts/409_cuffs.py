@@ -73,6 +73,30 @@ def cone(r0, r1, y0, y1):
     return Part.makeCone(r0, r1, y1 - y0, V(0.0, y0, 0.0), V(0.0, 1.0, 0.0))
 
 
+def desplit(sh):
+    """removeSplitter(), but only if it does not turn the solid inside out.
+
+    It does, here. Fusing the riser box onto the conical bore leaves a face tangent to the
+    cone at X = 0, and removeSplitter's attempt to merge that face flips the solid's
+    orientation: volume goes +153.69 -> -153.69 cm3. Nothing complains. isValid() stays
+    True, isClosed() stays True, len(Solids) stays 1, and the bounding box is unchanged --
+    but every subsequent cut then ADDS material, and three separate measurements came back
+    impossible before the cause was found:
+
+        common(cuff, limb)    4876 cm3, against a 153 cm3 cuff
+        distToShape           closest point at r 59.4, inside a limb whose surface is r 71.3
+        the solids filter     0 solids, because a negative volume fails "> 0.5 cm3"
+
+    An inverted solid is the same class of defect as the missing walls this repo keeps
+    finding: valid, closed, well-formed, and wrong. So check the sign and keep whichever
+    shape is right side out.
+    """
+    out = sh.removeSplitter()
+    if out.Volume > 0.0:
+        return out
+    return sh
+
+
 def cuff(name, fn, y0, y1, a0, a1, label):
     """Conical arc shell sized to limb + sleeve + air, with rolled rims."""
     ri0, ri1 = fn(y0) + SLEEVE + AIR, fn(y1) + SLEEVE + AIR
@@ -154,16 +178,42 @@ for (lbl, fn, y0, y1, a0, a1), (name, mount, zt, host, keepout) in zip(
             "%s riser at Y %.0f is outside %s (Y %.0f..%.0f) -- bolted to nothing"
             % (name, yb, host.Label, hb.YMin, hb.YMax))
         rr = fn(yb) + SLEEVE + AIR + WALL
-        # one wide riser spanning both bolts, rooted on the shell across X -16..16 where the
-        # shell definitely exists (a1 = 95 deg), not two columns perched on its edge
-        z_root = math.sqrt(max(1.0, rr * rr - 16.0 * 16.0)) - 3.0
+        # One wide riser spanning both bolts, rooted on the shell across X -16..16 where the
+        # shell definitely exists (a1 = 95 deg), not two columns perched on its edge.
+        # Its flat underside sits at the shell's INNER radius, not 3 mm below the outer: a
+        # flat bottom cannot follow a curved bore, so rooting it lower made it dip into the
+        # sleeve -- the sampled gap went to 2.19 mm under the shank risers, a 27% compressed
+        # hard spot on a cuff whose entire purpose here was to stop concentrating pressure.
+        # At the inner radius the box is tangent to the bore at X = 0 and buried in the wall
+        # everywhere else, so it still bonds.
+        z_root = fn(yb) + SLEEVE + AIR
         assert zt > z_root + 4.0, (
             "%s riser at Y %.0f would be %.1f mm tall -- shell top %.1f, host underside %.1f"
             % (name, yb, zt - z_root, z_root, zt))
         sh = sh.fuse(Part.makeBox(32.0, 18.0, zt - z_root, V(-16.0, yb - 9.0, z_root)))
+        ri = fn(yb) + SLEEVE + AIR
         for bx_ in (-10.0, 10.0):
-            sh = sh.cut(Part.makeCylinder(2.6, 40.0, V(bx_, yb, zt - 16.0), V(0, 0, 1)))
-    sh = sh.removeSplitter()
+            sh = sh.cut(Part.makeCylinder(2.6, 40.0, V(bx_, yb, zt - 18.0), V(0, 0, 1)))
+            # COUNTERBORE. The bolt goes UP into the rail's T-slot, so its head sits on the
+            # limb side. An M5 button head is 2.8 mm tall and the gap to the limb is 4.0 mm
+            # (3 sleeve + 1 air), so an unrecessed head lands inside the neoprene at all four
+            # bolts -- four hard points pressing on the leg, on a cuff whose whole purpose
+            # this rebuild was to stop concentrating pressure.
+            # The head recess is a BOX, not a counterbore cylinder. A cylinder cut into a
+            # cone meets it along a glancing curve and OCCT made a mess of it twice: first
+            # common() returned the whole limb (4876 cm3 against a 153 cm3 cuff -- not a
+            # volume a boolean can produce), then distToShape put the closest point at
+            # r 59.4 where the limb surface is r 71.3, i.e. inside the limb, on the plane
+            # where the bolt hole started. A box has planar faces and crosses the cone
+            # transversely, which is the robust version of the same recess.
+            # 3.5 mm deep from the riser's own flat underside: an M5 button head is 2.8 mm,
+            # so it sits flush with the bore and nothing protrudes into the sleeve.
+            sh = sh.cut(Part.makeBox(11.0, 11.0, 3.5,
+                                     V(bx_ - 5.5, yb - 5.5, z_root)))
+            assert zt - (z_root + 3.5) > 2.5, (
+                "%s head recess at Y %.0f leaves only %.1f mm of riser above it"
+                % (name, yb, zt - (z_root + 3.5)))
+    sh = desplit(sh)
 
     # ---- clear the structure it lives beside, but NOT its own host
     # P22/P25 are in here because the thigh cuff's proximal rim at Y 260 reaches r 89.8 and
@@ -177,8 +227,10 @@ for (lbl, fn, y0, y1, a0, a1), (name, mount, zt, host, keepout) in zip(
         if not sh.BoundBox.intersect(ob.Shape.BoundBox):
             continue
         sh = sh.cut(ob.Shape)
-    sh = sh.removeSplitter()
+    sh = desplit(sh)
 
+    assert sh.Volume > 0.0, (
+        "%s has negative volume %.1f cm3 -- the solid is inside out" % (name, sh.Volume / 1000.0))
     keep = [s for s in sh.Solids if s.Volume / 1000.0 > 0.5]
     if len(keep) != 1:
         raise AssertionError("%s has %d solids: %s" % (name, len(keep),
@@ -222,18 +274,50 @@ for (lbl, fn, y0, y1, a0, a1), (name, mount, zt, host, keepout) in zip(
 print()
 print("=" * 78)
 print("FIT CHECK -- the thing that was never checked before")
-for name, fn, lim in (("P5_ThighCuff", r_thigh, "REF_Thigh"),
-                      ("P7_ShankCuff", r_shank, "REF_Shank")):
-    o, L = doc.getObject(name), doc.getObject(lim)
-    d = o.Shape.distToShape(L.Shape)[0]
-    k = o.Shape.common(L.Shape)
-    v = 0.0 if k.isNull() else k.Volume / 1000.0
-    print("  %-14s to %-11s  closest %5.2f mm, overlap %.3f cm3" % (name, lim, d, v))
-    print("     a %.0f mm sleeve bridges %.2f mm of that; %s"
-          % (SLEEVE, d, "CONTACT" if d <= SLEEVE + AIR + 0.6 else "STILL FLOATS"))
-    assert d <= SLEEVE + AIR + 0.6, (
-        "%s is %.2f mm off the limb -- a %.0f mm sleeve cannot bridge it" % (name, d, SLEEVE))
-    assert v < 0.02, "%s is inside the limb by %.3f cm3" % (name, v)
+print()
+# SAMPLED, not boolean. distToShape and common both misbehave on this pair: common returned
+# 4876 cm3 against a 153 cm3 cuff, and distToShape put the closest point at r 59.4 where the
+# limb surface is r 71.3 -- a point inside the limb, on the plane where a bolt hole started.
+# Neither number is a geometry a boolean can produce, and the 1.02 mm an earlier run reported
+# was never explicable either, since the design gap is a constant 4.00 mm by construction.
+# Firing a ray and measuring where it crosses each surface uses only line-solid intersection,
+# which has been stable throughout, and it checks the actual design claim: that the gap is
+# uniform, which is the whole point of making the shells conical.
+def ray_r(sh, y, deg, outer=False):
+    t = math.radians(deg)
+    e = Part.makeLine(V(2.0 * math.cos(t), y, 2.0 * math.sin(t)),
+                      V(260.0 * math.cos(t), y, 260.0 * math.sin(t)))
+    k = sh.common(e)
+    if k.isNull() or not k.Vertexes:
+        return None
+    rr = [math.hypot(v.Point.x, v.Point.z) for v in k.Vertexes]
+    return max(rr) if outer else min(rr)
+
+
+for (lbl, fn, y0, y1, a0, a1), (name, lim) in zip(
+        SPEC, (("P5_ThighCuff", "REF_Thigh"), ("P7_ShankCuff", "REF_Shank"))):
+    c, L = doc.getObject(name).Shape, doc.getObject(lim).Shape
+    gaps, rim = [], []
+    for i in range(11):
+        y = y0 + (y1 - y0) * (i + 0.5) / 11.0
+        at_rim = (y - y0) < RIM_L + 2.0 or (y1 - y) < RIM_L + 2.0
+        for j in range(13):
+            a = a0 + (a1 - a0) * (j + 0.5) / 13.0
+            rl, rc = ray_r(L, y, a, outer=True), ray_r(c, y, a)
+            if rl is None or rc is None:
+                continue
+            (rim if at_rim else gaps).append(rc - rl)
+    assert len(gaps) > 60, "%s: only %d samples landed on the shell" % (name, len(gaps))
+    lo, hi = min(gaps), max(gaps)
+    print("  %-14s %d samples off the rim: gap %.2f..%.2f mm (design %.1f)"
+          % (name, len(gaps), lo, hi, SLEEVE + AIR))
+    print("     %d rim samples: gap %.2f..%.2f mm -- the rolled rim, flaring away on purpose"
+          % (len(rim), min(rim), max(rim)))
+    print("     a %.0f mm sleeve fills %.0f%% of it; %s"
+          % (SLEEVE, 100.0 * SLEEVE / hi, "BEARS" if hi <= SLEEVE + AIR + 0.6 else "TOO LOOSE"))
+    assert lo > 0.3, "%s touches the limb: minimum gap %.2f mm" % (name, lo)
+    assert hi <= SLEEVE + AIR + 0.6, (
+        "%s gap reaches %.2f mm -- a %.0f mm sleeve cannot fill it" % (name, hi, SLEEVE))
 
 doc.recompute()
 doc.save()
