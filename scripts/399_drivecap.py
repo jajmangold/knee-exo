@@ -41,10 +41,13 @@ So the motor keeps its tube. What v4 changes is everything AROUND the tube:
    axis above about +15 deg never reaches the thigh at all, so the flare is free there.
    Flare that ends up inside the cap costs nothing: the union already contains it.
 
-3. A DOMED NOSE. The proximal end points up the thigh and is the one you see. v2 closed it
-   with a flat disc at Y 211. v4 tapers it over Y 209..214.5 to a 19 mm blunt dome. It has
-   to be at full radius by Y 217 because that is where the motor can starts, and that is
-   what sets the taper length.
+3. A DOMED NOSE THAT PRINTS. The proximal end points up the thigh and is the one you see.
+   v2 closed it with a flat disc at Y 211. v4 tapers it to a 19 mm blunt nose, running from
+   Y 201 to Y 217 -- 16 mm, not the 5.5 it started as. 411_printability.py is why: this part
+   prints nose-down, a short nose is 70.7 deg from vertical, and a cone that wide DIVERGES
+   upward so every layer overhangs the one below. That was 40.6 cm2 of unsupported surface
+   on a part the BOM called support-free. At 16 mm the taper is 44.5 deg, inside what a
+   printer bridges unaided. It still has to reach full radius by 217, where the motor starts.
 
 Send with:  python tools/fcsend.py scripts/399_drivecap.py
 """
@@ -168,10 +171,15 @@ print("   %.1f, so the flare costs %.2f mm of limb clearance." % (plain, plain -
 assert worst[0] > plain - 0.05, "the flare has eaten into the limb side of the pod"
 
 # ---------------------------------------------------------------- pod sections
-# Full radius by Y 217 because that is where the motor can starts; the nose taper has to
-# fit entirely proximal of it, which is what sets its 5.5 mm length.
-POD_O = [(209.0, 0.55), (212.0, 0.88), (214.5, 1.00), (320.0, 1.00)]
-POD_I = [(211.5, 0.55), (214.3, 0.88), (217.0, 1.00), (317.0, 1.00)]
+# Full radius by Y 217 because that is where the motor can starts, so the whole taper has to
+# fit proximal of it. ONE STRAIGHT TAPER over 16 mm, not 5.5. The short nose was 70.7 deg from vertical, and
+# printed nose-down -- which is the orientation 411_printability.py finds best for this part
+# -- a cone that wide DIVERGES upward, so every layer overhangs the one below: 40.6 cm2 of
+# unsupported surface, on a part the BOM described as "prints nose-down on its domed end, no
+# supports". Running the taper from Y 201 instead of 209 puts it at 44.5 deg, inside what a
+# printer bridges unaided. It still has to be at full radius by 217, where the motor starts.
+POD_O = [(201.0, 0.55), (217.0, 1.00), (320.0, 1.00)]
+POD_I = [(204.0, 0.55), (217.5, 1.00), (317.0, 1.00)]
 
 
 def stadium(r1, r2, y0, y1):

@@ -42,7 +42,7 @@ BLOCK = ["P20_KneeShroud", "P21_ShellAnterior", "P22_DriveCap", "P25_MotorNacell
          "P1_KneeYoke", "P5_ThighCuff", "P7_ShankCuff",
          "P6_ShankSocket", "P23a_FairingMount", "P23b_FairingMount", "P23c_FairingMount",
          "A1_Extrusion_20x60_VSlot", "A7_DriveBox", "A4_Shank2020_VSlot",
-         "P2a_KneeHingePlate"]
+         "P2a_KneeHingePlate", "P30_InterfaceProx", "P31_InterfaceDist"]
 # The screw and the motor can are in here too: a ball screw turns at 1160 rpm and an
 # outrunner's CASE spins. Neither pinches, but neither is something to leave against skin.
 MOVING = ["P3_Carriage", "A2b_BallNut_SFU1620", "A2_BallScrew_SFU1620",

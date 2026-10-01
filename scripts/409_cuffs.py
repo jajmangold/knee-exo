@@ -58,8 +58,19 @@ def r_shank(y):
     return 60.0 - (60.0 - 38.0) * (abs(y) - 20.0) / 360.0
 
 
-def wedge(a0, a1, R, y0, y1, n=72):
-    """Angular sector as a prism -- predictable, unlike makeCylinder's angle argument."""
+def wedge(a0, a1, R, y0, y1, n=None):
+    """Angular sector as a prism -- predictable, unlike makeCylinder's angle argument.
+
+    n scales with the SPAN. It was fixed at 72, which is right for the 200 degree shell
+    sector and absurd for a 3.8 degree webbing slot: 72 facets across 3.8 degrees is one
+    every 0.05 deg, and at r 75 that is a 0.07 mm chord -- slivers. The resulting solid was
+    valid and closed by every OCCT test and would not tessellate into a manifold mesh at any
+    deflection; the exported STL came back with 92 unpaired edges. Bisecting showed the shell
+    and the risers meshed clean and the first cut after the SLOTS broke it, whatever that cut
+    was. One facet per 2.5 degrees, minimum 4.
+    """
+    if n is None:
+        n = max(4, int(abs(a1 - a0) / 2.5))
     pts = [V(0.0, y0, 0.0)]
     for i in range(n + 1):
         a = math.radians(a0 + (a1 - a0) * i / n)
@@ -123,8 +134,13 @@ SPEC = []
 # a1 = 95 deg on both: just past straight-lateral, so there is shell under BOTH bolt
 # positions at X +/-10. At exactly 90 the shell edge lands on X = 0 and the bosses hang in
 # space -- which is what the first build did, and it reported 3 solids.
-for lbl, fn, y0, y1, a0, a1 in (("thigh", r_thigh, 120.0, 260.0, -105.0, 95.0),
-                                ("shank", r_shank, -350.0, -190.0, -120.0, 95.0)):
+# a1 = 110, not 95. At 95 the shell's free edge lands at X = r*cos(95) = -6.6, while the
+# riser spans X -16..16 -- so the X = -10 bolt sat on a tab cantilevered off nothing, with
+# no shell under it at all. Structurally wrong, an overhang to print, and the source of a
+# BOPAlgo SelfIntersect that isValid() reported as fine and that stopped the part
+# tessellating into a manifold mesh. At 110 the shell reaches X -30 and carries both bolts.
+for lbl, fn, y0, y1, a0, a1 in (("thigh", r_thigh, 120.0, 260.0, -105.0, 110.0),
+                                ("shank", r_shank, -350.0, -190.0, -120.0, 110.0)):
     # the shank needs 215 deg where the thigh needs 200: the calf is a smaller
     # radius, so the same wrap angle buys a much shorter arc to spread load over.
     yc = abs(0.5 * (y0 + y1))
@@ -153,9 +169,10 @@ A4 = doc.getObject("A4_Shank2020_VSlot")
 # riser. That gap is the whole reason the OLD shank cuff sat at r 64: it was sized to reach
 # the structure, not to fit the leg, and reaching the structure is what it was optimised for.
 SOCK = doc.getObject("P6_ShankSocket")
-for (lbl, fn, y0, y1, a0, a1), (name, mount, zt, host, keepout) in zip(
-        SPEC, (("P5_ThighCuff", (130.0, 195.0), 88.0, ST, (A7,)),
-               ("P7_ShankCuff", (-290.0, -215.0), 68.0, SOCK, (A4,)))):
+for (lbl, fn, y0, y1, a0, a1), (name, mount, frac, zt, host, keepout) in zip(
+        SPEC, (("P5_ThighCuff", (177.0, 201.0), (0.164, 0.821), 88.0, ST, (A7,)),
+               ("P7_ShankCuff", (-290.0, -262.0), (0.144, 0.769), 68.0, SOCK, (A4,)))):
+    slot_y = [y0 + (y1 - y0) * f for f in frac]
     sh = cuff(name, fn, y0, y1, a0, a1, lbl)
 
     # ---- webbing slots: two stations, one near each free circumferential edge
@@ -164,7 +181,7 @@ for (lbl, fn, y0, y1, a0, a1), (name, mount, zt, host, keepout) in zip(
     # wrong bearing and left the real slot blocked. A sector built from the axis outward
     # cannot be mis-oriented: the strap's 38 mm width lies along Y (the limb axis, because
     # the strap runs circumferentially) and its thickness is an arc of WEB_T at radius rr.
-    for ys in (y0 + 0.28 * (y1 - y0), y0 + 0.72 * (y1 - y0)):
+    for ys in slot_y:
         rr = fn(ys) + SLEEVE + AIR
         d = math.degrees(0.5 * (WEB_T + 1.0) / rr)
         for a in (a0 + 9.0, a1 - 9.0):
@@ -172,7 +189,23 @@ for (lbl, fn, y0, y1, a0, a1), (name, mount, zt, host, keepout) in zip(
                               ys - WEB / 2.0, ys + WEB / 2.0))
 
     # ---- mounting risers up to the host's underside, inside the host's own Y span
+    # THE SLOTS AND THE RISERS MUST NOT SHARE Y. A 38 mm strap through a slot whose edge is
+    # blocked by an 18 mm riser does not thread, and the overlap is invisible in every check
+    # this script had: the slot probe fires at the slot's CENTRE, which stays clear. What
+    # found it was the exported mesh refusing to close -- a boolean between a slot wedge and
+    # a riser box, 2.2 mm wide, that OCCT called valid and the tessellator could not resolve.
+    # Both cuffs had it. Cheaper to assert than to discover again.
+    for ys in slot_y:
+        for yb in mount:
+            if abs(ys - yb) < WEB / 2.0 + 9.0 + 5.0:
+                raise AssertionError(
+                    "%s: webbing slot at Y %.0f (spans %.0f..%.0f) is within 5 mm of the "
+                    "riser at Y %.0f (spans %.0f..%.0f) -- the strap cannot thread past it, "
+                    "and the sliver of shell left between them is what stopped this part "
+                    "tessellating into a manifold mesh"
+                    % (name, ys, ys - WEB / 2, ys + WEB / 2, yb, yb - 9, yb + 9))
     hb = host.Shape.BoundBox
+    tools = []            # every bolt feature cut in ONE boolean, see below
     for yb in mount:
         assert hb.YMin - 1.0 <= yb <= hb.YMax + 1.0, (
             "%s riser at Y %.0f is outside %s (Y %.0f..%.0f) -- bolted to nothing"
@@ -186,14 +219,20 @@ for (lbl, fn, y0, y1, a0, a1), (name, mount, zt, host, keepout) in zip(
         # hard spot on a cuff whose entire purpose here was to stop concentrating pressure.
         # At the inner radius the box is tangent to the bore at X = 0 and buried in the wall
         # everywhere else, so it still bonds.
-        z_root = fn(yb) + SLEEVE + AIR
+        # +0.5, NOT exactly the bore radius. A plane at Z = ri is TANGENT to a bore of
+        # radius ri at X = 0, and a tangent intersection tessellates into slivers: the
+        # exported P5 mesh came out with 20 unpaired edges, every one of them in a 2.5 mm
+        # patch at the Y 130 riser corner, while P7 and P22 were clean. 0.5 mm clear of the
+        # bore the box bottom is embedded in the wall everywhere across X -16..16 and
+        # touches nothing tangentially -- and it still does not protrude into the sleeve.
+        z_root = fn(yb) + SLEEVE + AIR + 0.5
         assert zt > z_root + 4.0, (
             "%s riser at Y %.0f would be %.1f mm tall -- shell top %.1f, host underside %.1f"
             % (name, yb, zt - z_root, z_root, zt))
         sh = sh.fuse(Part.makeBox(32.0, 18.0, zt - z_root, V(-16.0, yb - 9.0, z_root)))
         ri = fn(yb) + SLEEVE + AIR
         for bx_ in (-10.0, 10.0):
-            sh = sh.cut(Part.makeCylinder(2.6, 40.0, V(bx_, yb, zt - 18.0), V(0, 0, 1)))
+            tools.append(Part.makeCylinder(2.6, 40.0, V(bx_, yb, zt - 18.0), V(0, 0, 1)))
             # COUNTERBORE. The bolt goes UP into the rail's T-slot, so its head sits on the
             # limb side. An M5 button head is 2.8 mm tall and the gap to the limb is 4.0 mm
             # (3 sleeve + 1 air), so an unrecessed head lands inside the neoprene at all four
@@ -206,13 +245,29 @@ for (lbl, fn, y0, y1, a0, a1), (name, mount, zt, host, keepout) in zip(
             # r 59.4 where the limb surface is r 71.3, i.e. inside the limb, on the plane
             # where the bolt hole started. A box has planar faces and crosses the cone
             # transversely, which is the robust version of the same recess.
-            # 3.5 mm deep from the riser's own flat underside: an M5 button head is 2.8 mm,
-            # so it sits flush with the bore and nothing protrudes into the sleeve.
-            sh = sh.cut(Part.makeBox(11.0, 11.0, 3.5,
-                                     V(bx_ - 5.5, yb - 5.5, z_root)))
+            # The recess breaks CLEAN THROUGH the bore rather than stopping above it. Floored
+            # at the riser's underside it left a 1.17 mm sliver of wall between bore and
+            # recess, perforated by the bolt hole -- and that sliver is where all 92 unpaired
+            # edges of the exported mesh were, in one 13 mm patch. It was also structurally
+            # pointless. Breaking through costs the head 1.0 mm of protrusion into a 4.0 mm
+            # gap, which a 3 mm sleeve still clears without being compressed.
+            z_in = math.sqrt(max(1.0, ri * ri - bx_ * bx_))
+            tools.append(Part.makeCylinder(5.2, (z_root + 3.5) - (z_in - 2.0),
+                                           V(bx_, yb, z_in - 2.0), V(0, 0, 1)))
             assert zt - (z_root + 3.5) > 2.5, (
                 "%s head recess at Y %.0f leaves only %.1f mm of riser above it"
                 % (name, yb, zt - (z_root + 3.5)))
+    # ONE cut with all the bolt tools fused, not eight sequential cuts. Cutting them one at
+    # a time left a solid that OCCT called valid and closed but that would not tessellate
+    # into a manifold mesh at any deflection -- 92 unpaired edges in the exported STL, all in
+    # one patch at the Y 130 riser. Bisecting the build showed the shell, the slots and the
+    # risers all meshed clean and the first bolt hole broke it. Sequential booleans on the
+    # same small region accumulate near-degenerate faces; fusing the tools first gives the
+    # modeller one clean problem instead of eight overlapping ones.
+    cutter = tools[0]
+    for t in tools[1:]:
+        cutter = cutter.fuse(t)
+    sh = sh.cut(cutter.removeSplitter())
     sh = desplit(sh)
 
     # ---- clear the structure it lives beside, but NOT its own host
@@ -229,6 +284,13 @@ for (lbl, fn, y0, y1, a0, a1), (name, mount, zt, host, keepout) in zip(
         sh = sh.cut(ob.Shape)
     sh = desplit(sh)
 
+    # isValid() is NOT enough. It returned True on a solid carrying a BOPAlgo SelfIntersect
+    # that no boolean, no repair and no tessellation deflection could get past. check() finds
+    # it; nothing else in this repo was asking.
+    try:
+        sh.check(True)
+    except Exception as e:
+        raise AssertionError("%s fails Shape.check(): %s" % (name, e))
     assert sh.Volume > 0.0, (
         "%s has negative volume %.1f cm3 -- the solid is inside out" % (name, sh.Volume / 1000.0))
     keep = [s for s in sh.Solids if s.Volume / 1000.0 > 0.5]
@@ -246,7 +308,7 @@ for (lbl, fn, y0, y1, a0, a1), (name, mount, zt, host, keepout) in zip(
     # two bracket floors to features that silently did not get cut. Fire a radial probe
     # through each intended slot and require it to meet no material.
     nslot = 0
-    for ys in (y0 + 0.28 * (y1 - y0), y0 + 0.72 * (y1 - y0)):
+    for ys in slot_y:
         rr = fn(ys) + SLEEVE + AIR
         for a in (a0 + 9.0, a1 - 9.0):
             t = math.radians(a)
@@ -294,23 +356,34 @@ def ray_r(sh, y, deg, outer=False):
     return max(rr) if outer else min(rr)
 
 
+MOUNTY = {"P5_ThighCuff": (177.0, 201.0), "P7_ShankCuff": (-290.0, -262.0)}
 for (lbl, fn, y0, y1, a0, a1), (name, lim) in zip(
         SPEC, (("P5_ThighCuff", "REF_Thigh"), ("P7_ShankCuff", "REF_Shank"))):
     c, L = doc.getObject(name).Shape, doc.getObject(lim).Shape
     gaps, rim = [], []
-    for i in range(11):
-        y = y0 + (y1 - y0) * (i + 0.5) / 11.0
+    for i in range(17):
+        y = y0 + (y1 - y0) * (i + 0.5) / 17.0
         at_rim = (y - y0) < RIM_L + 2.0 or (y1 - y) < RIM_L + 2.0
+        # Skip the riser stations. A ray fired at bearing +94 there goes straight down a bolt
+        # counterbore and meets the riser 8.2 mm out, which the check read as the shell
+        # floating 8 mm off the limb. It is a hole, not a fit problem -- but the distinction
+        # is invisible to a ray, so do not sample where the holes are.
+        if any(abs(y - ym) < 11.0 for ym in MOUNTY[name]):
+            continue
         for j in range(13):
             a = a0 + (a1 - a0) * (j + 0.5) / 13.0
             rl, rc = ray_r(L, y, a, outer=True), ray_r(c, y, a)
             if rl is None or rc is None:
                 continue
-            (rim if at_rim else gaps).append(rc - rl)
+            (rim if at_rim else gaps).append((rc - rl, y, a))
     assert len(gaps) > 60, "%s: only %d samples landed on the shell" % (name, len(gaps))
     lo, hi = min(gaps), max(gaps)
+    rim = [g[0] for g in rim]
     print("  %-14s %d samples off the rim: gap %.2f..%.2f mm (design %.1f)"
-          % (name, len(gaps), lo, hi, SLEEVE + AIR))
+          % (name, len(gaps), lo[0], hi[0], SLEEVE + AIR))
+    if hi[0] > SLEEVE + AIR + 0.6:
+        print("     worst sample at Y %.0f bearing %+.0f deg" % (hi[1], hi[2]))
+    lo, hi = lo[0], hi[0]
     print("     %d rim samples: gap %.2f..%.2f mm -- the rolled rim, flaring away on purpose"
           % (len(rim), min(rim), max(rim)))
     print("     a %.0f mm sleeve fills %.0f%% of it; %s"

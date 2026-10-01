@@ -35,14 +35,14 @@ A0 = 161.0
 THETA = [float(i) for i in range(-2, 105)]
 
 SHANK = ["A4_Shank2020_VSlot", "P2a_KneeHingePlate", "P6_ShankSocket", "P7_ShankCuff",
-         "P24_FairingShank", "REF_Shank", "HW_JointBolts"]
+         "P24_FairingShank", "P31_InterfaceDist", "REF_Shank", "HW_JointBolts"]
 GANTRY = ["P3_Carriage", "A2b_BallNut_SFU1620",
           "P10a_VWheel", "P10b_VWheel", "P10c_VWheel", "P10d_VWheel"]
 STAT = ["A1_Extrusion_20x60_VSlot", "P1_KneeYoke", "P5_ThighCuff", "REF_Thigh", "REF_Knee",
         "A2_BallScrew_SFU1620", "A3_Motor_6374", "A6_Idler29T", "A7_DriveBox",
         "A7b_LinkBelt", "HW_PinB_10",
         "A5_Belt_HTD8M", "A5b_Belt_DriveRun", "A5c_Belt_TakeRun", "A5d_Belt_WrapIdler",
-        "P20_KneeShroud", "P21_ShellAnterior", "P22_DriveCap", "P25_MotorNacelle",
+        "P20_KneeShroud", "P21_ShellAnterior", "P22_DriveCap", "P25_MotorNacelle", "P30_InterfaceProx",
         "P23a_FairingMount", "P23b_FairingMount", "P23c_FairingMount",
 ]
 

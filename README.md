@@ -842,6 +842,75 @@ python scripts/fc.py run scripts/223_cad_shots.py &&   python scripts/crop_cad.p
 
 ---
 
+## As a module of a full exoskeleton
+
+The question this was built to answer is one knee. The question it will be asked next is what
+a leg looks like, so [`500_as_a_module.py`](scripts/500_as_a_module.py) puts numbers on it
+before any more of the design hardens around a single joint.
+
+**A full exo cannot be eight of these.** The knee is the *smallest* of the four lower-limb
+joint types — the ankle wants 38 N·m at 30 % assist against the knee's 25, and 3.5× the peak
+power. Eight joints built like this one is 30.2 kg on the legs, which at published penalties
+for added limb mass is a **106 % metabolic cost against a 30 % assist budget**: 3.5× upside
+down. Even a perfect exo returning every newton-metre it promises would cost more than it
+gives. The ways out are architectural — load to ground, remote actuation at the pelvis, or
+assist fewer joints.
+
+**Every module usable alone *or* federated** is a stronger requirement than "modular", and it
+cuts against that mass. A module that works alone carries its own reaction path, controller,
+safety interlock and power — exactly what makes eight unwearable. So the architecture is
+modules that **shed** when they federate: local battery, second cuff, standalone MCU, e-stop
+link, its own loom — **1252 g, 33 % of the module**. A federated knee is 2.53 kg against 3.78.
+Shedding makes the system possible; it does not make it light.
+
+**The cuff stops being part of a module.** A hip module and a knee module both clamp the
+thigh. Self-contained they bring a cuff each — two shells fighting for the same 429 mm of
+limb, each applying its own roll torque. Federated they share one, which makes the cuff a
+component in its own right and means the thing to standardise is its *mounting interface*,
+not its shape.
+
+**Room to interconnect is tighter than it looks.** For a 1.75 m subject the hip joint centre
+is 429 mm above the knee and the ankle 430 below, while this module reaches Y +334 and −350 —
+so **95 mm at the top and 80 mm at the bottom**, and into those must fit the next joint's
+bearing, its structure and the splice. The drive end is the tight one, and it already spent
+its reach allowance moving the motor anterior.
+
+**A 1 kHz host loop over one CAN bus does not fit** — 8 nodes × 2 frames × 108 bits is 173 %
+of a 1 Mbit/s bus. Not a problem, but it dictates the architecture: the drives close current
+and velocity locally and the bus carries setpoints at ~200 Hz (35 %); if something ever needs
+kilohertz, split left and right legs onto two buses rather than raising the rate.
+
+### The KX-1 interface, fitted at both ends
+
+[`501_interface.py`](scripts/501_interface.py) sizes it and
+[`502_interface_build.py`](scripts/502_interface_build.py) builds it. The trap was sizing for
+today's load: standalone it only ever relieves a cuff, 148 N. Federated with a load-to-ground
+structure the same joint carries **1472 N**. Sized for the first number it is scrap the day
+the second module arrives.
+
+**Bearing sizes it, not tension and not the bolts.** 6 × M5 at class 8.8 is 36 kN of capacity
+against a 2943 N design load — never the limit. Bearing on a 5 mm hole in a printed boss is,
+and 4 bolts fails at every sensible thickness while 6 passes at 10 mm. Bolt count is the one
+thing in a mating pattern that cannot change later without changing both halves, so it is
+worth having found now.
+
+| | |
+|---|---|
+| face | 56 × 40, 10 mm boss |
+| bolts | 6 × M5 at face-X −18/0/+18 by face-Y ±9 |
+| dowels | 2 × ⌀5 H7 at face-X ±24 — two pins fully constrain in plane, and this interface is what sets where the joint axis lands relative to the patient's |
+| frame | face-X along the module's +Y, normal pointing out |
+
+The face points **laterally, not axially**: a lap joint costs none of the 95 mm budget and
+carries bending without relying on bolt tension, which an end-butt flange cannot. `P30` sits
+on `A7`'s top plate and pierces the drive shell through a port it then fills — coverage stays
+at 0 of 187 rays. It needed wings to reach solid metal, because `394`'s lightening windows
+leave `A7` solid only at |X| 32…40.
+
+Four placements were wrong before one was right, every one caught by a **per-hole** engagement
+check rather than an aggregate one — the first layout put two of four bolts into a lightening
+window and "0.13 cm³ removed" looked entirely plausible.
+
 ## Open items
 
 - **No FEA.** Hand calculations only.

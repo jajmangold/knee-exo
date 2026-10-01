@@ -121,8 +121,30 @@ gone — they became bought MGN7H blocks (S2a).
 | `P21_FairingThigh`, `P22_DriveCap`, `P24_FairingShank` | 1 each | 3 perimeters, 15%, cosmetic |
 | `P25_MotorNacelle` | 1 | 3 perimeters, 15%. Prints nose-down on its domed end, no supports |
 | `P23a/b/c_FairingMount` | 1 each | 4 perimeters, 40% — they carry the canopy |
+| `P30_InterfaceProx`, `P31_InterfaceDist` | 1 each | **KX-1 module interface.** 6 perimeters, 60% — structural. 6 × M5 heat-set inserts + 2 × ⌀5 dowels. Printed here because standalone this module needs 1.2 MPa of bearing; the same six holes in 6 mm aluminium carry the 1472 N load-to-ground case ([`501_interface.py`](../scripts/501_interface.py)) |
 
 Roughly 1.8–2.2 kg of filament including supports.
+
+**Every part is engraved with its own part number** ([`412_engrave.py`](../scripts/412_engrave.py)) —
+0.8 mm recessed, 8 mm Arial Bold, on a hidden inner face. Recessed rather than raised because on
+the cuffs that face is the bore, against the neoprene: a raised character is a pressure point, a
+recess under a 3 mm sleeve cannot be felt, and on a near-vertical wall a recess is just a
+shallower perimeter where raised text would be a chain of 0.8 mm islands.
+
+**Printability is measured, not assumed** ([`411_printability.py`](../scripts/411_printability.py)),
+and it reads the exported STLs rather than the CAD solids, because the STL is what gets sliced:
+
+| | |
+|---|---|
+| fits a 220 × 220 bed | all 15 parts — largest footprint 178 mm, tallest 185 mm |
+| mesh watertight | all 15 |
+| mean wall | 2.1–8.9 mm, all above the 1.2 mm two-perimeter floor |
+| needs support | only `P23a/b/c`, 4.2 cm² each — one flat bracket underside |
+
+It earns its keep: it found `P5_ThighCuff` exporting a **non-manifold mesh** that `isValid()` and
+`isClosed()` both called fine, and it caught `P25` being described in this BOM as *"prints nose-down,
+no supports"* when printed nose-down a 70° cone diverges upward and every layer overhangs — 41 cm².
+The nose taper now runs 16 mm instead of 5.5, at 44.5°, and is self-supporting.
 
 ## 6. Electronics
 
