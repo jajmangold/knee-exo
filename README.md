@@ -15,8 +15,9 @@
 > [!WARNING]
 > **This is not a validated medical device.** No FEA has been run — every number here is a
 > hand calculation, and the ones that matter are shown so you can check them. Cuffs are
-> sized nominally for 1.75 m / 80 kg. Do not fit this to anyone without a clinician in the
-> loop and a bench test under the loads listed.
+> sized nominally for 1.75 m / 80 kg **against a cone phantom, not a measured limb** — see
+> the cuff section below. Do not fit this to anyone without a clinician in the loop and a
+> bench test under the loads listed.
 
 ## The problem
 
@@ -426,6 +427,63 @@ skirt and leaves coverage at 0.
 
 `397_recladding.py` now checks `P21` against the yoke, the hinge plate and the shroud at
 build time, where it costs a second, rather than at the end of a twenty-minute sweep.
+
+### The cuffs, which had never been calculated
+
+Everything upstream of the cuffs — screw, bracket, belt, wheels — was sized by calculation.
+The thing that actually touches the patient was not, and when
+[`408_cuff_loads.py`](scripts/408_cuff_loads.py) was finally pointed at it, it found that
+**neither cuff fitted the limb.** Both phantoms are cones; both cuffs were cylinders.
+
+| | before | after |
+|---|---|---|
+| thigh cuff | floated over its distal half, bore on a **47 mm band at the proximal rim** at **~40 kPa** | conical, bears across all 140 mm at **12.5 kPa** |
+| shank cuff | **never touched the limb** — 15–23 mm of air, closest approach 7.78 mm | conical, 160 mm wide, **12.2 kPa** |
+
+40 kPa against a ~15 kPa sustained-comfort ceiling, concentrated at a shell edge, on a limb
+with post-operative circulation, is not a comfort problem — it is how braces injure people.
+
+The sweep had been reporting this for months and nobody read it. It flags
+`P5_ThighCuff ∩ REF_Thigh` at 0.836 cm³ every single run, and it has **never** flagged
+`P7_ShankCuff ∩ REF_Shank`. The absence was the finding.
+
+Three other things came out of the same pass:
+
+**The load that should drive the design is not the assist.** All 3.78 kg hangs lateral,
+~95 mm off the limb axis, which is a **constant 3.52 N·m roll torque** trying to rotate the
+brace around the leg — present with the motor off. Resisting it by friction needs ~31 N of
+strap tension per cuff, *repeatably*, because if it is not repeatable the device sits at a
+different roll angle each day and the knee axis stops lining up with the patient's.
+
+**A neoprene sleeve is the skin interface**, not an EVA pad. It raises the governing friction
+coefficient from 0.4 to ~0.6 worst case, so the strap needs **21 N instead of 31 N**; it
+bridges the shell rim instead of letting it dig; it moves the sliding interface off the
+patient; and it washes. What it cannot do is bridge a 20 mm gap — a compliant layer cannot
+fix geometry, which is why the cones were still necessary.
+
+**The closure is 38 mm nylon webbing, 2:1 through a D-ring into a cam buckle**, with a
+side-release buckle in the loop. Not lace: at 31 N across the open side of the cuff a 3.5 mm
+lace is ~90 kPa on soft tissue against 8.3 kPa for 38 mm webbing, so a laced brace needs a
+separate tongue and webbing is its own. And this is a **powered** device — one squeeze gets
+it off in ~2 s, against ~8 s to find and release a cord lock. That is the only safety
+argument in the whole analysis and it is the one that settled it.
+
+The shells now carry **rolled rims** at both ends, because the edge is where concentration
+lands even once the cone matches, and the gap to the limb is **4.00 mm, constant across the
+full width and every bearing** — sleeve plus 1 mm of donning air.
+
+One thing the rebuild exposed: the old shank cuff sat at r 64 because that is what it took to
+reach `P6_ShankSocket`, not what it took to fit a leg. It had been sized to the structure.
+Sizing it to the limb drops it to r ≈ 47 and it now reaches the socket on a riser.
+
+And one cost, stated because it is the kind of thing that only shows up on a person. The
+old cuff wrapped **posterior-lateral only** (0…110° and 300…355°) and never reached the
+medial side. Wrapping 200° to get the pressure down puts the shell **8.0 mm proud of the
+medial skin** — 3 sleeve + 1 donning air + 4 wall, which is the floor for any cuff with a
+sleeve, not something that can be optimised away. The medial envelope went from Z −76.2 to
+−89.8. Thighs pass close at midstance, so this is worth watching at the first fitting; if it
+catches the other leg, the trade is wrap −105° → −85° plus 20 mm more width, which lands at
+12.2 kPa and is still under the ceiling.
 
 ### Why the shank looks bare, and how much of that is necessary
 
