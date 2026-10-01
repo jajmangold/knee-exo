@@ -911,6 +911,22 @@ Four placements were wrong before one was right, every one caught by a **per-hol
 check rather than an aggregate one — the first layout put two of four bolts into a lightening
 window and "0.13 cm³ removed" looked entirely plausible.
 
+### A part can be in a check's list and never be posed
+
+`P31_InterfaceDist` was added to the interference sweep's part list and to the coverage test's
+blocker list, and it passed both. It was also sitting at identity placement while the shank
+rotated — **88 mm from the socket it bolts to**. It was blocking coverage rays from a position
+it does not occupy, and it was drawn detached from the leg in every CAD shot.
+
+The cause is that `406_coverage.py`'s `pose()` keeps a hardcoded shank tuple that is *separate*
+from its `BLOCK` list, so a part can be an occluder and never be moved. The same split exists
+in `220`, `221`, `222`, `223` and `395` — five pose lists and five part lists, maintained by
+hand. Adding a part means touching both halves of all of them, and nothing complains if you
+miss one.
+
+Worth knowing because every clean result this repo produces depends on the parts being where
+the checks think they are, and that is the one thing none of the checks test.
+
 ## Open items
 
 - **No FEA.** Hand calculations only.

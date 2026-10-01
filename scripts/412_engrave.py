@@ -42,7 +42,14 @@ import FreeCAD
 import Part
 from FreeCAD import Vector as V
 
-doc = FreeCAD.getDocument("KneeExo_v4")
+# Runs either in the GUI instance or headless under freecadcmd. Headless matters: the
+# bearing search on P24 takes over 90 s, which is the RPC server's dispatch limit, and
+# overrunning it does not fail cleanly -- it keeps working and leaves a half-applied document.
+DOCFILE = r"C:/Users/Josh/KneeExo_v6.FCStd"
+try:
+    doc = FreeCAD.getDocument("KneeExo_v4")
+except Exception:
+    doc = FreeCAD.openDocument(DOCFILE)
 
 FONT = None
 for cand in (r"C:/Windows/Fonts/arialbd.ttf", r"C:/Windows/Fonts/verdanab.ttf",
@@ -65,12 +72,18 @@ JOBS = [
     ("P5_ThighCuff",      "P5",  "Y", (150.0, 165.0, 135.0)),
     ("P7_ShankCuff",      "P7",  "Y", (-320.0, -305.0, -335.0)),
     ("P21_ShellAnterior", "P21", "Y", (100.0, 70.0, 140.0)),
-    ("P22_DriveCap",      "P22", "Y", (250.0, 230.0, 270.0)),
+    # NOT Y 226..283: 502 ports the shell there for the interface boss, so the old mark
+    # site is now a hole and the search correctly refuses it.
+    ("P22_DriveCap",      "P22", "Y", (205.0, 310.0, 195.0, 320.0)),
     ("P25_MotorNacelle",  "P25", "M", (250.0, 235.0, 265.0)),
-    ("P24_FairingShank",  "P24", "Y", (-150.0, -170.0, -130.0)),
+    # Stations vetted by 413: the knee end of these parts is OPEN, and marks placed there
+    # are visible from outside however "inner" the surface is.
+    ("P24_FairingShank",  "P24", "Y", (-175.0, -180.0, -170.0)),
     ("P20_KneeShroud",    "P20", "Y", (0.0, 15.0, -15.0)),
-    ("P1_KneeYoke",       "P1",  "Y", (60.0, 90.0, 30.0)),
-    ("P2a_KneeHingePlate", "P2a", "Y", (-60.0, -90.0, -30.0)),
+    ("P1_KneeYoke",       "P1",  "Y", (60.0, 90.0, 100.0)),
+    # P2a_KneeHingePlate is deliberately absent. 414 searched 16 stations x 36 bearings
+    # and found nowhere covered -- it is the knee hub at an open joint, reachable from
+    # every direction. It is the 143 cm3 29T pulley; an unmarked part is the better trade.
     ("P6_ShankSocket",    "P6",  "Y", (-260.0, -240.0, -280.0)),
     # The three mounts are the SAME PART printed three times -- 398 builds one shape at
     # three stations, 6.4 cm3 each, identical bounding box. They are interchangeable, so
@@ -90,7 +103,10 @@ JOBS = [
     # flat, and not on the underside, which beds on its host. 501 says a cold module should be
     # identifiable without a BOM; that is only true if the interface itself is marked.
     ("P30_InterfaceProx", "P30", "P2", (20.0, 255.0, 137.0)),
-    ("P31_InterfaceDist", "P31", "P2", (20.0, -275.0, 129.5)),
+    # UNDERSIDE, not the side face. 413 found the X=20 face open to the world, 13 of 13
+    # rays escaping; the underside at Z 123 beds on P6_ShankSocket. A 0.8 mm recess in a
+    # bolted joint face is harmless, a readable part number on the outside is not.
+    ("P31_InterfaceDist", "P31", "P3", (0.0, -275.0, 123.0)),
 ]
 
 
@@ -183,7 +199,7 @@ for name, mark, axis, stations in JOBS[I0:I1]:
         continue
     sh = o.Shape
 
-    if axis in ("P", "P2"):
+    if axis in ("P", "P2", "P3"):
         # explicit face: point on it, outward normal -X, text along +Z, up +Y
         px, py, pz = stations
         faces = None
@@ -202,14 +218,22 @@ for name, mark, axis, stations in JOBS[I0:I1]:
                                0.0, 1.0, 0.0, py,
                                1.0, 0.0, 0.0, pz,
                                0.0, 0.0, 0.0, 1.0)
-        else:
+        elif axis == "P2":
             # P2: local x -> +Y, local y -> +Z, local z -> -X. Same face normal, but the
             # string runs along the limb because these bosses are 56 long and 7 tall.
             m = FreeCAD.Matrix(0.0, 0.0, -1.0, px + 0.3,
                                1.0, 0.0, 0.0, py,
                                0.0, 1.0, 0.0, pz,
                                0.0, 0.0, 0.0, 1.0)
-        tool = tb.transformGeometry(m).extrude(V(-(DEPTH + 0.3), 0.0, 0.0))
+        else:
+            # P3: an UNDERSIDE. local x -> +Y, local y -> +X, local z -> +Z (upward into
+            # the part from below).
+            m = FreeCAD.Matrix(0.0, 1.0, 0.0, px,
+                               1.0, 0.0, 0.0, py,
+                               0.0, 0.0, 1.0, pz - 0.3,
+                               0.0, 0.0, 0.0, 1.0)
+        d = V(-(DEPTH + 0.3), 0.0, 0.0) if axis in ("P", "P2") else V(0.0, 0.0, DEPTH + 0.3)
+        tool = tb.transformGeometry(m).extrude(d)
         v0 = sh.Volume
         cut = sh.cut(tool)
         removed = (v0 - cut.Volume) / 1000.0
@@ -220,8 +244,9 @@ for name, mark, axis, stations in JOBS[I0:I1]:
         except Exception:
             chk = "SELF-INTERSECT"
         ok = 0.35 * want < removed < 1.8 * want and chk == "clean"
-        print("  %-20s %-6s face X %.0f        %7.3f cm3 %7.3f cm3  %s%s"
-              % (name, mark, px, removed, want, chk, "" if ok else "  <-- MISSED"))
+        print("  %-20s %-6s %-11s %7.3f cm3 %7.3f cm3  %s%s"
+              % (name, mark, ("face X %.0f" % px) if axis != "P3" else ("under Z %.0f" % pz),
+                 removed, want, chk, "" if ok else "  <-- MISSED"))
         if ok and len(cut.Solids) == 1:
             o.Shape = cut
             done += 1

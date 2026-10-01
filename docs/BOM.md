@@ -125,8 +125,22 @@ gone — they became bought MGN7H blocks (S2a).
 
 Roughly 1.8–2.2 kg of filament including supports.
 
-**Every part is engraved with its own part number** ([`412_engrave.py`](../scripts/412_engrave.py)) —
-0.8 mm recessed, 8 mm Arial Bold, on a hidden inner face. Recessed rather than raised because on
+**14 of the 15 parts are engraved with their part number**
+([`412_engrave.py`](../scripts/412_engrave.py)) — 0.8 mm recessed, 8 mm Arial Bold, on a face
+that is **verified hidden**, not assumed to be. `P2a_KneeHub_Pulley29T` carries no mark:
+[`414_remark.py`](../scripts/414_remark.py) searched 16 stations × 36 bearings and found
+nowhere covered, because it is the knee hub at an open joint. It is the 143 cm³ 29T pulley and
+nothing else resembles it.
+
+*Verified* matters here. The first placement rule was "the first surface a ray from the limb
+axis meets", which is an **inner surface** — not the same property as **hidden**, and nothing
+was checking the second one. Six marks were on show.
+[`413_mark_visibility.py`](../scripts/413_mark_visibility.py) now fires a 13-ray fan out from
+each marked surface and asks whether any of them escapes with the limb in place. All 14
+marks: **0 of 13 escaping rays**.
+
+The three fairing mounts share one mark (`P23`) because they are the same part printed three
+times — `398` builds one shape at three stations, identical bounding boxes, interchangeable. Recessed rather than raised because on
 the cuffs that face is the bore, against the neoprene: a raised character is a pressure point, a
 recess under a 3 mm sleeve cannot be felt, and on a near-vertical wall a recess is just a
 shallower perimeter where raised text would be a chain of 0.8 mm islands.

@@ -123,12 +123,13 @@ for name, xc, yc, z0, hostname, grp, mdy, mdx, wing_t in JOBS:
     # rebuilding and the second pass finds its own holes already there, reports 0 mm of
     # engagement, and fails with a message blaming the geometry. Rebuild 393..399 and 409
     # first. (That is exactly how the last three debugging rounds were spent.)
+    # Not every host is rebuilt by the chain. A7 is (393 makes it fresh every run), but
+    # P6_ShankSocket comes from 150_socket.py and is never regenerated, so its mount holes are
+    # permanent. Aborting on that was wrong -- the holes being there is the desired end state.
+    # Detect it, skip the drilling, and carry on building the plate.
     probe = Part.makeCylinder(MNT_R - 0.3, 30.0, V(xc - mdx, yc + mdy[0], z0 - 14.0), V(0, 0, 1))
     k0 = host.Shape.common(probe)
-    if k0.isNull() or k0.Volume < 1.0:
-        raise AssertionError(
-            "%s looks already drilled (no material in its first mount hole). Re-run the part "
-            "chain 393..399 and 409 before this script." % host.Label)
+    already = k0.isNull() or k0.Volume < 1.0
     p, holes = plate(xc, yc, z0, name, host, grp, mdy, mdx, wing_t)
     bb = p.BoundBox
     print("%-20s X %6.1f..%5.1f  Y %7.1f..%6.1f  Z %6.1f..%6.1f  %5.1f cm3  %3.0f g"
@@ -137,6 +138,11 @@ for name, xc, yc, z0, hostname, grp, mdy, mdx, wing_t in JOBS:
     print("     face at Z %.1f, mounted on %s" % (z0 + PT, host.Label))
 
     # the host needs the matching mount holes
+    if already:
+        print("     %s is already drilled (not rebuilt by the chain) -- holes left as they are"
+              % host.Label)
+        built.append((name, p))
+        continue
     hs = host.Shape
     v0 = hs.Volume
     # PER HOLE, not in aggregate. Four holes of which two hit a lightening window still
