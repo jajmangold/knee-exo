@@ -1,6 +1,7 @@
 import math, json, FreeCAD
 from FreeCAD import Vector as V
-doc=FreeCAD.getDocument("KneeExo_v4")
+doc=next(d for d in FreeCAD.listDocuments().values()
+                if d.FileName.replace("\\", "/").endswith("KneeExo_v6.FCStd"))
 K=json.load(open(r"C:/Users/Josh/KneeExo_anim/kin_low.json"))
 S=K["samples"]
 for th in (-2.,0.,4.):

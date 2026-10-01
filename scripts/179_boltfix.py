@@ -4,7 +4,8 @@ design. P2b is retired, and their heads sat inside the belt corridor (Z 116..146
 Only the 3 fork-to-2020 bolts remain."""
 import FreeCAD, Part
 from FreeCAD import Vector as V
-doc=FreeCAD.getDocument("KneeExo_v4")
+doc=next(d for d in FreeCAD.listDocuments().values()
+                if d.FileName.replace("\\", "/").endswith("KneeExo_v6.FCStd"))
 def cz(r,z0,z1,x=0.0,y=0.0): return Part.makeCylinder(r,z1-z0,V(x,y,z0),V(0,0,1))
 bolts=None
 for y in (-90.,-110.,-125.):

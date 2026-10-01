@@ -15,7 +15,8 @@ NFRAMES = 32
 PER = 4
 
 g = globals()
-doc = FreeCAD.getDocument("KneeExo_v4")
+doc = next(d for d in FreeCAD.listDocuments().values()
+                if d.FileName.replace("\\", "/").endswith("KneeExo_v6.FCStd"))
 t = g.get("_kx_timer")
 if t is not None:
     try:

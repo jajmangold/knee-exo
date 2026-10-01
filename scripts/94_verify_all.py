@@ -2,7 +2,8 @@
 """Full pairwise interference, NO skip list. Self-contained pose driver."""
 import math, json, itertools, FreeCAD
 from FreeCAD import Vector as V
-doc=FreeCAD.getDocument("KneeExo_v4")
+doc=next(d for d in FreeCAD.listDocuments().values()
+                if d.FileName.replace("\\", "/").endswith("KneeExo_v6.FCStd"))
 K=json.load(open(r"C:/Users/Josh/KneeExo_anim/kinematics.json"))
 S=K["samples"]; XE=K["XE"]; D0=tuple(K["D0"]); ROD_Z=K["rod_z"]
 def sm(t): return min(S,key=lambda q:abs(q["theta"]-t))

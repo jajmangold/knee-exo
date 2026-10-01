@@ -3,7 +3,8 @@
 blind hole so nothing protrudes into the rod's swept path. Also seat the clevis."""
 import FreeCAD, Part
 from FreeCAD import Vector as V
-doc=FreeCAD.getDocument("KneeExo_v4")
+doc=next(d for d in FreeCAD.listDocuments().values()
+                if d.FileName.replace("\\", "/").endswith("KneeExo_v6.FCStd"))
 def cx(r,x0,x1,y=0.0,z=0.0): return Part.makeCylinder(r,x1-x0,V(x0,y,z),V(1,0,0))
 SLOT_Z=131.0; SHARED=(-55.0,-85.0); TNUT=(-115.0,)
 A4=doc.getObject("A4_Shank2020_VSlot").Shape

@@ -23,7 +23,8 @@ import FreeCAD
 import Part
 from FreeCAD import Vector as V
 
-doc = FreeCAD.getDocument("KneeExo_v4")
+doc = next(d for d in FreeCAD.listDocuments().values()
+                if d.FileName.replace("\\", "/").endswith("KneeExo_v6.FCStd"))
 
 # ---------------------------------------------------------------- constants
 TEETH, PITCH = 29, 8.0

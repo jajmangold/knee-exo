@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import FreeCAD
-doc=FreeCAD.getDocument("KneeExo_v4")
+doc=next(d for d in FreeCAD.listDocuments().values()
+                if d.FileName.replace("\\", "/").endswith("KneeExo_v6.FCStd"))
 O=lambda n: doc.getObject(n)
 p8=O("P8_RodEndHousing_PETG"); rod=O("P4_Rod_8mm")
 print("P8 exists:", p8 is not None, " visible:", p8.ViewObject.Visibility if p8 else "-")

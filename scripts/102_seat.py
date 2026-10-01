@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 import FreeCAD, Part
 from FreeCAD import Vector as V
-doc=FreeCAD.getDocument("KneeExo_v4")
+doc=next(d for d in FreeCAD.listDocuments().values()
+                if d.FileName.replace("\\", "/").endswith("KneeExo_v6.FCStd"))
 cb=doc.getObject("P2b_RodClevisBlock").Shape
 A4=doc.getObject("A4_Shank2020_VSlot").Shape
 bb=cb.BoundBox

@@ -5,7 +5,8 @@ sweeps an arc. Built as fresh analytic cylinders on rotated axes (no transformGe
 which would turn the cylinder into a spline surface)."""
 import math, json, FreeCAD, Part
 from FreeCAD import Vector as V
-doc=FreeCAD.getDocument("KneeExo_v4")
+doc=next(d for d in FreeCAD.listDocuments().values()
+                if d.FileName.replace("\\", "/").endswith("KneeExo_v6.FCStd"))
 K=json.load(open(r"C:/Users/Josh/KneeExo_anim/kinematics.json"))
 S=K["samples"]
 p2b=doc.getObject("P2b_RodClevisBlock")

@@ -27,7 +27,8 @@ from FreeCAD import Vector as V
 I0 = __I0__
 I1 = __I1__
 ACC = r"C:/Users/Josh/KneeExo_anim/clash1.json"
-doc = FreeCAD.getDocument("KneeExo_v4")
+doc = next(d for d in FreeCAD.listDocuments().values()
+                if d.FileName.replace("\\", "/").endswith("KneeExo_v6.FCStd"))
 
 TEETH, PITCH = 29, 8.0
 R = TEETH * PITCH / (2 * math.pi)

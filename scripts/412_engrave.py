@@ -47,7 +47,8 @@ from FreeCAD import Vector as V
 # overrunning it does not fail cleanly -- it keeps working and leaves a half-applied document.
 DOCFILE = r"C:/Users/Josh/KneeExo_v6.FCStd"
 try:
-    doc = FreeCAD.getDocument("KneeExo_v4")
+    doc = next(d for d in FreeCAD.listDocuments().values()
+                if d.FileName.replace("\\", "/").endswith("KneeExo_v6.FCStd"))
 except Exception:
     doc = FreeCAD.openDocument(DOCFILE)
 
@@ -80,7 +81,7 @@ JOBS = [
     # are visible from outside however "inner" the surface is.
     ("P24_FairingShank",  "P24", "Y", (-175.0, -180.0, -170.0)),
     ("P20_KneeShroud",    "P20", "Y", (0.0, 15.0, -15.0)),
-    ("P1_KneeYoke",       "P1",  "Y", (60.0, 90.0, 100.0)),
+    ("P1_KneeYoke",       "P1",  "Y", (55.0, 60.0, 90.0)),
     # P2a_KneeHingePlate is deliberately absent. 414 searched 16 stations x 36 bearings
     # and found nowhere covered -- it is the knee hub at an open joint, reachable from
     # every direction. It is the 143 cm3 29T pulley; an unmarked part is the better trade.
@@ -151,6 +152,46 @@ def first_hit(sh, origin, y, deg, rmax=260.0, want_wall=0.0):
     return rs[0]
 
 
+def _fan(n, k=9):
+    n = V(n.x, n.y, n.z); n.normalize()
+    a = V(0., 1., 0.) if abs(n.y) < 0.9 else V(1., 0., 0.)
+    u = n.cross(a); u.normalize()
+    w = n.cross(u)
+    out = [n]
+    for ang in (35.0, 70.0):
+        for j in range(4):
+            ph = 2.0 * math.pi * j / 4.0
+            c, sn = math.cos(math.radians(ang)), math.sin(math.radians(ang))
+            out.append(V(n.x * c + (u.x * math.cos(ph) + w.x * math.sin(ph)) * sn,
+                         n.y * c + (u.y * math.cos(ph) + w.y * math.sin(ph)) * sn,
+                         n.z * c + (u.z * math.cos(ph) + w.z * math.sin(ph)) * sn))
+    return out[:k]
+
+
+def _occluders():
+    return [o for o in doc.Objects
+            if o.TypeId == "Part::Feature" and getattr(o, "Shape", None) is not None
+            and not o.Shape.isNull() and o.Shape.Solids]
+
+
+def is_hidden(pt, look, parts):
+    """no line of sight from outside, with the reference limbs counted as occluders"""
+    for d in _fan(look):
+        far = V(pt.x + d.x * 400., pt.y + d.y * 400., pt.z + d.z * 400.)
+        seg = Part.makeLine(V(pt.x + d.x * 0.25, pt.y + d.y * 0.25, pt.z + d.z * 0.25), far)
+        clear = True
+        for o in parts:
+            if not seg.BoundBox.intersect(o.Shape.BoundBox):
+                continue
+            k = o.Shape.common(seg)
+            if not k.isNull() and k.Edges:
+                clear = False
+                break
+        if clear:
+            return False
+    return True
+
+
 def find_spot(sh, org, stations, half_len, half_h, hoop=False):
     """a (station, bearing) whose surface is smooth across the whole text footprint"""
     best = None
@@ -176,6 +217,13 @@ def find_spot(sh, org, stations, half_len, half_h, hoop=False):
             spread = max(probes) - min(probes)
             if spread > 1.2:
                 continue
+            # VISIBILITY GATE. A smooth inner surface is not the same as a hidden one, and
+            # placing marks without this check put six of them on show -- the user spotted two
+            # by eye. The mark looks back along -rad, so that is the direction to test.
+            t = math.radians(deg)
+            pt = V(org.x + r0 * math.cos(t), stn, org.z + r0 * math.sin(t))
+            if not is_hidden(pt, V(-math.cos(t), 0.0, -math.sin(t)), OCC):
+                continue
             if best is None or spread < best[0]:
                 best = (spread, stn, deg, r0)
             if spread < 0.25:          # flat enough; stop looking
@@ -185,6 +233,7 @@ def find_spot(sh, org, stations, half_len, half_h, hoop=False):
     return best
 
 
+OCC = _occluders()
 print("=" * 86)
 print("ENGRAVING -- %s, %.0f mm tall, %.1f mm deep" % (os.path.basename(FONT), H, DEPTH))
 print("=" * 86)

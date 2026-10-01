@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import os, Mesh, MeshPart, FreeCAD
-doc=FreeCAD.getDocument("KneeExo_v4")
+doc=next(d for d in FreeCAD.listDocuments().values()
+                if d.FileName.replace("\\", "/").endswith("KneeExo_v6.FCStd"))
 OUT="C:/Users/Josh/KneeExo_anim"
 CH=["A4_Shank2020_VSlot","P2a_KneeHingePlate","P2b_RodClevisBlock","P6_ShankSocket",
     "P3_Carriage","A2_BallScrew_SFU1620","A3_Motor_6374"]

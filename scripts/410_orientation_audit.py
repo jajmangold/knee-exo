@@ -25,7 +25,8 @@ Send with:  python tools/fcsend.py scripts/410_orientation_audit.py
 """
 import FreeCAD
 
-doc = FreeCAD.getDocument("KneeExo_v4")
+doc = next(d for d in FreeCAD.listDocuments().values()
+                if d.FileName.replace("\\", "/").endswith("KneeExo_v6.FCStd"))
 
 print("=" * 78)
 print("ORIENTATION AUDIT -- every solid in the document")

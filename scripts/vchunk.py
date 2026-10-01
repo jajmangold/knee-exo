@@ -5,7 +5,8 @@ import math, json, itertools, os, FreeCAD
 from FreeCAD import Vector as V
 I0=__I0__; I1=__I1__
 ACC=r"C:/Users/Josh/KneeExo_anim/clash.json"
-doc=FreeCAD.getDocument("KneeExo_v4")
+doc=next(d for d in FreeCAD.listDocuments().values()
+                if d.FileName.replace("\\", "/").endswith("KneeExo_v6.FCStd"))
 K=json.load(open(r"C:/Users/Josh/KneeExo_anim/kinematics.json"))
 S=K["samples"]; XE=K["XE"]; D0=tuple(K["D0"])
 def sm(t): return min(S,key=lambda q:abs(q["theta"]-t))

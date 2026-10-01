@@ -4,7 +4,8 @@ almost no web. Rebuild as a proper 20x60 V-slot: 8 mm bores centred in each 20 m
 slots on all four faces."""
 import FreeCAD, Part, os
 from FreeCAD import Vector as V
-doc = FreeCAD.getDocument("KneeExo_v4")
+doc = next(d for d in FreeCAD.listDocuments().values()
+                if d.FileName.replace("\\", "/").endswith("KneeExo_v6.FCStd"))
 def bx(x0,x1,y0,y1,z0,z1): return Part.makeBox(x1-x0,y1-y0,z1-z0,V(x0,y0,z0))
 def cy(r,y0,y1,x=0.0,z=0.0): return Part.makeCylinder(r,y1-y0,V(x,y0,z),V(0,1,0))
 A1=doc.getObject("A1_Extrusion_20x60_VSlot"); bb=A1.Shape.BoundBox

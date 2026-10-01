@@ -4,7 +4,8 @@ P4 had both housings integral AND P8 duplicated one of them statically.
 Split properly so all three share the rod's transform."""
 import math, json, FreeCAD, Part
 from FreeCAD import Vector as V
-doc=FreeCAD.getDocument("KneeExo_v4")
+doc=next(d for d in FreeCAD.listDocuments().values()
+                if d.FileName.replace("\\", "/").endswith("KneeExo_v6.FCStd"))
 def bx(x0,x1,y0,y1,z0,z1): return Part.makeBox(x1-x0,y1-y0,z1-z0,V(x0,y0,z0))
 def cz(r,z0,z1,x=0.0,y=0.0): return Part.makeCylinder(r,z1-z0,V(x,y,z0),V(0,0,1))
 K=json.load(open(r"C:/Users/Josh/KneeExo_anim/kinematics.json"))

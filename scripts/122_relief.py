@@ -3,7 +3,8 @@
 transformed into the target part's local frame instead, so nothing gets baked in."""
 import math, json, FreeCAD, Part
 from FreeCAD import Vector as V
-doc=FreeCAD.getDocument("KneeExo_v4")
+doc=next(d for d in FreeCAD.listDocuments().values()
+                if d.FileName.replace("\\", "/").endswith("KneeExo_v6.FCStd"))
 for o in doc.Objects:
     if o.TypeId=="Part::Feature": o.Placement=FreeCAD.Placement()
 doc.recompute()

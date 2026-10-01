@@ -3,7 +3,8 @@ import math, json, itertools, os, FreeCAD, Part
 from FreeCAD import Vector as V
 I0=__I0__; I1=__I1__
 ACC=r"C:/Users/Josh/KneeExo_anim/clash.json"
-doc=FreeCAD.getDocument("KneeExo_v4")
+doc=next(d for d in FreeCAD.listDocuments().values()
+                if d.FileName.replace("\\", "/").endswith("KneeExo_v6.FCStd"))
 K=json.load(open(r"C:/Users/Josh/KneeExo_anim/kin_diff.json"))
 S=K["samples"]; C0=K["C0"]; C1=K["C1"]; R=K["R"]; BZ=tuple(K["belt_z"])
 BIN,BOUT=R-1.372+0.05,R+4.2

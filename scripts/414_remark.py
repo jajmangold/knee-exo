@@ -23,26 +23,21 @@ import FreeCAD
 import Part
 from FreeCAD import Vector as V
 
-doc = FreeCAD.getDocument("KneeExo_v4")
+doc = next(d for d in FreeCAD.listDocuments().values()
+                if d.FileName.replace("\\", "/").endswith("KneeExo_v6.FCStd"))
 FONT = r"C:/Windows/Fonts/arialbd.ttf"
 DEPTH = 0.8
 
 # (part, mark, the placement 412 used, the stations to try instead)
 REDO = [
-    ("P24_FairingShank", "P24", (-200.0, 90.0, 8.0),
-     tuple(float(v) for v in range(-205, -70, 5))),
+    ("P1_KneeYoke", "P1", (100.0, 90.0, 8.0),
+     tuple(float(v) for v in range(40, 125, 5))),
 ]
 
 # P31's mark is PLANAR and its X = +20 face is open to the world -- 13 of 13 rays escape.
 # Its only covered face is the underside at Z 123, which beds on P6_ShankSocket. A 0.8 mm
 # recess in a bolted joint face is harmless; a visible part number is not what was asked for.
-PLANAR_REDO = [("P31_InterfaceDist", "P31",
-                V(20.3, -275.0, 129.5), V(-1.0, 0.0, 0.0),      # old: face X=20, cut -X
-                V(0.0, -275.0, 122.7), V(0.0, 0.0, 1.0))]       # new: underside, cut +Z
-
-PARTS = [o for o in doc.Objects
-         if o.TypeId == "Part::Feature" and getattr(o, "Shape", None) is not None
-         and not o.Shape.isNull() and o.Shape.Solids]
+PLANAR_REDO = []
 
 
 def text_faces(s, h):

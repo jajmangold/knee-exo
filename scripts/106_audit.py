@@ -2,7 +2,8 @@
 """Every joint that is SUPPOSED to be in contact - is it?"""
 import FreeCAD, Part
 from FreeCAD import Vector as V
-doc=FreeCAD.getDocument("KneeExo_v4")
+doc=next(d for d in FreeCAD.listDocuments().values()
+                if d.FileName.replace("\\", "/").endswith("KneeExo_v6.FCStd"))
 O=lambda n: doc.getObject(n)
 MATES=[("P2a_KneeHingePlate","A4_Shank2020_VSlot","plate laps the 2020 anterior face"),
        ("P2b_RodClevisBlock","A4_Shank2020_VSlot","clevis on the 2020 posterior face"),

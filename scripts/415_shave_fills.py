@@ -25,7 +25,8 @@ import FreeCAD
 import Part
 from FreeCAD import Vector as V
 
-doc = FreeCAD.getDocument("KneeExo_v4")
+doc = next(d for d in FreeCAD.listDocuments().values()
+                if d.FileName.replace("\\", "/").endswith("KneeExo_v6.FCStd"))
 
 # (part, how to describe the surface the fill overshot)
 #   ("cyl", r, y0, y1)   material lies OUTSIDE radius r about the limb axis over that span

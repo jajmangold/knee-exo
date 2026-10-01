@@ -4,7 +4,8 @@ SFU1620 ball nut modelled for the first time. Screw Z stays 117 so the motor sta
 coaxial; only X changes, which is all that was needed to free the rod plane."""
 import FreeCAD, Part
 from FreeCAD import Vector as V
-doc=FreeCAD.getDocument("KneeExo_v4")
+doc=next(d for d in FreeCAD.listDocuments().values()
+                if d.FileName.replace("\\", "/").endswith("KneeExo_v6.FCStd"))
 def bx(x0,x1,y0,y1,z0,z1): return Part.makeBox(x1-x0,y1-y0,z1-z0,V(x0,y0,z0))
 def cy(r,y0,y1,x=0.0,z=0.0): return Part.makeCylinder(r,y1-y0,V(x,y0,z),V(0,1,0))
 RAIL_X=(10.0,70.0); RAIL_Y=(46.0,284.7); RAIL_Z=(88.0,108.0)

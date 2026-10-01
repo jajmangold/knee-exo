@@ -38,7 +38,8 @@ import FreeCAD
 import Part
 from FreeCAD import Vector as V
 
-doc = FreeCAD.getDocument("KneeExo_v4")
+doc = next(d for d in FreeCAD.listDocuments().values()
+                if d.FileName.replace("\\", "/").endswith("KneeExo_v6.FCStd"))
 
 PW, PL, PT = 40.0, 56.0, 10.0      # plate: X width, Y length, Z thickness
 BOLT_R, DOWEL_R, MNT_R = 2.6, 2.5, 2.1

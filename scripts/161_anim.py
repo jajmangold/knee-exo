@@ -5,7 +5,8 @@ import math, json, FreeCAD, FreeCADGui
 from FreeCAD import Vector as V
 from PySide import QtCore
 g=globals()
-doc=FreeCAD.getDocument("KneeExo_v4")
+doc=next(d for d in FreeCAD.listDocuments().values()
+                if d.FileName.replace("\\", "/").endswith("KneeExo_v6.FCStd"))
 K=json.load(open(r"C:/Users/Josh/KneeExo_anim/kinematics.json"))
 S=K["samples"]; XE=K["XE"]; D0=tuple(K["D0"])
 TMIN=S[0]["theta"]; TMAX=S[-1]["theta"]

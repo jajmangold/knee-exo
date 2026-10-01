@@ -1,5 +1,6 @@
 import FreeCAD
-doc=FreeCAD.getDocument("KneeExo_v4")
+doc=next(d for d in FreeCAD.listDocuments().values()
+                if d.FileName.replace("\\", "/").endswith("KneeExo_v6.FCStd"))
 for o in doc.Objects:
     if not hasattr(o,"Shape") or o.Shape.isNull(): print("%-26s NULL"%o.Name); continue
     b=o.Shape.BoundBox; s=o.Shape

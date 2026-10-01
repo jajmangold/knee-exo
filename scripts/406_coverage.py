@@ -28,7 +28,8 @@ import FreeCAD
 import Part
 from FreeCAD import Vector as V
 
-doc = FreeCAD.getDocument("KneeExo_v4")
+doc = next(d for d in FreeCAD.listDocuments().values()
+                if d.FileName.replace("\\", "/").endswith("KneeExo_v6.FCStd"))
 R_CAP = 29 * 8.0 / (2 * math.pi)
 A0 = 161.0
 LEG_R = 84.9

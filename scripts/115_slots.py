@@ -4,7 +4,8 @@ so its socket cannot enter. Open both slots to 20 mm; ears go 8 -> 6 mm.
 6 mm ear on an 8 mm pin = 984/(8*6) = 20.5 MPa bearing - fine in 6061."""
 import math, json, FreeCAD, Part
 from FreeCAD import Vector as V
-doc=FreeCAD.getDocument("KneeExo_v4")
+doc=next(d for d in FreeCAD.listDocuments().values()
+                if d.FileName.replace("\\", "/").endswith("KneeExo_v6.FCStd"))
 def cz(r,z0,z1,x=0.0,y=0.0): return Part.makeCylinder(r,z1-z0,V(x,y,z0),V(0,0,1))
 def sector_at(c,r_out,a0,a1,z0,z1,r_in=0.0):
     q=Part.makeCylinder(r_out,z1-z0,V(0,0,z0),V(0,0,1),(a1-a0)%360 or 360)

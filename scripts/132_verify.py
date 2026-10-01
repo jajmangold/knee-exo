@@ -5,7 +5,8 @@ the SAMPLE's own theta, not the requested t -- samples stop at 104 deg, so askin
 misalignment, which is what the 0.04 cm3 'clash' was)."""
 import math, json, itertools, FreeCAD
 from FreeCAD import Vector as V
-doc=FreeCAD.getDocument("KneeExo_v4")
+doc=next(d for d in FreeCAD.listDocuments().values()
+                if d.FileName.replace("\\", "/").endswith("KneeExo_v6.FCStd"))
 K=json.load(open(r"C:/Users/Josh/KneeExo_anim/kinematics.json"))
 S=K["samples"]; XE=K["XE"]; D0=tuple(K["D0"])
 def sm(t): return min(S,key=lambda q:abs(q["theta"]-t))

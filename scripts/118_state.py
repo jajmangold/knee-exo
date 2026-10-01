@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import FreeCAD
-doc=FreeCAD.getDocument("KneeExo_v4")
+doc=next(d for d in FreeCAD.listDocuments().values()
+                if d.FileName.replace("\\", "/").endswith("KneeExo_v6.FCStd"))
 for n in ("P2b_RodClevisBlock","P3_Carriage","P4_Rod_8mm","A2_BallScrew_SFU1620"):
     o=doc.getObject(n)
     if not o: print("%-28s MISSING"%n); continue

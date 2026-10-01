@@ -4,7 +4,8 @@ import math, json, itertools, os, FreeCAD
 from FreeCAD import Vector as V
 I0=__I0__; I1=__I1__
 ACC=r"C:/Users/Josh/KneeExo_anim/clash.json"
-doc=FreeCAD.getDocument("KneeExo_v4")
+doc=next(d for d in FreeCAD.listDocuments().values()
+                if d.FileName.replace("\\", "/").endswith("KneeExo_v6.FCStd"))
 K=json.load(open(r"C:/Users/Josh/KneeExo_anim/kin_belt.json"))
 S=K["samples"]; C0=K["C0"]
 SHANK=["A4_Shank2020_VSlot","P2a_KneeHingePlate","P6_ShankSocket","P7_ShankCuff",

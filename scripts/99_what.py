@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 import FreeCAD, Part
 from FreeCAD import Vector as V
-doc=FreeCAD.getDocument("KneeExo_v4")
+doc=next(d for d in FreeCAD.listDocuments().values()
+                if d.FileName.replace("\\", "/").endswith("KneeExo_v6.FCStd"))
 P=doc.getObject("P2a_KneeHingePlate"); s=P.Shape; bb=s.BoundBox
 print("P2a_KneeHingePlate")
 print("  bbox X[%.0f,%.0f] Y[%.0f,%.0f] Z[%.0f,%.0f]  -> %.0f x %.0f x %.0f mm"

@@ -8,7 +8,8 @@ import math, json, FreeCAD, FreeCADGui, Part
 from FreeCAD import Vector as V
 from PySide import QtCore
 g=globals()
-doc=FreeCAD.getDocument("KneeExo_v4")
+doc=next(d for d in FreeCAD.listDocuments().values()
+                if d.FileName.replace("\\", "/").endswith("KneeExo_v6.FCStd"))
 K=json.load(open(r"C:/Users/Josh/KneeExo_anim/kin_belt.json"))
 S=K["samples"]; C0=K["C0"]; R=K["R"]
 TMIN=S[0]["theta"]; TMAX=S[-1]["theta"]

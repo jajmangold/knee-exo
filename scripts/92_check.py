@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import FreeCAD
-doc=FreeCAD.getDocument("KneeExo_v4")
+doc=next(d for d in FreeCAD.listDocuments().values()
+                if d.FileName.replace("\\", "/").endswith("KneeExo_v6.FCStd"))
 A=doc.getObject("P2a_KneeHingePlate").Shape
 B=doc.getObject("A4_Shank2020_VSlot").Shape
 for n,s in (("P2a_KneeHingePlate",A),("A4_Shank2020_VSlot",B)):

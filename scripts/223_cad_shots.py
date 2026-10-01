@@ -24,7 +24,8 @@ import os, math, json, FreeCAD, Part, FreeCADGui as Gui
 from FreeCAD import Vector as V, Rotation as Rot
 
 OUT = r"C:/Users/Josh/KneeExo_render/cad"
-doc = FreeCAD.getDocument("KneeExo_v4")
+doc = next(d for d in FreeCAD.listDocuments().values()
+                if d.FileName.replace("\\", "/").endswith("KneeExo_v6.FCStd"))
 
 t = globals().get("_kx_timer")
 if t is not None:

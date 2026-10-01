@@ -27,7 +27,8 @@ import FreeCAD
 import Part
 from FreeCAD import Vector as V
 
-doc = FreeCAD.getDocument("KneeExo_v4")
+doc = next(d for d in FreeCAD.listDocuments().values()
+                if d.FileName.replace("\\", "/").endswith("KneeExo_v6.FCStd"))
 
 # (part, mark point, outward normal) -- taken from 412's own report
 MARKS = [
@@ -42,11 +43,11 @@ MARKS = [
     ("P5_ThighCuff",       V(13.2, 135.0, 74.5),    V(0.17, 0.0, 0.98), "r"),
     ("P7_ShankCuff",       V(29.4, -320.0, -35.0),  V(0.64, 0.0, -0.77), "r"),
     ("P21_ShellAnterior",  V(0.0, 70.0, 134.9),     V(0.0, 0.0, 1.0), "r"),
-    ("P22_DriveCap",       V(0.0, 250.0, 135.5),    V(0.0, 0.0, 1.0), "r"),
+    ("P22_DriveCap",       V(0.0, 205.0, 135.6),    V(0.0, 0.0, 1.0), "r"),
     ("P25_MotorNacelle",   V(-72.0, 250.0, 62.0),   V(1.0, 0.0, 0.0), "r"),
-    ("P24_FairingShank",   V(18.2, -175.0, 103.3),  V(0.17, 0.0, 0.98), "r"),
+    ("P24_FairingShank",   V(0.0, -170.0, 122.0),   V(0.0, 0.0, 1.0), "r"),
     ("P20_KneeShroud",     V(47.3, 15.0, 130.1),    V(0.34, 0.0, 0.94), "r"),
-    ("P1_KneeYoke",        V(0.0, 60.0, 77.6),      V(0.0, 0.0, 1.0), "r"),
+    ("P1_KneeYoke",        V(0.0, 55.0, 78.4),      V(0.0, 0.0, 1.0), "r"),
     ("P6_ShankSocket",     V(0.0, -260.0, 68.0),    V(0.0, 0.0, 1.0), "r"),
     ("P23a_FairingMount",  V(47.0, 88.0, 109.0),    V(1.0, 0.0, 0.0), "p"),
     ("P23b_FairingMount",  V(47.0, 124.0, 109.0),   V(1.0, 0.0, 0.0), "p"),

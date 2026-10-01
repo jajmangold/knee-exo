@@ -4,7 +4,8 @@ Each eye still turns on a Z pin; only the barrel and rod tilt 6.72 deg out of th
 plane, which is a CONSTANT misalignment well inside the rod end's +/-13 deg."""
 import math, json, FreeCAD, Part
 from FreeCAD import Vector as V
-doc=FreeCAD.getDocument("KneeExo_v4")
+doc=next(d for d in FreeCAD.listDocuments().values()
+                if d.FileName.replace("\\", "/").endswith("KneeExo_v6.FCStd"))
 K=json.load(open(r"C:/Users/Josh/KneeExo_anim/kinematics.json"))
 S=K["samples"]; XE=K["XE"]; D0=tuple(K["D0"])
 def sm(t): return min(S,key=lambda q:abs(q["theta"]-t))

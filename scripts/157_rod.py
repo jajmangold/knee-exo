@@ -6,7 +6,8 @@ SI8 / SIQK8 nominal: bore 8, eye width B=12, eye OD 24, pivot centre to rear fac
 M8 internal thread, 16 mm engagement."""
 import math, json, FreeCAD, Part
 from FreeCAD import Vector as V
-doc=FreeCAD.getDocument("KneeExo_v4")
+doc=next(d for d in FreeCAD.listDocuments().values()
+                if d.FileName.replace("\\", "/").endswith("KneeExo_v6.FCStd"))
 K=json.load(open(r"C:/Users/Josh/KneeExo_anim/kinematics.json"))
 S=K["samples"]; XE=K["XE"]; D0=tuple(K["D0"])
 def sm(t): return min(S,key=lambda q:abs(q["theta"]-t))

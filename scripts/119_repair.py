@@ -8,7 +8,8 @@ t=g.get("_kx_timer")
 if t is not None:
     try: t.stop(); print("animation timer stopped")
     except Exception as e: print("timer stop:",e)
-doc=FreeCAD.getDocument("KneeExo_v4")
+doc=next(d for d in FreeCAD.listDocuments().values()
+                if d.FileName.replace("\\", "/").endswith("KneeExo_v6.FCStd"))
 for o in doc.Objects:
     if o.TypeId=="Part::Feature": o.Placement=FreeCAD.Placement()
 doc.recompute()
