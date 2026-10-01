@@ -24,8 +24,23 @@ import os, math, json, FreeCAD, Part, FreeCADGui as Gui
 from FreeCAD import Vector as V, Rotation as Rot
 
 OUT = r"C:/Users/Josh/KneeExo_render/cad"
-doc = next(d for d in FreeCAD.listDocuments().values()
-                if d.FileName.replace("\\", "/").endswith("KneeExo_v6.FCStd"))
+def _kx_doc():
+    """The model, in the GUI instance or headless under freecadcmd.
+
+    The bare next(...) this replaces raises StopIteration when no document is open, which
+    surfaces from freecadcmd as the unhelpful "<unknown exception data>" -- and is why these
+    older build scripts could not be re-run without the GUI at all.
+    """
+    import os as _os
+    want = _os.environ.get("KX_DOC", r"C:/Users/Josh/KneeExo_v6.FCStd").replace(chr(92), "/")
+    base = want.rsplit("/", 1)[-1]
+    for d in FreeCAD.listDocuments().values():
+        if d.FileName.replace(chr(92), "/").endswith(base):
+            return d
+    return FreeCAD.openDocument(want)
+
+
+doc = _kx_doc()
 
 t = globals().get("_kx_timer")
 if t is not None:
@@ -78,13 +93,17 @@ COL["A7_DriveBox"] = (0.25, 0.25, 0.27)
 for n, c in COL.items():
     o = O(n)
     if o:
-        o.ViewObject.ShapeColor = c
-        o.ViewObject.Transparency = 0
+        if getattr(o, "ViewObject", None) is not None:  # absent headless
+            o.ViewObject.ShapeColor = c
+        if getattr(o, "ViewObject", None) is not None:  # absent headless
+            o.ViewObject.Transparency = 0
 for n in REFS:
     o = O(n)
     if o:
-        o.ViewObject.ShapeColor = (0.80, 0.66, 0.58)
-        o.ViewObject.Transparency = 75
+        if getattr(o, "ViewObject", None) is not None:  # absent headless
+            o.ViewObject.ShapeColor = (0.80, 0.66, 0.58)
+        if getattr(o, "ViewObject", None) is not None:  # absent headless
+            o.ViewObject.Transparency = 75
 
 # The knee axis is Z, so Z is medial-lateral and the limb swings in the XY plane.
 # Looking along -Z therefore views the SAGITTAL plane; looking along -X views the
@@ -115,7 +134,8 @@ def show(names, on):
     for n in names:
         o = O(n)
         if o:
-            o.ViewObject.Visibility = bool(on)
+            if getattr(o, "ViewObject", None) is not None:  # absent headless
+                o.ViewObject.Visibility = bool(on)
 
 
 def prep(theta, fair=True, refs=True, cam="tq", focus=None, ortho=False):

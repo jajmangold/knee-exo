@@ -2,8 +2,22 @@ import math, json, FreeCAD, FreeCADGui, Part
 from FreeCAD import Vector as V
 from PySide import QtCore
 g=globals()
-doc=next(d for d in FreeCAD.listDocuments().values()
-                if d.FileName.replace("\\", "/").endswith("KneeExo_v6.FCStd"))
+def _kx_doc():
+    """The model, in the GUI instance or headless under freecadcmd.
+
+    The bare next(...) this replaces raises StopIteration under freecadcmd, where no document is
+    open yet -- which is why these older build scripts could not be re-run without the GUI.
+    """
+    import os as _os
+    want = _os.environ.get("KX_DOC", r"C:/Users/Josh/KneeExo_v6.FCStd").replace("\\", "/")
+    base = want.rsplit("/", 1)[-1]
+    for d in FreeCAD.listDocuments().values():
+        if d.FileName.replace("\\", "/").endswith(base):
+            return d
+    return FreeCAD.openDocument(want)
+
+
+doc = _kx_doc()
 K=json.load(open(r"C:/Users/Josh/KneeExo_anim/kin_low.json"))
 S=K["samples"]; C0=K["C0"]; C1=K["C1"]; R=K["R"]; BZ=tuple(K["belt_z"])
 BIN,BOUT=K["belt_x"][0]+0.05,K["belt_x"][1]

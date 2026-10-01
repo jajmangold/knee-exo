@@ -13,8 +13,22 @@ nothing else uses: the carriages take the X=+/-20 outboard slots and the X=+/-30
 slots, so a spine at X=0 is never swept."""
 import math, FreeCAD, Part
 from FreeCAD import Vector as V
-doc=next(d for d in FreeCAD.listDocuments().values()
-                if d.FileName.replace("\\", "/").endswith("KneeExo_v6.FCStd"))
+def _kx_doc():
+    """The model, in the GUI instance or headless under freecadcmd.
+
+    The bare next(...) this replaces raises StopIteration under freecadcmd, where no document is
+    open yet -- which is why these older build scripts could not be re-run without the GUI.
+    """
+    import os as _os
+    want = _os.environ.get("KX_DOC", r"C:/Users/Josh/KneeExo_v6.FCStd").replace("\\", "/")
+    base = want.rsplit("/", 1)[-1]
+    for d in FreeCAD.listDocuments().values():
+        if d.FileName.replace("\\", "/").endswith(base):
+            return d
+    return FreeCAD.openDocument(want)
+
+
+doc = _kx_doc()
 def bx(x0,x1,y0,y1,z0,z1): return Part.makeBox(x1-x0,y1-y0,z1-z0,V(x0,y0,z0))
 def cz(r,z0,z1,x=0.0,y=0.0): return Part.makeCylinder(r,z1-z0,V(x,y,z0),V(0,0,1))
 N_EXP,N_PTS=3.4,64

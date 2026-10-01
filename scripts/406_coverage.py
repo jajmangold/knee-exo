@@ -21,15 +21,33 @@ bigger section's floor fell inside the limb cut and was deleted. Both failures a
 same kind: a surface that is not there. An interference sweep cannot see those, because a
 missing wall is an absence, not an overlap.
 
-Send with:  python tools/fcsend.py scripts/406_coverage.py
+Run with:  freecadcmd.exe scripts/406_coverage.py   (all three poses, no chunking)
 """
 import math
+import os
+
 import FreeCAD
 import Part
 from FreeCAD import Vector as V
 
-doc = next(d for d in FreeCAD.listDocuments().values()
-                if d.FileName.replace("\\", "/").endswith("KneeExo_v6.FCStd"))
+def _kx_doc():
+    """The model, whether we are in the GUI instance or under freecadcmd.
+
+    KX_DOC overrides the file, which is how the mirrored right leg is checked with the same
+    scripts. Headless matters: 397 and 409 both exceed the RPC server's 90 s dispatch limit,
+    and overrunning it does not fail cleanly -- it keeps working and leaves a half-built
+    document the next script reads as finished.
+    """
+    import os as _os
+    want = _os.environ.get("KX_DOC", r"C:/Users/Josh/KneeExo_v6.FCStd").replace("\\", "/")
+    base = want.rsplit("/", 1)[-1]
+    for d in FreeCAD.listDocuments().values():
+        if d.FileName.replace("\\", "/").endswith(base):
+            return d
+    return FreeCAD.openDocument(want)
+
+
+doc = _kx_doc()
 R_CAP = 29 * 8.0 / (2 * math.pi)
 A0 = 161.0
 LEG_R = 84.9
@@ -104,35 +122,44 @@ def first_r(parts, y, ang):
     return best, who
 
 
-# One pose per call: fusing 12 cladding solids and firing a grid of rays through them
-# blows past the 90 s GUI dispatch limit if all three are done together.
-THETA = __THETA__
+# One pose per call was a GUI requirement, not a property of the test: fusing 12 cladding
+# solids and firing a grid of rays through them blows past the RPC server's 90 s dispatch
+# limit if all three poses are done together, and fcsend.py substituted the angle into
+# __THETA__ for each call. Headless has no dispatch limit, so run all three in one process --
+# which also means the summary line below compares poses instead of three separate outputs.
+# KX_THETA overrides the list.
+POSES = [float(t) for t in os.environ.get("KX_THETA", "0,30,104").split(",")]
 ANGLES = list(range(-70, 75, 14))
 STATIONS = list(range(40, 332, 18))
 print("=" * 78)
-print("LIMB'S-EYE COVERAGE -- rays out from r %.1f, %d angles x %d stations x 3 poses"
-      % (LEG_R + 0.5, len(ANGLES), len(STATIONS)))
+print("LIMB'S-EYE COVERAGE -- rays out from r %.1f, %d angles x %d stations x %d poses"
+      % (LEG_R + 0.5, len(ANGLES), len(STATIONS), len(POSES)))
 print("   angle 0 = straight out laterally (+Z); negative = anterior (-X)")
 print()
-rows = []
-pose(THETA)
-doc.recompute()
-cl, mv = shapes(BLOCK), shapes(MOVING)
-exposed = 0
-for y in STATIONS:
-    for a in ANGLES:
-        rm, mwho = first_r(mv, float(y), float(a))
-        if rm is None:
-            continue
-        rc, cwho = first_r(cl, float(y), float(a))
-        if rc is None or rc > rm + 0.5:
-            exposed += 1
-            rows.append((y, a, rm, rc, mwho))
-print("   theta %+6.1f : %3d of %d rays reach a moving part first"
-      % (THETA, exposed, len(ANGLES) * len(STATIONS)))
-for y, a, rm, rc, mwho in rows:
-    print("     OPEN  Y %3d  angle %+4d deg   %s at r %.1f, first blocker %s"
-          % (y, a, mwho, rm, "NONE" if rc is None else "r %.1f" % rc))
+total_exposed = 0
+for THETA in POSES:
+    rows = []
+    pose(THETA)
+    doc.recompute()
+    cl, mv = shapes(BLOCK), shapes(MOVING)
+    exposed = 0
+    for y in STATIONS:
+        for a in ANGLES:
+            rm, mwho = first_r(mv, float(y), float(a))
+            if rm is None:
+                continue
+            rc, cwho = first_r(cl, float(y), float(a))
+            if rc is None or rc > rm + 0.5:
+                exposed += 1
+                rows.append((y, a, rm, rc, mwho))
+    total_exposed += exposed
+    print("   theta %+6.1f : %3d of %d rays reach a moving part first"
+          % (THETA, exposed, len(ANGLES) * len(STATIONS)))
+    for y, a, rm, rc, mwho in rows:
+        print("     OPEN  Y %3d  angle %+4d deg   %s at r %.1f, first blocker %s"
+              % (y, a, mwho, rm, "NONE" if rc is None else "r %.1f" % rc))
+print()
+print("   %d exposed rays across all %d poses" % (total_exposed, len(POSES)))
 
 pose(0.0)
 doc.recompute()

@@ -32,8 +32,23 @@ import FreeCAD
 import Part
 from FreeCAD import Vector as V
 
-doc = next(d for d in FreeCAD.listDocuments().values()
-                if d.FileName.replace("\\", "/").endswith("KneeExo_v6.FCStd"))
+def _kx_doc():
+    """The model, in the GUI instance or headless under freecadcmd.
+
+    The bare next(...) this replaces raises StopIteration when no document is open, which
+    surfaces from freecadcmd as the unhelpful "<unknown exception data>" -- and is why these
+    older build scripts could not be re-run without the GUI at all.
+    """
+    import os as _os
+    want = _os.environ.get("KX_DOC", r"C:/Users/Josh/KneeExo_v6.FCStd").replace(chr(92), "/")
+    base = want.rsplit("/", 1)[-1]
+    for d in FreeCAD.listDocuments().values():
+        if d.FileName.replace(chr(92), "/").endswith(base):
+            return d
+    return FreeCAD.openDocument(want)
+
+
+doc = _kx_doc()
 
 TEETH, PITCH = 29, 8.0
 R = TEETH * PITCH / (2 * math.pi)

@@ -5,8 +5,22 @@ load), and the screw/nut/motor move to X=-14 so the nut sits beside the belt on 
 carriage's anterior arm -- yaw couple 59.8 -> 17.1 N.m."""
 import math, json, FreeCAD, Part
 from FreeCAD import Vector as V
-doc=next(d for d in FreeCAD.listDocuments().values()
-                if d.FileName.replace("\\", "/").endswith("KneeExo_v6.FCStd"))
+def _kx_doc():
+    """The model, in the GUI instance or headless under freecadcmd.
+
+    The bare next(...) this replaces raises StopIteration under freecadcmd, where no document is
+    open yet -- which is why these older build scripts could not be re-run without the GUI.
+    """
+    import os as _os
+    want = _os.environ.get("KX_DOC", r"C:/Users/Josh/KneeExo_v6.FCStd").replace("\\", "/")
+    base = want.rsplit("/", 1)[-1]
+    for d in FreeCAD.listDocuments().values():
+        if d.FileName.replace("\\", "/").endswith(base):
+            return d
+    return FreeCAD.openDocument(want)
+
+
+doc = _kx_doc()
 def cy(r,y0,y1,x=0.0,z=0.0): return Part.makeCylinder(r,y1-y0,V(x,y0,z),V(0,1,0))
 def cz(r,z0,z1,x=0.0,y=0.0): return Part.makeCylinder(r,z1-z0,V(x,y,z0),V(0,0,1))
 TEETH=28; PITCH=8.0; R=TEETH*PITCH/(2*math.pi)

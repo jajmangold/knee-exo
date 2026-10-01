@@ -38,8 +38,25 @@ import FreeCAD
 import Part
 from FreeCAD import Vector as V
 
-doc = next(d for d in FreeCAD.listDocuments().values()
-                if d.FileName.replace("\\", "/").endswith("KneeExo_v6.FCStd"))
+def _kx_doc():
+    """The model, whether we are inside the GUI instance or running under freecadcmd.
+
+    KX_DOC overrides the file, which is how the mirrored right leg is built with the same
+    scripts. Headless matters: 397 and 409 both exceed the RPC server's 90 s dispatch limit,
+    and overrunning it does not fail cleanly -- it keeps working and leaves a half-built
+    document that the next script reads as finished.
+    """
+    import os as _os
+    want = _os.environ.get("KX_DOC", r"C:/Users/Josh/KneeExo_v6.FCStd").replace("\\", "/")
+    base = want.rsplit("/", 1)[-1]
+    for d in FreeCAD.listDocuments().values():
+        if d.FileName.replace("\\", "/").endswith(base):
+            return d
+    return FreeCAD.openDocument(want)
+
+
+doc = _kx_doc()
+
 
 PW, PL, PT = 40.0, 56.0, 10.0      # plate: X width, Y length, Z thickness
 BOLT_R, DOWEL_R, MNT_R = 2.6, 2.5, 2.1
@@ -89,7 +106,8 @@ def plate(xc, yc, z0, name, host, host_top, mdy, mdx, wing_t):
     o.Label = name
     try:
         src = doc.getObject("P22_DriveCap").ViewObject
-        o.ViewObject.ShapeColor = src.ShapeColor
+        if getattr(o, "ViewObject", None) is not None:  # absent headless
+            o.ViewObject.ShapeColor = src.ShapeColor
     except Exception:
         pass
     return p, holes

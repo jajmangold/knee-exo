@@ -32,8 +32,25 @@ import FreeCAD
 import Part
 from FreeCAD import Vector as V
 
-doc = next(d for d in FreeCAD.listDocuments().values()
-                if d.FileName.replace("\\", "/").endswith("KneeExo_v6.FCStd"))
+def _kx_doc():
+    """The model, whether we are inside the GUI instance or running under freecadcmd.
+
+    KX_DOC overrides the file, which is how the mirrored right leg is built with the same
+    scripts. Headless matters: 397 and 409 both exceed the RPC server's 90 s dispatch limit,
+    and overrunning it does not fail cleanly -- it keeps working and leaves a half-built
+    document that the next script reads as finished.
+    """
+    import os as _os
+    want = _os.environ.get("KX_DOC", r"C:/Users/Josh/KneeExo_v6.FCStd").replace("\\", "/")
+    base = want.rsplit("/", 1)[-1]
+    for d in FreeCAD.listDocuments().values():
+        if d.FileName.replace("\\", "/").endswith(base):
+            return d
+    return FreeCAD.openDocument(want)
+
+
+doc = _kx_doc()
+
 
 TEETH, PITCH = 29, 8.0
 R = TEETH * PITCH / (2 * math.pi)
@@ -90,6 +107,22 @@ for k, (sgn, dy) in enumerate([(-1, -WHEEL_Y), (-1, WHEEL_Y), (1, -WHEEL_Y), (1,
 # motor went anterior (402_motor_anterior.py). This file used to rebuild them here and
 # would now undo that, so those blocks are gone. It keeps the V-wheel geometry and the
 # leg checks.
+def vs_leg(sh, label, limit=0.02):
+    """Does this part intrude into the reference thigh?
+
+    This function used to exist only in the GUI session's globals -- it was defined by some
+    ad-hoc script sent to the RPC server months ago and never written down, while 396 called
+    it on every run. The GUI shares one namespace across calls, so it worked; a clean checkout
+    could never run this file, and nor could a headless process. Found by running the chain
+    under freecadcmd, where each process starts empty.
+    """
+    ref = doc.getObject("REF_Thigh")
+    k = sh.common(ref.Shape)
+    v = 0.0 if k.isNull() else k.Volume / 1000.0
+    print("    %-22s vs REF_Thigh: %.3f cm3" % (label, v))
+    assert v < limit, "%s intrudes into the leg by %.3f cm3" % (label, v)
+
+
 vs_leg(doc.getObject('A3_Motor_6374').Shape, 'A3_Motor')
 vs_leg(doc.getObject('A7_DriveBox').Shape, 'A7_DriveBracket')
 

@@ -5,8 +5,22 @@ import math, json, itertools, os, FreeCAD
 from FreeCAD import Vector as V
 I0=__I0__; I1=__I1__
 ACC=r"C:/Users/Josh/KneeExo_anim/clash.json"
-doc=next(d for d in FreeCAD.listDocuments().values()
-                if d.FileName.replace("\\", "/").endswith("KneeExo_v6.FCStd"))
+def _kx_doc():
+    """The model, in the GUI instance or headless under freecadcmd.
+
+    The bare next(...) this replaces raises StopIteration under freecadcmd, where no document is
+    open yet -- which is why these older build scripts could not be re-run without the GUI.
+    """
+    import os as _os
+    want = _os.environ.get("KX_DOC", r"C:/Users/Josh/KneeExo_v6.FCStd").replace("\\", "/")
+    base = want.rsplit("/", 1)[-1]
+    for d in FreeCAD.listDocuments().values():
+        if d.FileName.replace("\\", "/").endswith(base):
+            return d
+    return FreeCAD.openDocument(want)
+
+
+doc = _kx_doc()
 K=json.load(open(r"C:/Users/Josh/KneeExo_anim/kinematics.json"))
 S=K["samples"]; XE=K["XE"]; D0=tuple(K["D0"])
 def sm(t): return min(S,key=lambda q:abs(q["theta"]-t))

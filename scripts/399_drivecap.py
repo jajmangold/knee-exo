@@ -56,8 +56,25 @@ import FreeCAD
 import Part
 from FreeCAD import Vector as V
 
-doc = next(d for d in FreeCAD.listDocuments().values()
-                if d.FileName.replace("\\", "/").endswith("KneeExo_v6.FCStd"))
+def _kx_doc():
+    """The model, whether we are inside the GUI instance or running under freecadcmd.
+
+    KX_DOC overrides the file, which is how the mirrored right leg is built with the same
+    scripts. Headless matters: 397 and 409 both exceed the RPC server's 90 s dispatch limit,
+    and overrunning it does not fail cleanly -- it keeps working and leaves a half-built
+    document that the next script reads as finished.
+    """
+    import os as _os
+    want = _os.environ.get("KX_DOC", r"C:/Users/Josh/KneeExo_v6.FCStd").replace("\\", "/")
+    base = want.rsplit("/", 1)[-1]
+    for d in FreeCAD.listDocuments().values():
+        if d.FileName.replace("\\", "/").endswith(base):
+            return d
+    return FreeCAD.openDocument(want)
+
+
+doc = _kx_doc()
+
 
 N_EXP, N_PTS = 5.5, 32
 WALL = 3.0
@@ -328,8 +345,10 @@ o25.Label = "P25_MotorNacelle"
 # kind of wrong to notice.
 try:
     src = doc.getObject("P22_DriveCap").ViewObject
-    o25.ViewObject.ShapeColor = src.ShapeColor
-    o25.ViewObject.Transparency = src.Transparency
+    if getattr(o25, "ViewObject", None) is not None:  # absent headless
+        o25.ViewObject.ShapeColor = src.ShapeColor
+    if getattr(o25, "ViewObject", None) is not None:  # absent headless
+        o25.ViewObject.Transparency = src.Transparency
     print("     P25 colour matched to P22 %s" % (tuple(round(c, 2) for c in src.ShapeColor),))
 except Exception as e:
     print("     could not set P25 colour (%s) -- headless?" % e)

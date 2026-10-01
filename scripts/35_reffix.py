@@ -3,7 +3,8 @@
 the thigh. Reference-only bug, but it made the limb-clearance column meaningless."""
 sh = Part.makeCone(60.0, 38.0, 360.0, FreeCAD.Vector(0,-20,0), FreeCAD.Vector(0,-1,0))
 doc.getObject("REF_Shank").Shape = sh
-doc.getObject("REF_Shank").ViewObject.Transparency = 80
+if getattr(doc.getObject("REF_Shank"), "ViewObject", None) is not None:  # absent headless
+    doc.getObject("REF_Shank").ViewObject.Transparency = 80
 pose(0.0); doc.recompute()
 O = lambda n: doc.getObject(n)
 LIMB = ["REF_Thigh","REF_Knee","REF_Shank"]

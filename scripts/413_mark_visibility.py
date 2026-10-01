@@ -22,16 +22,39 @@ occluders here -- a mark facing the thigh is not on show, there is a leg in the 
 
 Send with:  python tools/fcsend.py scripts/413_mark_visibility.py
 """
+import json
 import math
+import os
+
 import FreeCAD
 import Part
 from FreeCAD import Vector as V
 
-doc = next(d for d in FreeCAD.listDocuments().values()
-                if d.FileName.replace("\\", "/").endswith("KneeExo_v6.FCStd"))
+def _kx_doc():
+    """The model, whether we are in the GUI instance or under freecadcmd.
 
-# (part, mark point, outward normal) -- taken from 412's own report
-MARKS = [
+    KX_DOC overrides the file, which is how the mirrored right leg is checked with the same
+    scripts. Headless matters: 397 and 409 both exceed the RPC server's 90 s dispatch limit,
+    and overrunning it does not fail cleanly -- it keeps working and leaves a half-built
+    document the next script reads as finished.
+    """
+    import os as _os
+    want = _os.environ.get("KX_DOC", r"C:/Users/Josh/KneeExo_v6.FCStd").replace("\\", "/")
+    base = want.rsplit("/", 1)[-1]
+    for d in FreeCAD.listDocuments().values():
+        if d.FileName.replace("\\", "/").endswith(base):
+            return d
+    return FreeCAD.openDocument(want)
+
+
+doc = _kx_doc()
+
+# PREFER THE REGISTRY 412 WRITES. The table below was maintained by hand from 412's printed
+# report, and a hand-copied table of computed values goes stale the moment anything shifts:
+# adding the L/R leg suffix moved five marks and dropped two onto a smaller cap height, so a
+# check against the old points would have been testing empty surface and reporting it covered.
+# The table is kept only as the fallback for a document engraved before the registry existed.
+TABLE = [
     # (part, a point on the marked surface, the face normal, how 412 cut it)
     #   "r" radial: the tool starts at the surface and extrudes OUTWARD, so material lies
     #       outboard and the mark looks back toward the limb  -> test along -normal
@@ -58,6 +81,15 @@ MARKS = [
     # nowhere covered: it is the knee hub at an open joint, reachable from every direction.
     # Its recess was filled. It is the 143 cm3 29T pulley; an unmarked part is the better trade.
 ]
+
+_reg = doc.FileName.replace("\\", "/")[:-6] + ".marks.json"
+if os.path.exists(_reg):
+    _r = json.load(open(_reg))
+    MARKS = [(k, V(*v["point"]), V(*v["normal"]), v["mode"]) for k, v in sorted(_r.items())]
+    print("  %d marks from %s" % (len(MARKS), os.path.basename(_reg)))
+else:
+    MARKS = TABLE
+    print("  no registry beside this document -- falling back to the hand-written table")
 
 # Part::Feature only. Groups carry a compound of their children and occlude everything.
 # The reference limbs ARE occluders: a mark facing the thigh is not on show.

@@ -1,7 +1,23 @@
 import os, FreeCAD, Mesh, MeshPart
 g=globals()
-doc=next(d for d in FreeCAD.listDocuments().values()
-                if d.FileName.replace("\\", "/").endswith("KneeExo_v6.FCStd"))
+def _kx_doc():
+    """The model, whether we are in the GUI instance or under freecadcmd.
+
+    KX_DOC overrides the file, which is how the mirrored right leg is checked with the same
+    scripts. Headless matters: 397 and 409 both exceed the RPC server's 90 s dispatch limit,
+    and overrunning it does not fail cleanly -- it keeps working and leaves a half-built
+    document the next script reads as finished.
+    """
+    import os as _os
+    want = _os.environ.get("KX_DOC", r"C:/Users/Josh/KneeExo_v6.FCStd").replace("\\", "/")
+    base = want.rsplit("/", 1)[-1]
+    for d in FreeCAD.listDocuments().values():
+        if d.FileName.replace("\\", "/").endswith(base):
+            return d
+    return FreeCAD.openDocument(want)
+
+
+doc = _kx_doc()
 t=g.get("_kx_timer")
 if t is not None:
     try: t.stop()
@@ -9,7 +25,13 @@ if t is not None:
 for o in doc.Objects:
     if hasattr(o,"Placement") and not o.Placement.isIdentity(): o.Placement=FreeCAD.Placement()
 doc.recompute()
-OUT=r"C:/Users/Josh/KneeExo_v6_STL"
+# One directory PER DOCUMENT, named after it, so the two legs cannot overwrite each other:
+# the parts have the same object names in both files and a single shared folder would silently
+# leave you with one leg's worth of STLs under names that look like a full set.
+OUT=os.environ.get("KX_STL") or (r"C:/Users/Josh/%s_STL"
+                                 % os.path.basename(doc.FileName)[:-6])
+if not os.path.isdir(OUT):
+    os.makedirs(OUT)
 for f in os.listdir(OUT):
     if f.endswith(".stl"): os.remove(os.path.join(OUT,f))
 # P3 is no longer printed -- it is a bought aluminium V-wheel gantry (392_gantry.py) --

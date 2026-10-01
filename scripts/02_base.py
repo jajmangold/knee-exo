@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
 """KneeExo v1 - parameters, helpers, document.
 CS:  X = posterior(+)/anterior(-)   Y = proximal(+)/distal(-)   Z = lateral(+) from limb midline
-Knee flexion axis = line X=0,Y=0 along Z.  Right leg (MIRROR flag for left).
+Knee flexion axis = line X=0,Y=0 along Z.  +Z is LATERAL, so the built model is the
+LEFT leg; the right is mirrored Z -> -Z into its own document by 701_mirror_build.py.
+(This line read "Right leg (MIRROR flag for left)" from v1 onward and was simply
+wrong by the time anything was built against it.)
 """
 import math, FreeCAD, Part
 from FreeCAD import Vector as V
@@ -85,7 +88,8 @@ def insert_holes(shape, pts, d=6.4, depth=11.0, axis="z"):
     return shape
 def add(name, shape, rgb, grp=None):
     o = doc.addObject("Part::Feature", name); o.Shape = shape
-    o.ViewObject.ShapeColor = rgb; o.ViewObject.Transparency = 0
+    if getattr(o, "ViewObject", None) is not None:  # absent headless
+        o.ViewObject.ShapeColor = rgb; o.ViewObject.Transparency = 0
     if grp is not None: grp.addObject(o)
     return o
 

@@ -5,8 +5,22 @@ import math, json, FreeCAD, FreeCADGui
 from FreeCAD import Vector as V
 from PySide import QtCore
 g=globals()
-doc=next(d for d in FreeCAD.listDocuments().values()
-                if d.FileName.replace("\\", "/").endswith("KneeExo_v6.FCStd"))
+def _kx_doc():
+    """The model, in the GUI instance or headless under freecadcmd.
+
+    The bare next(...) this replaces raises StopIteration under freecadcmd, where no document is
+    open yet -- which is why these older build scripts could not be re-run without the GUI.
+    """
+    import os as _os
+    want = _os.environ.get("KX_DOC", r"C:/Users/Josh/KneeExo_v6.FCStd").replace("\\", "/")
+    base = want.rsplit("/", 1)[-1]
+    for d in FreeCAD.listDocuments().values():
+        if d.FileName.replace("\\", "/").endswith(base):
+            return d
+    return FreeCAD.openDocument(want)
+
+
+doc = _kx_doc()
 K=json.load(open(r"C:/Users/Josh/KneeExo_anim/kinematics.json"))
 S=K["samples"]; XE=K["XE"]; D0=tuple(K["D0"])
 def sm(t):
@@ -21,7 +35,8 @@ O=lambda n: doc.getObject(n)
 for n in SHANK+ROD+STATIC+["P3_Carriage"]:
     o=O(n)
     if o and not o.Name.startswith("MFG") and "RodEndHousing" not in o.Name:
-        o.ViewObject.Visibility=True
+        if getattr(o, "ViewObject", None) is not None:  # absent headless
+            o.ViewObject.Visibility=True
 for n in ("REF_Thigh","REF_Knee","REF_Shank"):
     if O(n): O(n).ViewObject.Transparency=82
 def setpose(t):

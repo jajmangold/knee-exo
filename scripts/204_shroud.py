@@ -10,8 +10,23 @@ No inboard side plate: the gap there is only 2 mm (fork cheek tops out at Z=94, 
 starts at Z=96) and the pulley at r<=35.6 plus the cheek already close it."""
 import math, FreeCAD, Part
 from FreeCAD import Vector as V
-doc=next(d for d in FreeCAD.listDocuments().values()
-                if d.FileName.replace("\\", "/").endswith("KneeExo_v6.FCStd"))
+def _kx_doc():
+    """The model, in the GUI instance or headless under freecadcmd.
+
+    The bare next(...) this replaces raises StopIteration when no document is open, which
+    surfaces from freecadcmd as the unhelpful "<unknown exception data>" -- and is why these
+    older build scripts could not be re-run without the GUI at all.
+    """
+    import os as _os
+    want = _os.environ.get("KX_DOC", r"C:/Users/Josh/KneeExo_v6.FCStd").replace(chr(92), "/")
+    base = want.rsplit("/", 1)[-1]
+    for d in FreeCAD.listDocuments().values():
+        if d.FileName.replace(chr(92), "/").endswith(base):
+            return d
+    return FreeCAD.openDocument(want)
+
+
+doc = _kx_doc()
 def cz(r,z0,z1,x=0.0,y=0.0): return Part.makeCylinder(r,z1-z0,V(x,y,z0),V(0,0,1))
 def asect(ri,ro,a0,a1,z0,z1):
     q=Part.makeCylinder(ro,z1-z0,V(0,0,z0),V(0,0,1),(a1-a0)%360 or 360)

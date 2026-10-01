@@ -30,7 +30,10 @@ import math
 import os
 import struct
 
-STL_DIR = r"C:/Users/Josh/KneeExo_v6_STL"
+# KX_STL, or KX_DOC's own directory, so the right leg is checked against the right leg's STLs.
+STL_DIR = os.environ.get("KX_STL") or (
+    r"C:/Users/Josh/%s_STL"
+    % os.path.basename(os.environ.get("KX_DOC", "KneeExo_v6.FCStd")).replace(".FCStd", ""))
 NOZZLE = 0.4
 OVERHANG = 45.0
 BEDS = [("Ender 3 / Mini", 220.0, 220.0, 250.0),

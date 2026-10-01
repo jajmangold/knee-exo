@@ -4,8 +4,22 @@ the MINIMUM radius reached by any shank-side (moving) part over the whole ROM, a
 maximum radius of the belt itself. The gap between them is what a static shroud can use."""
 import math, json, FreeCAD, Part
 from FreeCAD import Vector as V
-doc=next(d for d in FreeCAD.listDocuments().values()
-                if d.FileName.replace("\\", "/").endswith("KneeExo_v6.FCStd"))
+def _kx_doc():
+    """The model, in the GUI instance or headless under freecadcmd.
+
+    The bare next(...) this replaces raises StopIteration under freecadcmd, where no document is
+    open yet -- which is why these older build scripts could not be re-run without the GUI.
+    """
+    import os as _os
+    want = _os.environ.get("KX_DOC", r"C:/Users/Josh/KneeExo_v6.FCStd").replace("\\", "/")
+    base = want.rsplit("/", 1)[-1]
+    for d in FreeCAD.listDocuments().values():
+        if d.FileName.replace("\\", "/").endswith(base):
+            return d
+    return FreeCAD.openDocument(want)
+
+
+doc = _kx_doc()
 K=json.load(open(r"C:/Users/Josh/KneeExo_anim/kin_low.json"))
 S=K["samples"]; R=K["R"]; BIN,BOUT=K["belt_x"]; BZ=tuple(K["belt_z"])
 MOVING=["A4_Shank2020_VSlot","P2a_KneeHingePlate","P6_ShankSocket","HW_JointBolts"]

@@ -30,14 +30,20 @@ Choices and why:
   Shape.check() afterwards: text is dozens of small faces and tight curves, which is exactly
   the kind of geometry that produced a BOPAlgo SelfIntersect on the cuff earlier.
 
-Run ONE PART PER CALL. The bearing search is ~1000 line-solid booleans and chunks of
-three went past the 90 s GUI dispatch limit -- which does not fail cleanly, it keeps
-working in the background and leaves the document in a state the next run misreads:
+Run headless, all parts in one process:
 
-  for i in $(seq 0 14); do ... I0=$i I1=$((i+1)) ; done
+    KX_DOC=.../KneeExo_v6.FCStd KX_SUFFIX=L freecadcmd.exe scripts/412_engrave.py
+
+KX_DRYRUN=1 reports each mark site without cutting. KX_I0/KX_I1 narrow the job list to
+re-cut a single part. (The old form was one part per GUI call, because the bearing search is
+~1000 line-solid booleans and three parts went past the 90 s dispatch limit -- which does not
+fail cleanly, it keeps working in the background and leaves a document the next run misreads.)
 """
+import json
 import math
 import os
+import sys
+
 import FreeCAD
 import Part
 from FreeCAD import Vector as V
@@ -45,12 +51,43 @@ from FreeCAD import Vector as V
 # Runs either in the GUI instance or headless under freecadcmd. Headless matters: the
 # bearing search on P24 takes over 90 s, which is the RPC server's dispatch limit, and
 # overrunning it does not fail cleanly -- it keeps working and leaves a half-applied document.
-DOCFILE = r"C:/Users/Josh/KneeExo_v6.FCStd"
+DOCFILE = os.environ.get("KX_DOC", r"C:/Users/Josh/KneeExo_v6.FCStd").replace("\\", "/")
+_BASE = DOCFILE.rsplit("/", 1)[-1]
 try:
     doc = next(d for d in FreeCAD.listDocuments().values()
-                if d.FileName.replace("\\", "/").endswith("KneeExo_v6.FCStd"))
-except Exception:
+               if d.FileName.replace(chr(92), "/").endswith(_BASE))
+except StopIteration:
     doc = FreeCAD.openDocument(DOCFILE)
+
+# KX_SUFFIX appends a leg letter, so the pair is "P5L" and "P5R" rather than two parts with
+# the same number and no way to tell which leg they came off. It used to live only in the GUI
+# session's globals -- the same failure as vs_leg: the script read SUFFIX and nothing in the
+# repository ever set it, so a clean run died with NameError.
+SUFFIX = os.environ.get("KX_SUFFIX", "")
+# DRY RUN reports what each part's mark site looks like -- blank, already engraved, or no
+# patch at all -- and cuts nothing. Needed before mirroring: a mark that survives into the
+# right document reads backwards, and the only way to know which parts carry one is to probe.
+DRY = bool(os.environ.get("KX_DRYRUN"))
+# FILL mode puts a mark BACK. It exists because the four parts outside the 393..409 rebuild
+# chain (P1, P20, P2a, P6) keep their engraving forever, and a kept mark is a mirrored mark
+# once 701 reflects the document -- "P6" reads backwards on the right leg, which is worse than
+# no mark. The tool is built by exactly the same placement code as the cut, which is the only
+# way to be sure it lands on the same glyphs; a hand-written filler for three parts (414) had
+# to be measured by hand and then shaved by 415 when it came out proud. Verified both ways:
+# the skin must read PITTED before the fuse and SOLID after it.
+FILL = bool(os.environ.get("KX_FILL"))
+# KX_LEGACY builds the tool on the pre-fix, left-handed frame. Needed to FILL the 12 marks that
+# were cut mirrored before tools/markframe.py existed; never for cutting.
+LEGACY = bool(os.environ.get("KX_LEGACY"))
+# An EXPLICIT site, "station,bearing,radius", for a fill whose placement this script's own
+# search cannot rediscover. P1_KneeYoke is the case: 414 re-cut its mark with a looser wall
+# criterion than find_spot demands, so find_spot now reports "no patch" on a part that is
+# definitely engraved. The authoritative record of where every mark went is 413's MARKS
+# table -- P1 is the point V(0, 55, 78.4), i.e. station 55, bearing +90, radius 78.4.
+SITE = os.environ.get("KX_SITE")
+
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "tools"))
+from markframe import matrix as mark_matrix     # noqa: E402
 
 FONT = None
 for cand in (r"C:/Windows/Fonts/arialbd.ttf", r"C:/Windows/Fonts/verdanab.ttf",
@@ -62,6 +99,12 @@ assert FONT, "no bold font found"
 H = 8.0          # cap height
 DEPTH = 0.8      # recess
 MIN_STEM = 1.1   # mm, what a 0.4 nozzle resolves at 3 perimeters
+# How solid an 8 x 8 x 0.5 slab of skin has to be for the site to count as NOT yet engraved.
+# Measured, not guessed. Engraved sites: P20 59%, P6 59%, P24 76%. Blank sites: P5 87%,
+# P30 91%, P7 92%, P22 95%, P21 99%, P23 100%, P25 100%. The gap is 76..87, so 80% separates
+# them; the 88% this started at called P5's blank bore "already engraved" and skipped it,
+# because the slab there clips the edge of a webbing slot.
+SKIN = 0.80
 
 # part -> (label, axis to cast from, station along it). The BEARING is searched for, not
 # chosen: hand-picked bearing 0 (posterior) missed ten of the thirteen parts outright,
@@ -109,6 +152,58 @@ JOBS = [
     # bolted joint face is harmless, a readable part number on the outside is not.
     ("P31_InterfaceDist", "P31", "P3", (0.0, -275.0, 123.0)),
 ]
+
+
+def fuse_clean(sh, tool):
+    """Fuse and return the result that passes Shape.check(), with how it was made.
+
+    removeSplitter() tidies the coplanar seams a fill leaves behind, and on P24_FairingShank it
+    also produced a BOPAlgo self-intersection from a fuse that was already clean -- valid(),
+    one solid, the right volume, and rejected by 701 on the mirror. Measured on that part:
+    every variant through removeSplitter failed, every raw fuse passed, regardless of tool
+    inflation, depth or fusing glyph by glyph. So prefer the tidy result and fall back to the
+    raw one rather than losing the fill; leftover seam faces cost nothing in an STL.
+    """
+    out = []
+    try:
+        t = sh.fuse(tool).removeSplitter()
+        if t.Volume < 0:                       # removeSplitter has inverted a solid before
+            t.reverse()
+        out.append(("merged", t))
+    except Exception:
+        pass
+    try:
+        out.append(("raw fuse", sh.fuse(tool)))
+    except Exception:
+        pass
+    for how, t in out:
+        try:
+            t.check(True)
+            return t, how, "clean"
+        except Exception:
+            continue
+    return (out[0][1], out[0][0], "SELF-INTERSECT") if out else (None, "none", "FAILED")
+
+
+def inflate(shape, f=1.06):
+    """Grow a planar face set about its own centre.
+
+    A fill tool that is exactly the shape of the recess shares every side wall with it, and
+    fusing two solids across coincident faces is the classic way to get a BOPAlgo
+    self-intersection: P24_FairingShank came back valid(), one solid, the right volume, and
+    failed Shape.check() -- which 701 then refused to mirror. Growing the glyphs a few percent
+    removes the coincidence. It is safe because the material around a mark is solid by
+    construction: find_spot proved the surface smooth over the footprint plus 2 mm.
+    Isotropic, about the centre, so a planar face set stays planar.
+    """
+    c = shape.BoundBox.Center
+    m = FreeCAD.Matrix()
+    m.move(V(-c.x, -c.y, -c.z))
+    sc = FreeCAD.Matrix()
+    sc.scale(f, f, f)
+    back = FreeCAD.Matrix()
+    back.move(V(c.x, c.y, c.z))
+    return shape.transformGeometry(back.multiply(sc.multiply(m)))
 
 
 def text_faces(s, h=None):
@@ -233,14 +328,41 @@ def find_spot(sh, org, stations, half_len, half_h, hoop=False):
     return best
 
 
+# WHERE EVERY MARK WENT, written next to the document. 413 used to carry a hand-maintained
+# table of these points, and a hand-maintained table of a thing a script computes goes stale
+# the first time anything moves: the leg suffix alone shifted five marks and pushed two onto a
+# smaller cap height. The registry is also the only record of a site the search cannot
+# rediscover -- P1_KneeYoke's, which needed KX_SITE to find at all.
+REG = DOCFILE[:-6] + ".marks.json"
+registry = {}
+if os.path.exists(REG):
+    try:
+        registry = json.load(open(REG))
+    except Exception:
+        registry = {}
+
+
+def record(name, text, pt, normal, mode, h, axis):
+    """mode is what 413 needs (which way to fire its rays); axis is the exact frame style, so
+    that a later fill, re-cut or render reconstructs the SAME frame rather than guessing."""
+    registry[name] = {"text": text, "point": [round(v, 3) for v in pt],
+                      "normal": [round(v, 4) for v in normal], "mode": mode,
+                      "axis": axis, "height": h}
+
+
 OCC = _occluders()
 print("=" * 86)
 print("ENGRAVING -- %s, %.0f mm tall, %.1f mm deep" % (os.path.basename(FONT), H, DEPTH))
 print("=" * 86)
 print("  %-20s %-6s %-19s %-11s %-11s %s"
       % ("part", "mark", "placed at", "removed", "expected", "check"))
-I0, I1 = __I0__, __I1__          # chunked: the bearing search is ~2000 ray casts
-done = 0                         # per part and the GUI dispatch dies at 90 s
+# The chunking (one part per call, __I0__/__I1__ substituted by fcsend.py) was a GUI
+# workaround: the bearing search is ~2000 ray casts per part and the RPC dispatch dies at
+# 90 s. freecadcmd has no such limit, so the default is now every job in one process.
+# KX_I0/KX_I1 still narrow it when re-cutting a single part.
+I0 = int(os.environ.get("KX_I0", 0))
+I1 = int(os.environ.get("KX_I1", len(JOBS)))
+done = 0
 for name, mark, axis, stations in JOBS[I0:I1]:
     o = doc.getObject(name)
     if o is None:
@@ -253,7 +375,7 @@ for name, mark, axis, stations in JOBS[I0:I1]:
         px, py, pz = stations
         faces = None
         for h in ((H, 6.0, 5.0) if axis == "P" else (5.0, 4.0)):
-            faces = text_faces(mark, h)
+            faces = text_faces(mark + SUFFIX, h)
             tb = faces[0]
             for f in faces[1:]:
                 tb = tb.fuse(f)
@@ -261,28 +383,54 @@ for name, mark, axis, stations in JOBS[I0:I1]:
                 break
         bb = tb.BoundBox
         tb.translate(V(-0.5 * (bb.XMin + bb.XMax), -0.5 * (bb.YMin + bb.YMax), 0.0))
-        if axis == "P":
-            # local x -> +Z, local y -> +Y, local z -> -X (into the part from X = 47)
-            m = FreeCAD.Matrix(0.0, 0.0, -1.0, px + 0.3,
-                               0.0, 1.0, 0.0, py,
-                               1.0, 0.0, 0.0, pz,
-                               0.0, 0.0, 0.0, 1.0)
-        elif axis == "P2":
-            # P2: local x -> +Y, local y -> +Z, local z -> -X. Same face normal, but the
-            # string runs along the limb because these bosses are 56 long and 7 tall.
-            m = FreeCAD.Matrix(0.0, 0.0, -1.0, px + 0.3,
-                               1.0, 0.0, 0.0, py,
-                               0.0, 1.0, 0.0, pz,
-                               0.0, 0.0, 0.0, 1.0)
-        else:
-            # P3: an UNDERSIDE. local x -> +Y, local y -> +X, local z -> +Z (upward into
-            # the part from below).
-            m = FreeCAD.Matrix(0.0, 1.0, 0.0, px,
-                               1.0, 0.0, 0.0, py,
-                               0.0, 0.0, 1.0, pz - 0.3,
-                               0.0, 0.0, 0.0, 1.0)
-        d = V(-(DEPTH + 0.3), 0.0, 0.0) if axis in ("P", "P2") else V(0.0, 0.0, DEPTH + 0.3)
-        tool = tb.transformGeometry(m).extrude(d)
+        # The face's outward normal: +X for the two X faces, -Z for the underside. Every
+        # frame in this script now comes from tools/markframe.py, because when they were
+        # written out inline here -- four of them, one per style -- three were LEFT-handed and
+        # cut 12 of 14 part numbers as mirror images. Nothing caught it: the volume was right,
+        # the solid was clean and the mark was hidden. See tools/readmark.py.
+        nrm = V(1.0, 0.0, 0.0) if axis in ("P", "P2") else V(0.0, 0.0, -1.0)
+        m, into = mark_matrix(axis, V(px, py, pz), nrm, standoff=0.3, legacy=FILL and LEGACY)
+        d = V(into.x, into.y, into.z).multiply(DEPTH + 0.3)
+        flat = tb.transformGeometry(m)
+        if FILL:
+            # Same face, but starting ON it rather than 0.3 mm proud of it, so the fill is
+            # flush. The sign matters and is easy to get backwards: the cutting tool is placed
+            # 0.3 mm OUTSIDE the face (px + 0.3 for the X faces, pz - 0.3 for the underside)
+            # and cuts inward, so the fill moves back toward the material, not further out.
+            # Getting it wrong adds a 0.3 mm proud layer to a face that was never engraved --
+            # which is exactly what the first run of this did to five blank parts.
+            back = V(into.x, into.y, into.z).multiply(0.3)
+            # And gate on the skin, as the radial branch does. Without this the fill is
+            # applied to any part whose mark site is blank, bulging a flat mating face.
+            # The slab goes INTO the material (local +z is `into`), which is the one thing a
+            # skin probe must get right: built the other way it sits in air and reports 0% solid
+            # on a perfectly blank face.
+            pb = Part.makeBox(8.0, 8.0, 0.5, V(-4.0, -4.0, 0.0))
+            pm, _ = mark_matrix(axis, V(px, py, pz), nrm, standoff=0.0, legacy=FILL and LEGACY)
+            pb = pb.transformGeometry(pm)
+            pk = sh.common(pb)
+            frac = (0.0 if pk.isNull() else pk.Volume) / max(1e-9, pb.Volume)
+            if frac >= SKIN:
+                print("  %-20s %-6s skin already %.0f%% solid -- nothing to fill"
+                      % (name, mark, 100 * frac))
+                continue
+            fl = inflate(flat.copy())
+            fl.translate(back)
+            fd = V(into.x, into.y, into.z).multiply(DEPTH)
+            v0 = sh.Volume
+            new, how, pchk = fuse_clean(sh, fl.extrude(fd))
+            added = (abs(new.Volume) - v0) / 1000.0 if new else 0.0
+            want = sum(f.Area for f in faces) * DEPTH / 1000.0
+            ok = (new is not None and 0.35 * want < added < 2.2 * want
+                  and len(new.Solids) == 1 and pchk == "clean")
+            print("  %-20s %-6s FILL %-11s +%6.3f cm3 %7.3f cm3  skin %.0f%%  %s, %s %s"
+                  % (name, mark, ("face X %.0f" % px) if axis != "P3" else ("under Z %.0f" % pz),
+                     added, want, 100 * frac, how, pchk, "filled" if ok else "NOT APPLIED"))
+            if ok and not DRY:
+                o.Shape = new
+                done += 1
+            continue
+        tool = flat.extrude(d)
         v0 = sh.Volume
         cut = sh.cut(tool)
         removed = (v0 - cut.Volume) / 1000.0
@@ -296,8 +444,9 @@ for name, mark, axis, stations in JOBS[I0:I1]:
         print("  %-20s %-6s %-11s %7.3f cm3 %7.3f cm3  %s%s"
               % (name, mark, ("face X %.0f" % px) if axis != "P3" else ("under Z %.0f" % pz),
                  removed, want, chk, "" if ok else "  <-- MISSED"))
-        if ok and len(cut.Solids) == 1:
+        if ok and len(cut.Solids) == 1 and not DRY:
             o.Shape = cut
+            record(name, mark + SUFFIX, (px, py, pz), (nrm.x, nrm.y, nrm.z), "p", h, axis)
             done += 1
         continue
 
@@ -307,8 +456,15 @@ for name, mark, axis, stations in JOBS[I0:I1]:
     # the search could never find room. Step the cap height down until it fits; 4 mm in a
     # bold face still has ~0.6 mm stems, which is thin but legible as a recess.
     spot = faces = tb = tbb = None
-    for h in (H, 5.0):
-        faces = text_faces(mark, h)
+    ladder = () if SITE else (H, 5.0, 4.0)
+    # 8, then 5, then 4 mm. The ladder gained its bottom rung when the leg suffix went on:
+    # "P24L" is one character longer than "P24", which is 5.5 mm more string at 8 mm and
+    # 3.4 mm more at 5 mm, and that was enough for the search to find no smooth patch at all
+    # on P24_FairingShank and P1_KneeYoke -- both of which had fitted unsuffixed. 4 mm bold is
+    # ~0.6 mm stems: thin for a 0.4 nozzle, but this is a recess, not an island, so it prints
+    # as a shallower perimeter rather than a bead that may not stick.
+    for h in ladder:
+        faces = text_faces(mark + SUFFIX, h)
         if not faces:
             continue
         tb = faces[0]
@@ -321,6 +477,22 @@ for name, mark, axis, stations in JOBS[I0:I1]:
             if h != H:
                 print("  %-20s %-6s shrunk to %.0f mm to fit" % (name, mark, h))
             break
+    if SITE and spot is None:
+        # An EXPLICIT site skips the SEARCH, not the checks: the removed-volume band and
+        # Shape.check() below still have to pass, and 413 still has to agree the mark is
+        # covered. Worth skipping -- the search is ~2000 ray casts and on a part it cannot
+        # satisfy it spends all of them before giving up, which is minutes per run.
+        _stn, _deg, _r = (float(v) for v in SITE.split(","))
+        for h in (H, 5.0, 4.0):
+            faces = text_faces(mark + SUFFIX, h)
+            tb = faces[0]
+            for f in faces[1:]:
+                tb = tb.fuse(f)
+            tbb = tb.BoundBox
+            break
+        spot = (0.0, _stn, _deg, _r)
+        print("  %-20s %-6s using the explicit site Y %+.0f %+.0f r %.1f"
+              % (name, mark, _stn, _deg, _r))
     if spot is None:
         print("  %-20s %-6s no patch with %.1f mm of wall on any station -- not engraved"
               % (name, mark, DEPTH + 0.6))
@@ -332,13 +504,8 @@ for name, mark, axis, stations in JOBS[I0:I1]:
     blk.translate(V(-0.5 * (bb.XMin + bb.XMax), -0.5 * (bb.YMin + bb.YMax), 0.0))
     t = math.radians(deg)
     rad = V(math.cos(t), 0.0, math.sin(t))
-    tang = V(-math.sin(t), 0.0, math.cos(t))
-    axis_y = V(0.0, 1.0, 0.0)
-    u, w = (tang, axis_y) if hoop else (axis_y, tang)
-    m = FreeCAD.Matrix(u.x, w.x, rad.x, org.x + rad.x * (r0 - 0.3),
-                       u.y, w.y, rad.y, stn,
-                       u.z, w.z, rad.z, org.z + rad.z * (r0 - 0.3),
-                       0.0, 0.0, 0.0, 1.0)
+    surf = V(org.x + rad.x * r0, stn, org.z + rad.z * r0)
+    m, into = mark_matrix("r", surf, rad, standoff=0.3, hoop=hoop, legacy=FILL and LEGACY)
     blk = blk.transformGeometry(m)
 
     # ALREADY ENGRAVED? This script is destructive and not idempotent, and it cannot
@@ -351,19 +518,37 @@ for name, mark, axis, stations in JOBS[I0:I1]:
     # motor pod) that is 0.25 mm, comfortably inside 0.5 mm of thickness. A 24 mm slab would
     # lift 2.2 mm and report intact skin as engraved.
     probe = Part.makeBox(8.0, 8.0, 0.5, V(-4.0, -4.0, 0.0))
-    probe = probe.transformGeometry(FreeCAD.Matrix(
-        u.x, w.x, rad.x, org.x + rad.x * r0,
-        u.y, w.y, rad.y, stn,
-        u.z, w.z, rad.z, org.z + rad.z * r0,
-        0.0, 0.0, 0.0, 1.0))
+    pm0, _ = mark_matrix("r", surf, rad, standoff=0.0, hoop=hoop, legacy=FILL and LEGACY)
+    probe = probe.transformGeometry(pm0)
     pk = sh.common(probe)
     frac = (0.0 if pk.isNull() else pk.Volume) / max(1e-9, probe.Volume)
-    if frac < 0.88:
-        print("  %-20s %-6s already engraved (%.0f%% solid skin at Y %+.0f %+.0f) -- skipped"
-              % (name, mark, 100 * frac, stn, deg))
+    if FILL:
+        if frac >= SKIN:
+            print("  %-20s %-6s skin already %.0f%% solid -- nothing to fill"
+                  % (name, mark, 100 * frac))
+            continue
+        # from the surface INWARD by exactly DEPTH. The cutting tool starts 0.3 mm proud so
+        # it cannot miss the surface; reusing that offset here is what left 415 with raised
+        # glyphs to shave off.
+        base = inflate(blk.copy())
+        base.translate(V(into.x, into.y, into.z).multiply(0.3))
+        tool = base.extrude(V(into.x, into.y, into.z).multiply(DEPTH))
+        v0 = sh.Volume
+        new, how, chk = fuse_clean(sh, tool)
+        added = (abs(new.Volume) - v0) / 1000.0 if new else 0.0
+        pk2 = new.common(probe) if new else None
+        f2 = (0.0 if (pk2 is None or pk2.isNull()) else pk2.Volume) / max(1e-9, probe.Volume)
+        ok = new is not None and f2 > 0.95 and len(new.Solids) == 1 and chk == "clean"
+        print("  %-20s %-6s FILL Y%+7.0f %+4.0f  +%6.3f cm3  skin %.0f%% -> %.0f%%  %s, %s %s"
+              % (name, mark, stn, deg, added, 100 * frac, 100 * f2, how, chk,
+                 "filled" if ok else "NOT APPLIED"))
+        if ok and not DRY:
+            o.Shape = new
+            registry.pop(name, None)
+            done += 1
         continue
 
-    tool = blk.extrude(V(rad.x, rad.y, rad.z).multiply(DEPTH + 0.3))
+    tool = blk.extrude(V(into.x, into.y, into.z).multiply(DEPTH + 0.3))
     v0 = sh.Volume
     cut = sh.cut(tool)
     removed = (v0 - cut.Volume) / 1000.0
@@ -383,11 +568,15 @@ for name, mark, axis, stations in JOBS[I0:I1]:
         print("       engraving broke the solid -- not applied")
         continue
     assert len(cut.Solids) == 1, "%s split into %d solids" % (name, len(cut.Solids))
+    if DRY:
+        continue
     o.Shape = cut
+    record(name, mark + SUFFIX, (surf.x, surf.y, surf.z),
+           (rad.x, rad.y, rad.z), "r", h, "r")
     done += 1
 
 print()
-print("  engraved %d of %d parts in this chunk" % (done, len(JOBS[I0:I1])))
+print("  %s %d of %d parts" % ("filled" if FILL else "engraved", done, len(JOBS[I0:I1])))
 print()
 print("  NOTE ON VERIFYING THIS. A tempting shortcut is to scan each part's surface for")
 print("  voids and call a pitted patch 'engraved'. It does not work: bolt holes, lightening")
@@ -396,6 +585,11 @@ print("  interface bosses as engraved at 68%% solid skin when they were still bl
 print("  reading their bolt holes. The only trustworthy record is this script's own report.")
 print("  Stem width at %.0f mm in this font is about %.1f mm; a 0.4 nozzle needs %.1f."
       % (H, 0.15 * H, MIN_STEM))
-doc.recompute()
-doc.save()
-print("STAGE 10 DONE, saved.")
+if DRY:
+    print("DRY RUN -- nothing cut, nothing saved.")
+else:
+    doc.recompute()
+    doc.save()
+    json.dump(registry, open(REG, "w"), indent=1, sort_keys=True)
+    print("  %d marks recorded in %s" % (len(registry), os.path.basename(REG)))
+    print("STAGE 10 DONE, saved.")

@@ -3,8 +3,22 @@
 printed housings as manufacturing-only (not assembly geometry)."""
 import math, json, FreeCAD, Part
 from FreeCAD import Vector as V
-doc=next(d for d in FreeCAD.listDocuments().values()
-                if d.FileName.replace("\\", "/").endswith("KneeExo_v6.FCStd"))
+def _kx_doc():
+    """The model, in the GUI instance or headless under freecadcmd.
+
+    The bare next(...) this replaces raises StopIteration under freecadcmd, where no document is
+    open yet -- which is why these older build scripts could not be re-run without the GUI.
+    """
+    import os as _os
+    want = _os.environ.get("KX_DOC", r"C:/Users/Josh/KneeExo_v6.FCStd").replace("\\", "/")
+    base = want.rsplit("/", 1)[-1]
+    for d in FreeCAD.listDocuments().values():
+        if d.FileName.replace("\\", "/").endswith(base):
+            return d
+    return FreeCAD.openDocument(want)
+
+
+doc = _kx_doc()
 def cz(r,z0,z1,x=0.0,y=0.0): return Part.makeCylinder(r,z1-z0,V(x,y,z0),V(0,0,1))
 K=json.load(open(r"C:/Users/Josh/KneeExo_anim/kinematics.json"))
 S=K["samples"]; XE=K["XE"]; D0=tuple(K["D0"])
@@ -25,7 +39,8 @@ for n in ("P8_RodEndHousing_PETG","P8b_RodEndHousing_Carriage"):
     h=doc.getObject(n)
     if h:
         h.Placement=FreeCAD.Placement()
-        h.ViewObject.Visibility=False
+        if getattr(h, "ViewObject", None) is not None:  # absent headless
+            h.ViewObject.Visibility=False
         h.Label=n.replace("P8","MFG_P8")
 print("rod restored integral: %.1f cm3"%(r.Volume/1000))
 print("housings hidden (manufacturing detail, geometry duplicated inside the rod)")

@@ -31,6 +31,36 @@ def send(code, port=PORT, timeout=110):
     return ok, msg, dt
 
 
+POSE_CHECK = """
+import FreeCAD as _A
+_p = [o.Name for d in _A.listDocuments().values() for o in d.Objects
+      if o.isDerivedFrom("Part::Feature") and not o.Placement.isIdentity()]
+print("KX_POSED:%d:%s" % (len(_p), ",".join(_p[:6])))
+"""
+
+
+def posed(port=PORT):
+    """Which parts are sitting at an animation pose right now.
+
+    Worth a round trip after every dispatch. The animation scripts pose by writing Placements
+    and leave the timer running; nothing saves, so the pose lives in the GUI session until the
+    NEXT build script calls doc.save() and bakes it into the file. That is invisible --
+    valid shapes, right volumes, clean save -- and every boolean against a posed reference then
+    uses geometry that is not where the part is. It cost this project a wrong-looking cuff fit,
+    a sweep run against a flexed limb, and the user asking why the leg no longer lined up with
+    the machine. Cheap to detect, expensive to miss.
+    """
+    try:
+        ok, msg, _ = send(POSE_CHECK, port=port, timeout=20)
+    except Exception:
+        return None
+    for line in (msg or "").splitlines():
+        if line.startswith("KX_POSED:"):
+            _, n, names = line.split(":", 2)
+            return int(n), [x for x in names.split(",") if x]
+    return None
+
+
 def main():
     a = sys.argv[1:]
     if not a:
@@ -40,6 +70,13 @@ def main():
     ok, msg, dt = send(code)
     print(msg.rstrip())
     print("[%s in %.1f s]" % ("ok" if ok else "FAILED", dt))
+    p = posed()
+    if p and p[0]:
+        sys.stderr.write("\n!! %d parts are at an animation pose (%s%s).\n"
+                         "!! Any save from here bakes it into the file and every boolean\n"
+                         "!! against a posed reference reads the wrong geometry.\n"
+                         "!! Clear it:  freecadcmd.exe tools/unpose.py\n"
+                         % (p[0], ", ".join(p[1]), " ..." if p[0] > len(p[1]) else ""))
     return 0 if ok else 1
 
 

@@ -1,7 +1,22 @@
 # -*- coding: utf-8 -*-
 import FreeCAD
-doc=next(d for d in FreeCAD.listDocuments().values()
-                if d.FileName.replace("\\", "/").endswith("KneeExo_v6.FCStd"))
+def _kx_doc():
+    """The model, in the GUI instance or headless under freecadcmd.
+
+    The bare next(...) this replaces raises StopIteration when no document is open, which
+    surfaces from freecadcmd as the unhelpful "<unknown exception data>" -- and is why these
+    older build scripts could not be re-run without the GUI at all.
+    """
+    import os as _os
+    want = _os.environ.get("KX_DOC", r"C:/Users/Josh/KneeExo_v6.FCStd").replace(chr(92), "/")
+    base = want.rsplit("/", 1)[-1]
+    for d in FreeCAD.listDocuments().values():
+        if d.FileName.replace(chr(92), "/").endswith(base):
+            return d
+    return FreeCAD.openDocument(want)
+
+
+doc = _kx_doc()
 O=lambda n: doc.getObject(n)
 p8=O("P8_RodEndHousing_PETG"); rod=O("P4_Rod_8mm")
 print("P8 exists:", p8 is not None, " visible:", p8.ViewObject.Visibility if p8 else "-")

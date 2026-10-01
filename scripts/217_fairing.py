@@ -12,8 +12,22 @@ Open below Z=92: the thigh cuff tops out at Z=88 and the carriage bottom is at Z
 there is no room for a wall between them -- the underside faces the limb anyway."""
 import math, FreeCAD, Part
 from FreeCAD import Vector as V
-doc=next(d for d in FreeCAD.listDocuments().values()
-                if d.FileName.replace("\\", "/").endswith("KneeExo_v6.FCStd"))
+def _kx_doc():
+    """The model, in the GUI instance or headless under freecadcmd.
+
+    The bare next(...) this replaces raises StopIteration with no document open, which is why
+    this generator could only ever be run from the GUI.
+    """
+    import os as _os
+    want = _os.environ.get("KX_DOC", r"C:/Users/Josh/KneeExo_v6.FCStd").replace("\\", "/")
+    base = want.rsplit("/", 1)[-1]
+    for d in FreeCAD.listDocuments().values():
+        if d.FileName.replace("\\", "/").endswith(base):
+            return d
+    return FreeCAD.openDocument(want)
+
+
+doc = _kx_doc()
 def bx(x0,x1,y0,y1,z0,z1): return Part.makeBox(x1-x0,y1-y0,z1-z0,V(x0,y0,z0))
 def cz(r,z0,z1,x=0.0,y=0.0): return Part.makeCylinder(r,z1-z0,V(x,y,z0),V(0,0,1))
 N_EXP,N_PTS=5.5,32
@@ -75,7 +89,9 @@ sk=sk.removeSplitter()
 for y in SSP: sk=sk.cut(cz(2.6,108.,124.,0.,y))
 assert len(sk.Solids)==1 and sk.isValid(),"shank solids=%d"%len(sk.Solids)
 o=doc.getObject("P24_FairingShank") or doc.addObject("Part::Feature","P24_FairingShank")
-o.Shape=sk; o.Label="P24_FairingShank"; o.ViewObject.Visibility=True
+o.Shape=sk; o.Label="P24_FairingShank"
+if getattr(o, "ViewObject", None) is not None:        # absent under freecadcmd
+    o.ViewObject.Visibility=True
 b=sk.BoundBox
 print("P24_FairingShank X %6.1f..%5.1f Y %6.1f..%5.1f Z %5.1f..%5.1f  %5.1f cm3"%(
     b.XMin,b.XMax,b.YMin,b.YMax,b.ZMin,b.ZMax,sk.Volume/1000))

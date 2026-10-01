@@ -927,6 +927,107 @@ miss one.
 Worth knowing because every clean result this repo produces depends on the parts being where
 the checks think they are, and that is the one thing none of the checks test.
 
+## Building the pair
+
+The model is the **LEFT** leg. `+Z` is lateral and the whole device lives at `+Z`, so nothing
+straddles the sagittal plane and every printed part is chiral. The right leg is a reflection,
+`Z -> -Z`, built into its own document by
+[`scripts/701_mirror_build.py`](scripts/701_mirror_build.py):
+`KneeExo_v6.FCStd` (left) and `KneeExo_v6_R.FCStd` (right), 37 solids each.
+
+Separate documents, not more objects in one, for two reasons: every verification script works on
+"each Part::Feature in the document", so doubling the objects would double every sweep and halve
+what the results mean; and interference, coverage and contact pressure are all invariant under
+reflection, so the right leg does **not** need the 107-pose sweep repeated. Keeping it separate
+states that argument instead of burying it.
+
+What does not mirror is the **ball screw**. Reflecting an assembly reflects its threads, so a
+literal mirror wants a left-hand SFU1610 — a special order at a premium, already priced and
+rejected in [`370_no_lh_screw.py`](scripts/370_no_lh_screw.py). The screw is not a structural
+mirror of anything; it is a rotary-to-linear converter between two parts that *are* mirrored.
+Keep the RH screw on both legs and the only consequence is a sign:
+
+| | +motor rotation | nut travels | knee |
+|---|---|---|---|
+| left | + | distal | **extends** |
+| right | + | distal | **flexes** |
+
+One constant, in one place — the joint direction in firmware. The trap is doing nothing and
+assuming symmetry: a right leg with the left leg's sign drives the knee the wrong way under a
+28.2 N·m assist, which is not a subtle failure. See
+[`700_handedness.py`](scripts/700_handedness.py).
+
+For a pair the printed and fabricated parts double but do **not** repeat — they are new part
+numbers, not more of the same: 15 L + 15 R printed (2.5 kg of filament), 2 L + 2 R aluminium
+(956 g). Everything symmetric is shared: extrusion, belts, pulleys, motors, drive, V-wheels,
+bearings, fasteners, neoprene sleeves, webbing.
+
+### The part numbers carry the leg
+
+Each printed part is engraved with its number **and its leg letter** — `P5L` and `P5R` — 0.8 mm
+recessed, on a face that is hidden once assembled, by
+[`412_engrave.py`](scripts/412_engrave.py). The pair is the reason the letter is there at all:
+the two cuffs, the two drive-shell halves and the three fairing mounts are already hard to tell
+apart on the bed, and with two legs in the same print queue there are thirty parts, not fifteen.
+
+Three things this costs, all of them paid rather than argued away:
+
+- **A mirrored mark reads backwards**, so the right leg cannot inherit the left's engraving. The
+  mirror is taken from a fully *un-engraved* left leg, and each leg is then engraved through the
+  same code with its own letter. Four parts live outside the `393…409` rebuild chain and keep
+  their marks forever, so `412` also has a **fill** mode that rebuilds the original cutting tool
+  and fuses it back, verified by probing the skin before and after (59% solid -> 100%).
+- **One more character needs more room.** `P24L` is 5.5 mm longer than `P24` at 8 mm, which was
+  enough that the placement search found no smooth patch at all on two parts. The cap-height
+  ladder now steps 8 -> 5 -> 4 mm; `P24` sits at 4 mm and `P1_KneeYoke` needs an explicit site,
+  because its surface satisfies no automatic search.
+- **Where every mark went is now recorded** next to the document, in `<doc>.marks.json`, and the
+  visibility check reads it. It used to read a table copied by hand from `412`'s printed output,
+  and adding the leg letter moved five of the fourteen marks — a hand-copied table would have
+  been testing bare surface and reporting it covered.
+
+### Nothing was reading the part numbers
+
+Twelve of the fourteen marks were cut as **mirror images**, and every check in this repository
+passed them. `412` verified the cut removed a plausible volume; `413` verified no ray escapes from
+the mark's surface; `411` verified the mesh. None of them asks what the glyphs *say*.
+
+The cause was duplication. `412` built the text frame inline, four times, once per mark style — and
+three of the four were left-handed. A glyph reads forwards only when the layout's reading direction
+is the reader's right hand, and for a reader standing on the open side of the surface looking along
+`into` (the direction the material lies), with their head up along `up`, that is
+
+    right = into × up
+
+Get the sign wrong and the mark is still 0.8 mm deep, still on a hidden face, still one clean
+solid, and still unreadable. It cost a full re-engraving of both legs.
+
+Three things came out of it, and they are the shape of the fix rather than the fix itself:
+
+- [`tools/markframe.py`](tools/markframe.py) is the single authority for which way a mark points,
+  with the rule stated once. `412`, `416` and `702` all call it, so they cannot disagree again.
+  It also carries a `legacy` flag that reproduces the old left-handed frames, for the one job that
+  needs them: *filling* a mark that was cut with them.
+- [`tools/marktool.py`](tools/marktool.py) holds the shared tool-building — the text, the 6% tool
+  inflation that avoids fusing across coincident faces, the `removeSplitter`-then-raw-fuse
+  fallback, the skin probe. Same reason.
+- [`tools/readmark.py`](tools/readmark.py) prints each mark as ASCII, sampled from the reader's own
+  viewpoint, so "does it read forwards" is now a check and not an assumption. No renderer, no
+  screenshot: sample 0.4 mm inside the material and print `#` where material remains.
+
+Removing the bad marks was its own problem. [`416_unmark.py`](scripts/416_unmark.py) rebuilds each
+cutting tool from the registry and fuses it back, verified by probing the skin before and after
+(59% solid → 100%). It worked on 13 of 14. `P24_FairingShank` refused every variant — at tool
+inflation 1.0 the volume came back exactly right and the solid was still broken — so it was
+rebuilt blank from its own generator instead, which meant making `217_fairing.py` and
+`232_covers.py` run headless. A part that resists booleans is better regenerated than repaired.
+
+### Two documents means two of everything downstream
+
+STLs export to a directory named after the document (`KneeExo_v6_STL`, `KneeExo_v6_R_STL`), one
+per leg. The part object names are identical in both files, so a single shared folder would
+quietly leave one leg's STLs under names that look like a complete set.
+
 ## Open items
 
 - **No FEA.** Hand calculations only.

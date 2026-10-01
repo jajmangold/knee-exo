@@ -7,6 +7,15 @@ Every mechanism-derived number below comes out of
 [`scripts/300_drivetrain.py`](../scripts/300_drivetrain.py). Run it before ordering,
 because changing one assumption moves several lines at once.
 
+**Ordering for both legs?** Only the symmetric lines double in quantity — extrusion, belts,
+pulleys, motors, drive, V-wheels, bearings, fasteners, neoprene sleeves, webbing. The printed
+and machined parts double in *count* but are **new part numbers, not more of the same**: 15 L +
+15 R printed (2.5 kg of filament) and 2 L + 2 R aluminium (956 g), each engraved with its leg
+letter. The **ball screw stays right-hand on both legs** — a mirrored screw would be left-hand,
+which is a special-order premium part, and the reflection is absorbed by one sign in firmware
+instead. See [`700_handedness.py`](../scripts/700_handedness.py) and the README's
+"Building the pair".
+
 ---
 
 ## 1. Open decision you must settle before ordering

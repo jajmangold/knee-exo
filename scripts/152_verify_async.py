@@ -1,14 +1,28 @@
 # -*- coding: utf-8 -*-
 import math, json, itertools, FreeCAD
 from FreeCAD import Vector as V
-doc=next(d for d in FreeCAD.listDocuments().values()
-                if d.FileName.replace("\\", "/").endswith("KneeExo_v6.FCStd"))
+def _kx_doc():
+    """The model, in the GUI instance or headless under freecadcmd.
+
+    The bare next(...) this replaces raises StopIteration when no document is open, which
+    surfaces from freecadcmd as the unhelpful "<unknown exception data>" -- and is why these
+    older build scripts could not be re-run without the GUI at all.
+    """
+    import os as _os
+    want = _os.environ.get("KX_DOC", r"C:/Users/Josh/KneeExo_v6.FCStd").replace(chr(92), "/")
+    base = want.rsplit("/", 1)[-1]
+    for d in FreeCAD.listDocuments().values():
+        if d.FileName.replace(chr(92), "/").endswith(base):
+            return d
+    return FreeCAD.openDocument(want)
+
+
+doc = _kx_doc()
 K=json.load(open(r"C:/Users/Josh/KneeExo_anim/kinematics.json"))
 S=K["samples"]; XE=K["XE"]; D0=tuple(K["D0"])
 _f=open(r"C:/Users/Josh/KneeExo_anim/verify.log","w",encoding="utf-8")
 def _w(*a):
-    _f.write(" ".join(str(x) for x in a)+"
-"); _f.flush()
+    _f.write(" ".join(str(x) for x in a) + chr(10)); _f.flush()
 def sm(t): return min(S,key=lambda q:abs(q["theta"]-t))
 BASE=sm(0.0); PHI0=BASE["phi"]; CARR0=BASE["carr"]
 SHANK=["A4_Shank2020_VSlot","P2a_KneeHingePlate","P2b_RodClevisBlock","P6_ShankSocket",

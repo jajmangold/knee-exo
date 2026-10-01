@@ -65,8 +65,23 @@ Run after 240_nut1610.py and 241_fixups.py.
 import math, json, FreeCAD, Part
 from FreeCAD import Vector as V
 
-doc = next(d for d in FreeCAD.listDocuments().values()
-                if d.FileName.replace("\\", "/").endswith("KneeExo_v6.FCStd"))
+def _kx_doc():
+    """The model, in the GUI instance or headless under freecadcmd.
+
+    The bare next(...) this replaces raises StopIteration when no document is open, which
+    surfaces from freecadcmd as the unhelpful "<unknown exception data>" -- and is why these
+    older build scripts could not be re-run without the GUI at all.
+    """
+    import os as _os
+    want = _os.environ.get("KX_DOC", r"C:/Users/Josh/KneeExo_v6.FCStd").replace(chr(92), "/")
+    base = want.rsplit("/", 1)[-1]
+    for d in FreeCAD.listDocuments().values():
+        if d.FileName.replace(chr(92), "/").endswith(base):
+            return d
+    return FreeCAD.openDocument(want)
+
+
+doc = _kx_doc()
 
 t = globals().get("_kx_timer")
 if t is not None:
@@ -146,7 +161,8 @@ for nm, lab, g, RAIL_Y in (("A9_RailMGN9_A", "A9_RailMGN7H_A", -1.0, RAIL_Y_A),
     o = O(nm) or doc.addObject("Part::Feature", nm)
     o.Shape = r
     o.Label = lab
-    o.ViewObject.Visibility = True
+    if getattr(o, "ViewObject", None) is not None:  # absent headless
+        o.ViewObject.Visibility = True
     b = r.BoundBox
     print("%-16s X %+6.1f..%+6.1f  Y %+6.1f..%+6.1f = %5.1f mm  Z %+6.1f..%+6.1f"
           % (lab, b.XMin, b.XMax, b.YMin, b.YMax, b.YLength, b.ZMin, b.ZMax))

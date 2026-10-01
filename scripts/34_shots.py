@@ -15,7 +15,8 @@ for p in ("HW_ROMpin_flexion_105deg","HW_ROMpin_extension_0deg"):
 for n in ("REF_Thigh","REF_Knee","REF_Shank"):
     if O(n): O(n).ViewObject.Transparency = 80
 for n in ("P3_ThighCuff","P6_ShankCuff"):
-    O(n).ViewObject.Transparency = 35
+    if getattr(O(n), "ViewObject", None) is not None:  # absent headless
+        O(n).ViewObject.Transparency = 35
 pose(0.0)
 FreeCADGui.ActiveDocument.ActiveView.viewIsometric()
 FreeCADGui.SendMsgToActiveView("ViewFit")
