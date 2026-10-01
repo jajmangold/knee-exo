@@ -16,7 +16,7 @@ g["_kx_timer"]=None
 R = 29 * 8.0 / (2 * math.pi)
 A0 = 161.0
 SHANK=["A4_Shank2020_VSlot","P2a_KneeHingePlate","P6_ShankSocket","P7_ShankCuff",
-       "P24_FairingShank","HW_JointBolts"]
+       "P24_FairingShank","P31_InterfaceDist","HW_JointBolts"]
 # posed with the shank but never exported: the renders leave the reference limb out.
 # vlow.py has always posed REF_Shank; this script used not to, which was invisible while
 # the limb was hidden and wrong the moment it was shown.
@@ -28,12 +28,12 @@ GANTRY=["P3_Carriage","A2b_BallNut_SFU1620",
 STAT=["A1_Extrusion_20x60_VSlot","P1_KneeYoke","P5_ThighCuff","A2_BallScrew_SFU1620",
       "A3_Motor_6374","A6_Idler29T","A7_DriveBox","A7b_LinkBelt","HW_PinB_10",
       "A5_Belt_HTD8M","A5b_Belt_DriveRun","A5c_Belt_TakeRun","A5d_Belt_WrapIdler",
-      "P20_KneeShroud","P21_ShellAnterior","P22_DriveCap","P25_MotorNacelle","P23a_FairingMount","P23b_FairingMount","P23c_FairingMount"]
+      "P20_KneeShroud","P21_ShellAnterior","P22_DriveCap","P25_MotorNacelle","P30_InterfaceProx","P23a_FairingMount","P23b_FairingMount","P23c_FairingMount"]
 MAT={}
 for n in ("A1_Extrusion_20x60_VSlot","A4_Shank2020_VSlot"): MAT[n]="ALU"
 for n in ("P1_KneeYoke","P2a_KneeHingePlate","P5_ThighCuff","A6_Idler29T",
           "P6_ShankSocket","P7_ShankCuff"): MAT[n]="PETG"
-for n in ("P20_KneeShroud","P21_ShellAnterior","P22_DriveCap","P25_MotorNacelle","P24_FairingShank","P23a_FairingMount","P23b_FairingMount",
+for n in ("P20_KneeShroud","P21_ShellAnterior","P22_DriveCap","P25_MotorNacelle","P30_InterfaceProx","P31_InterfaceDist","P24_FairingShank","P23a_FairingMount","P23b_FairingMount",
           "P23c_FairingMount"): MAT[n]="FAIR"
 for n in ("A2_BallScrew_SFU1620","HW_PinB_10","HW_JointBolts"): MAT[n]="STEEL"
 MAT["A2b_BallNut_SFU1620"]="NUT"

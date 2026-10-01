@@ -8,7 +8,7 @@ S=K["samples"]; C0=K["C0"]; C1=K["C1"]; R=K["R"]; BZ=tuple(K["belt_z"])
 BIN,BOUT=K["belt_x"][0]+0.05,K["belt_x"][1]
 TMIN,TMAX=S[0]["theta"],S[-1]["theta"]
 SHANK=["A4_Shank2020_VSlot","P2a_KneeHingePlate","P6_ShankSocket","P7_ShankCuff",
-       "P24_FairingShank","REF_Shank","HW_JointBolts"]
+       "P24_FairingShank","REF_Shank","HW_JointBolts","P31_InterfaceDist"]
 CA=["P3_Carriage","A2b_BallNut_SFU1620","P10a_Slider_Delrin","P10b_Slider_Delrin"]
 CB=["P3b_CarriageB","A2d_BallNut_LH","P10c_Slider_Delrin","P10d_Slider_Delrin",
     "P11_SprungAnchor","A8_TensionSpring","P13_HallTension"]

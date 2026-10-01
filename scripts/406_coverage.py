@@ -72,8 +72,11 @@ def shapes(names):
 def pose(th):
     r = FreeCAD.Rotation(V(0, 0, 1), th)
     dy = (A0 - R_CAP * math.radians(th)) - A0
+    # This tuple is the SHANK group and it is separate from BLOCK, so a part can be listed
+    # as an occluder and still never get posed. P31_InterfaceDist was: it sat at identity
+    # while the shank rotated, 88 mm from its host, and blocked rays from where it was not.
     for n in ("A4_Shank2020_VSlot", "P2a_KneeHingePlate", "P6_ShankSocket",
-              "P7_ShankCuff", "P24_FairingShank", "HW_JointBolts"):
+              "P7_ShankCuff", "P24_FairingShank", "P31_InterfaceDist", "HW_JointBolts"):
         if O(n):
             O(n).Placement = FreeCAD.Placement(V(0, 0, 0), r, V(0, 0, 0))
     for n in GANTRY:

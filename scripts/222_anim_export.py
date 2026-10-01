@@ -30,7 +30,7 @@ R = 29 * 8.0 / (2 * math.pi)
 A0 = 161.0
 
 SHANK = ["A4_Shank2020_VSlot", "P2a_KneeHingePlate", "P6_ShankSocket", "P7_ShankCuff",
-         "P24_FairingShank", "HW_JointBolts"]
+         "P24_FairingShank", "P31_InterfaceDist", "HW_JointBolts"]
 # posed with the shank but never exported -- the renders leave the reference limb out
 # One moving group. The belt is a closed loop whose strands and wraps are static, so
 # nothing is rebuilt per frame.
@@ -47,7 +47,7 @@ for n in ("A1_Extrusion_20x60_VSlot", "A4_Shank2020_VSlot"):
 for n in ("P1_KneeYoke", "P2a_KneeHingePlate", "A6_Idler29T",
           "P5_ThighCuff", "P6_ShankSocket", "P7_ShankCuff"):
     MAT[n] = "PETG"
-for n in ("P20_KneeShroud", "P21_ShellAnterior", "P22_DriveCap", "P25_MotorNacelle", "P24_FairingShank",
+for n in ("P20_KneeShroud", "P21_ShellAnterior", "P22_DriveCap", "P25_MotorNacelle", "P30_InterfaceProx", "P31_InterfaceDist", "P24_FairingShank",
           "P23a_FairingMount", "P23b_FairingMount",
           "P23c_FairingMount"):
     MAT[n] = "FAIR"

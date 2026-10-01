@@ -30,9 +30,11 @@ Choices and why:
   Shape.check() afterwards: text is dozens of small faces and tight curves, which is exactly
   the kind of geometry that produced a BOPAlgo SelfIntersect on the cuff earlier.
 
-Run in chunks of three -- the bearing search is a few thousand ray casts per part:
+Run ONE PART PER CALL. The bearing search is ~1000 line-solid booleans and chunks of
+three went past the 90 s GUI dispatch limit -- which does not fail cleanly, it keeps
+working in the background and leaves the document in a state the next run misreads:
 
-  for i in 0 3 6 9 12; do ... I0=$i I1=$((i+3)) ; done
+  for i in $(seq 0 14); do ... I0=$i I1=$((i+1)) ; done
 """
 import math
 import os
@@ -70,9 +72,25 @@ JOBS = [
     ("P1_KneeYoke",       "P1",  "Y", (60.0, 90.0, 30.0)),
     ("P2a_KneeHingePlate", "P2a", "Y", (-60.0, -90.0, -30.0)),
     ("P6_ShankSocket",    "P6",  "Y", (-260.0, -240.0, -280.0)),
-    ("P23a_FairingMount", "P23a", "Y", (88.0,)),
-    ("P23b_FairingMount", "P23b", "Y", (124.0,)),
-    ("P23c_FairingMount", "P23c", "Y", (160.0,)),
+    # The three mounts are the SAME PART printed three times -- 398 builds one shape at
+    # three stations, 6.4 cm3 each, identical bounding box. They are interchangeable, so
+    # they get the same mark, and "P23a" never fitted anyway: the bracket is 16 mm along
+    # the limb axis and the four-character string is 22 mm at full height.
+    # PLANAR, not radial. These are 27 x 16 x 39 brackets sitting off to the side at
+    # X 20..47, not shells around the limb axis: a ray from that axis hits one of them at
+    # exactly ONE bearing out of 36, so the smoothness search can never find a patch.
+    # The face is X = 47, which faces the thigh fairing's inner surface and is hidden once
+    # assembled. X = 20 was the first choice -- it beds against the rail -- but a material map
+    # showed it solid over only 12 mm of Z, so a third of the glyphs fell into air and the cut
+    # removed 0.016 cm3 of an expected 0.050. X = 47 is solid for 36 mm.
+    ("P23a_FairingMount", "P23", "P", (47.0, 88.0, 109.0)),
+    ("P23b_FairingMount", "P23", "P", (47.0, 124.0, 109.0)),
+    ("P23c_FairingMount", "P23", "P", (47.0, 160.0, 109.0)),
+    # The KX-1 bosses, on their X = +20 side face -- not on the mating face, which has to stay
+    # flat, and not on the underside, which beds on its host. 501 says a cold module should be
+    # identifiable without a BOM; that is only true if the interface itself is marked.
+    ("P30_InterfaceProx", "P30", "P2", (20.0, 255.0, 137.0)),
+    ("P31_InterfaceDist", "P31", "P2", (20.0, -275.0, 129.5)),
 ]
 
 
@@ -117,7 +135,7 @@ def first_hit(sh, origin, y, deg, rmax=260.0, want_wall=0.0):
     return rs[0]
 
 
-def find_spot(sh, org, stations, half_len, half_h):
+def find_spot(sh, org, stations, half_len, half_h, hoop=False):
     """a (station, bearing) whose surface is smooth across the whole text footprint"""
     best = None
     for stn in stations:
@@ -126,10 +144,17 @@ def find_spot(sh, org, stations, half_len, half_h):
             r0 = first_hit(sh, org, stn, deg, want_wall=DEPTH + 0.6)
             if r0 is None or r0 < 12.0:
                 continue
-            dang = math.degrees(half_h / r0)
+            # AXIAL lays the string along the limb; HOOP lays it around the part. The
+            # fairing mounts are 16 mm of limb axis and 'P23' is 12 mm at 5 mm height, so
+            # axially the edge probes land exactly on the part's boundary and the search
+            # finds nothing. Around the hoop at r 113 the same string is 6 degrees of arc.
+            dang = math.degrees((half_len if hoop else half_h) / r0)
+            dlen = half_h if hoop else half_len
+            # five probes, not nine: centre plus the four edge midpoints. The corners were
+            # costing 44% of the search for no case they alone rejected.
             probes = [first_hit(sh, org, stn + dy, deg + da, want_wall=DEPTH + 0.4)
-                      for dy in (-half_len, 0.0, half_len)
-                      for da in (-dang, 0.0, dang)]
+                      for dy, da in ((0.0, 0.0), (-dlen, 0.0), (dlen, 0.0),
+                                     (0.0, -dang), (0.0, dang))]
             if any(q is None for q in probes):
                 continue
             spread = max(probes) - min(probes)
@@ -157,12 +182,58 @@ for name, mark, axis, stations in JOBS[I0:I1]:
         print("  %-22s MISSING" % name)
         continue
     sh = o.Shape
-    org = MOT if axis == "M" else V(0.0, 0.0, 0.0)
+
+    if axis in ("P", "P2"):
+        # explicit face: point on it, outward normal -X, text along +Z, up +Y
+        px, py, pz = stations
+        faces = None
+        for h in ((H, 6.0, 5.0) if axis == "P" else (5.0, 4.0)):
+            faces = text_faces(mark, h)
+            tb = faces[0]
+            for f in faces[1:]:
+                tb = tb.fuse(f)
+            if tb.BoundBox.XLength < 34.0:
+                break
+        bb = tb.BoundBox
+        tb.translate(V(-0.5 * (bb.XMin + bb.XMax), -0.5 * (bb.YMin + bb.YMax), 0.0))
+        if axis == "P":
+            # local x -> +Z, local y -> +Y, local z -> -X (into the part from X = 47)
+            m = FreeCAD.Matrix(0.0, 0.0, -1.0, px + 0.3,
+                               0.0, 1.0, 0.0, py,
+                               1.0, 0.0, 0.0, pz,
+                               0.0, 0.0, 0.0, 1.0)
+        else:
+            # P2: local x -> +Y, local y -> +Z, local z -> -X. Same face normal, but the
+            # string runs along the limb because these bosses are 56 long and 7 tall.
+            m = FreeCAD.Matrix(0.0, 0.0, -1.0, px + 0.3,
+                               1.0, 0.0, 0.0, py,
+                               0.0, 1.0, 0.0, pz,
+                               0.0, 0.0, 0.0, 1.0)
+        tool = tb.transformGeometry(m).extrude(V(-(DEPTH + 0.3), 0.0, 0.0))
+        v0 = sh.Volume
+        cut = sh.cut(tool)
+        removed = (v0 - cut.Volume) / 1000.0
+        want = sum(f.Area for f in faces) * DEPTH / 1000.0
+        try:
+            cut.check(True)
+            chk = "clean"
+        except Exception:
+            chk = "SELF-INTERSECT"
+        ok = 0.35 * want < removed < 1.8 * want and chk == "clean"
+        print("  %-20s %-6s face X %.0f        %7.3f cm3 %7.3f cm3  %s%s"
+              % (name, mark, px, removed, want, chk, "" if ok else "  <-- MISSED"))
+        if ok and len(cut.Solids) == 1:
+            o.Shape = cut
+            done += 1
+        continue
+
+    org = MOT if axis.startswith("M") else V(0.0, 0.0, 0.0)
+    hoop = axis.endswith("h")
     # SHRINK TO FIT. "P23a" at 8 mm is 22 mm long and the mount is 16 mm of limb axis, so
     # the search could never find room. Step the cap height down until it fits; 4 mm in a
     # bold face still has ~0.6 mm stems, which is thin but legible as a recess.
     spot = faces = tb = tbb = None
-    for h in (H, 6.0, 5.0, 4.0):
+    for h in (H, 5.0):
         faces = text_faces(mark, h)
         if not faces:
             continue
@@ -170,7 +241,8 @@ for name, mark, axis, stations in JOBS[I0:I1]:
         for f in faces[1:]:
             tb = tb.fuse(f)
         tbb = tb.BoundBox
-        spot = find_spot(sh, org, stations, 0.5 * tbb.XLength + 2.0, 0.5 * h + 1.5)
+        spot = find_spot(sh, org, stations, 0.5 * tbb.XLength + 2.0, 0.5 * h + 1.5,
+                         hoop=hoop)
         if spot is not None:
             if h != H:
                 print("  %-20s %-6s shrunk to %.0f mm to fit" % (name, mark, h))
@@ -188,9 +260,10 @@ for name, mark, axis, stations in JOBS[I0:I1]:
     rad = V(math.cos(t), 0.0, math.sin(t))
     tang = V(-math.sin(t), 0.0, math.cos(t))
     axis_y = V(0.0, 1.0, 0.0)
-    m = FreeCAD.Matrix(axis_y.x, tang.x, rad.x, org.x + rad.x * (r0 - 0.3),
-                       axis_y.y, tang.y, rad.y, stn,
-                       axis_y.z, tang.z, rad.z, org.z + rad.z * (r0 - 0.3),
+    u, w = (tang, axis_y) if hoop else (axis_y, tang)
+    m = FreeCAD.Matrix(u.x, w.x, rad.x, org.x + rad.x * (r0 - 0.3),
+                       u.y, w.y, rad.y, stn,
+                       u.z, w.z, rad.z, org.z + rad.z * (r0 - 0.3),
                        0.0, 0.0, 0.0, 1.0)
     blk = blk.transformGeometry(m)
 
@@ -205,9 +278,9 @@ for name, mark, axis, stations in JOBS[I0:I1]:
     # lift 2.2 mm and report intact skin as engraved.
     probe = Part.makeBox(8.0, 8.0, 0.5, V(-4.0, -4.0, 0.0))
     probe = probe.transformGeometry(FreeCAD.Matrix(
-        axis_y.x, tang.x, rad.x, org.x + rad.x * r0,
-        axis_y.y, tang.y, rad.y, stn,
-        axis_y.z, tang.z, rad.z, org.z + rad.z * r0,
+        u.x, w.x, rad.x, org.x + rad.x * r0,
+        u.y, w.y, rad.y, stn,
+        u.z, w.z, rad.z, org.z + rad.z * r0,
         0.0, 0.0, 0.0, 1.0))
     pk = sh.common(probe)
     frac = (0.0 if pk.isNull() else pk.Volume) / max(1e-9, probe.Volume)
@@ -241,6 +314,12 @@ for name, mark, axis, stations in JOBS[I0:I1]:
 
 print()
 print("  engraved %d of %d parts in this chunk" % (done, len(JOBS[I0:I1])))
+print()
+print("  NOTE ON VERIFYING THIS. A tempting shortcut is to scan each part's surface for")
+print("  voids and call a pitted patch 'engraved'. It does not work: bolt holes, lightening")
+print("  windows and shell ports all read the same way. A probe written that way scored the")
+print("  interface bosses as engraved at 68%% solid skin when they were still blank -- it was")
+print("  reading their bolt holes. The only trustworthy record is this script's own report.")
 print("  Stem width at %.0f mm in this font is about %.1f mm; a 0.4 nozzle needs %.1f."
       % (H, 0.15 * H, MIN_STEM))
 doc.recompute()

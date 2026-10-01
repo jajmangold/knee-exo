@@ -40,7 +40,7 @@ BZ = tuple(K["belt_z"])
 BIN, BOUT = K["belt_x"][0] + 0.05, K["belt_x"][1]
 
 SHANK = ["A4_Shank2020_VSlot", "P2a_KneeHingePlate", "P6_ShankSocket", "P7_ShankCuff",
-         "P24_FairingShank", "HW_JointBolts", "REF_Shank"]
+         "P24_FairingShank", "HW_JointBolts", "REF_Shank", "P31_InterfaceDist"]
 # Updated for the ONE-SCREW build (391-397). One moving group, not two: the gantry, the
 # single nut and the four mini V-wheels. The belt is a closed loop whose strands and
 # wraps are all STATIC geometry -- only the clamp slides along the -X strand -- so

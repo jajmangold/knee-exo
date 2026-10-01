@@ -107,7 +107,7 @@ drifting, and there is no adjustment for it. Each screw only needs **162 mm of t
 
 ## 5. Printed parts
 
-All 12 in [`stl/`](../stl). Blue PETG as rendered, 0.2 mm layers. The Delrin gibs are
+All 15 in [`stl/`](../stl). Blue PETG as rendered, 0.2 mm layers. The Delrin gibs are
 gone — they became bought MGN7H blocks (S2a).
 
 | Part | Qty | Suggested |
