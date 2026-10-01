@@ -74,22 +74,25 @@ print("Q1c.  NO SUPERELLIPSE CLEARS THE THIGH AT THAT BEARING EITHER")
 print("=" * 78)
 print("  An n=%.1f section is WIDER than a circle on its diagonals -- that is the whole" % N)
 print("  point of the formal language. For a pod that has to contain the can, the diagonal")
-print("  is pointed at the thigh:")
+print("  is pointed at the thigh. The section must also be CENTRED on the can: offsetting it")
+print("  outboard to protect the inboard diagonal forces the inboard half-size up by the")
+print("  same amount, so the diagonal gets worse, not better. Centred is optimal, which is")
+print("  why a brute-force search over centre AND exponent returns nothing.")
 print()
-print("    %-10s %-12s %-12s %-10s" % ("n", "half-size", "diagonal reach", "pod face"))
-for n in (2.0, 3.0, 4.0, N):
-    # smallest a=b that contains a circle of radius MOT_R+0.5: worst case is on the axes
-    s = MOT_R + 0.5
-    # the superellipse |x/s|^n + |z/s|^n = 1 passes through (s,0); its 45 deg point is at
-    # s * 2^(-1/n) in each axis -> radius s * 2^(1/2 - 1/n) * sqrt(2)/sqrt(2)
-    diag = s * 2.0 ** (0.5 - 1.0 / n)
-    print("    %-10.1f %-12.1f %-12.1f %-10.1f %s"
-          % (n, s, diag, ax - diag, "" if ax - diag > LEG_R else "<- inside the thigh"))
+print("    %-6s %-11s %-13s %-11s %-10s" % ("n", "half-size", "diagonal", "+%.0fmm wall" % WALL, "pod face"))
+for n in (2.0, 2.5, 3.0, 4.0, N):
+    s_ = MOT_R + 0.5                       # inner surface: the can plus bore clearance
+    diag = s_ * 2.0 ** (0.5 - 1.0 / n)     # the superellipse 45 deg point
+    face = ax - (diag + WALL)              # OUTER surface, which is what has to clear
+    print("    %-6.1f %-11.1f %-13.1f %-11.1f %-10.1f %s"
+          % (n, s_, diag, diag + WALL, face,
+             "" if face > LEG_R else "<- inside the thigh"))
 print()
-print("  A circle (n=2) is the only section whose worst bearing is its half-size. Every")
-print("  higher exponent buries itself. So the pod is round, and coherence has to come from")
-print("  the junction and the end caps -- which is what the faired foot and the domed nose")
-print("  are for.")
+print("  A circle is the only section whose worst bearing is its half-size, and it clears")
+print("  by 1.2 mm. Even n=2.5 is already inside the limb once the wall is counted -- the")
+print("  earlier version of this table showed the INNER surface and so understated it.")
+print("  So the pod is round, and coherence has to come from the junction and the end caps,")
+print("  which is what the faired foot and the domed nose are for.")
 
 print()
 print("=" * 78)

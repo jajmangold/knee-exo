@@ -367,7 +367,10 @@ screw runs at Z 103, the small cap's floor is at Z 78 and survives the cut at Z 
 the merged section's floor is at Z 22 and goes. `406_coverage.py` scored the merge at 16
 exposed rays against 0 for the pair: the screw and the motor both became touchable. An
 n=5.5 section is wider on its diagonals than a circle too, so no superelliptical pod of any
-size clears the thigh at that bearing either. What the pod got instead is a **faired foot**
+size clears the thigh at that bearing either — once the 3 mm wall is counted, even **n = 2.5**
+is inside the limb (pod face 83.8 against a thigh at 84.9), and only the circle survives, at
+86.1. Offsetting the section outboard does not rescue it: the inboard half-size then has to
+grow by the same amount and the diagonal gets worse. What the pod got instead is a **faired foot**
 — a raised-cosine flare over the +12…+100° window about the motor axis, 12 mm at its peak,
 so the tube grows out of the cap's flank rather than piercing it — and a **domed nose**,
 tapered over Y 209…214.5 to a 19 mm blunt end. The window costs nothing: a ray leaving the
