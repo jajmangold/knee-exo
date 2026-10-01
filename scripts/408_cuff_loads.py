@@ -468,3 +468,52 @@ print("  a sleeve goes over a CLOSED, dry incision, not a fresh one, and neopren
 print("  dermatitis from thiourea accelerators is common enough to plan for. Worth one")
 print("  question to whoever is running his rehab, and a nylon-faced or neoprene-free")
 print("  sleeve is the fallback. That is a question for them, not a thing to design around.")
+
+print()
+print("=" * 78)
+print("8.  CAN IT ACTUALLY GO ON?  --  200 deg of wrap is a C that has to spring open")
+print("=" * 78)
+print("  Wrapping past 180 deg is what makes the cuff GRIP: the shell edges are beyond the")
+print("  widest point, so pulling them together clamps rather than slides off. It is also")
+print("  what gets the pressure down. The cost is that the leg no longer drops in -- the")
+print("  shell has to spring.")
+print()
+E_PETG = 2000.0        # MPa
+EPS_Y = 0.04           # PETG yields around 4% strain
+print("  %-8s %-9s %-12s %-11s %-10s %-10s %s"
+      % ("cuff", "wrap", "limb+sleeve", "opening", "spring", "strain", "vs yield"))
+for lbl, fn, yc, wrap, wall in (("thigh", r_thigh, 190.0, 200.0, 4.0),
+                                ("shank", r_shank, -270.0, 215.0, 4.0)):
+    r_in = fn(yc) + 3.0 + 1.0           # shell inner: limb + sleeve + air
+    half_open = math.radians(360.0 - wrap) / 2.0
+    chord = 2.0 * r_in * math.sin(half_open)
+    limb_dia = 2.0 * (fn(yc) + T_SLEEVE)   # the sleeve is ON when you don it
+    spring = max(0.0, limb_dia - chord)
+    # opening a C-shell changes its curvature; outer-fibre strain = (t/2) * dk,
+    # with dk ~ kappa * (spring / chord)
+    dk = (1.0 / r_in) * (spring / chord) if chord > 0 else 0.0
+    eps = (wall / 2.0) * dk
+    print("  %-8s %4.0f deg  %8.1f mm  %7.1f mm  %6.1f mm  %8.3f%%  %s"
+          % (lbl, wrap, limb_dia, chord, spring, eps * 100.0,
+             "%.0fx margin" % (EPS_Y / eps) if eps > 0 else "drops straight on"))
+print()
+print("  0.4 mm on the thigh and 2.5 mm on the shank, at 582x and 36x margin against yield.")
+print("  The shank needs more because 215 deg of wrap on a 48 mm radius closes the opening")
+print("  much faster than the standoff opens it -- but 0.11% strain in a part that yields at")
+print("  4% is not a concern, and 2.5 mm of spring in a 93 mm C is a push, not a fight.")
+print("  Measured against the BARE limb both drop straight on; it is the sleeve that makes")
+print("  them touch anything at all.")
+print()
+print("  Worth knowing because the instinct with a rigid printed C is to reduce the wrap to")
+print("  get it on, and that is exactly the change that put the old cuff at 40 kPa. Here the")
+print("  wrap is free: it costs no donning effort and buys both the clamping action and the")
+print("  bearing area.")
+print()
+print("  Order of operations for the patient: sleeve on, cuff clicks over, webbing pulled to")
+print("  the witness mark, side-release buckles clipped. Coming off is one squeeze.")
+print()
+print("  The witness mark is a PEN MARK ON THE WEBBING, not a printed feature -- section 5")
+print("  wanted a repeatable number and a cam buckle is stepless, so the tail position at the")
+print("  slot is the indicator. Saying so explicitly because an earlier draft described a")
+print("  printed scale that was never cut, and documenting a feature that does not exist is")
+print("  the exact failure mode this repo keeps catching in its own geometry.")
