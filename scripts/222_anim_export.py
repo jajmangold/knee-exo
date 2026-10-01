@@ -47,8 +47,8 @@ for n in ("A1_Extrusion_20x60_VSlot", "A4_Shank2020_VSlot"):
 for n in ("P1_KneeYoke", "P2a_KneeHingePlate", "A6_Idler29T",
           "P5_ThighCuff", "P6_ShankSocket", "P7_ShankCuff"):
     MAT[n] = "PETG"
-for n in ("P20_KneeShroud", "P21_ShellAnterior", "P22_DriveCap", "P24_FairingShank",
-          "P25_MotorNacelle", "P23a_FairingMount", "P23b_FairingMount",
+for n in ("P20_KneeShroud", "P21_ShellAnterior", "P22_DriveCap", "P25_MotorNacelle", "P24_FairingShank",
+          "P23a_FairingMount", "P23b_FairingMount",
           "P23c_FairingMount"):
     MAT[n] = "FAIR"
 for n in ("A2_BallScrew_SFU1620", "HW_PinB_10", "HW_JointBolts"):

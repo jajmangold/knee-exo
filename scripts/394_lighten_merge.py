@@ -51,10 +51,22 @@ if doc.getObject("A5e_Belt_Return") is not None:
 # ------------------------------------------------------------------ lighten A7
 a = doc.getObject("A7_DriveBox").Shape
 v0 = a.Volume / 1000.0
-# top and bottom plates: keep a band around the idler axle, window out the rest
-for z0, z1 in ((87.0, 93.0), (125.3, 131.3)):        # bands follow 393's 4 mm plates
-    for y0, y1 in ((219.0, 236.0), (274.0, 296.0)):
-        a = a.cut(bx(-30.0, 30.0, y0, y1, z0, z1))
+# GUARD: this script LIGHTENS whatever is already in the document -- it does not rebuild.
+# Run it twice without re-running 393 in between and the second pass re-cuts windows the
+# first one already made, which is harmless, but it also means a window REMOVED from this
+# file does not come back: the old cut is still in the shape. That is exactly how the
+# bracket's limb-facing floor stayed open after those windows were deleted here, and it
+# cost a round of coverage testing to find. Fail loudly instead.
+assert v0 > 130.0, (
+    "A7 is already lightened (%.1f cm3, expected >130). Re-run 393_driveend.py first -- "
+    "this script cannot restore material it removed on a previous pass." % v0)
+# Window out the TOP plate only. The bottom plate faces the LIMB, and the idler sits
+# directly above it -- windows there are a hole from the skin straight to a 71 mm pulley
+# turning at 1160 rpm. That is what they were: 406_coverage.py fires rays from the skin
+# and they went through these openings and hit A6. Costs ~25 g to leave solid, which is
+# the cheapest 25 g in the build.
+for y0, y1 in ((219.0, 236.0), (274.0, 296.0)):
+    a = a.cut(bx(-30.0, 30.0, y0, y1, 125.3, 131.3))
 # cheeks: two windows each
 for sgn in (-1.0, 1.0):
     lo, hi = sorted((sgn * 40.5, sgn * 47.5))

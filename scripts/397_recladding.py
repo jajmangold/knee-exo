@@ -130,8 +130,74 @@ inner = [(y, prof(y)[0], prof(y)[1] - WALL, B_IN, ZC)
          for y in [26.] + YS[1:-1] + [Y_END + 2.]]
 lo = loft(outer)
 f = lo.cut(loft(inner))
-f = f.cut(bx(-110., 80., 20., 320., 40., 92.))            # open below Z 92, as before
+# THE UNDERSIDE FOLLOWS THE LEG, it is not cut off flat. 217_fairing.py opened the shell
+# below Z 92 across its whole width, on the argument that "the thigh cuff tops out at Z 88
+# and the carriage bottom is at Z 90, so there is no room for a wall between them". That
+# is true directly under the rail and nowhere else: the leg is a CYLINDER and curves away,
+# so the gap between it and where the shell's own surface naturally falls is 2.5 mm at
+# X -30, 7 mm at X -40, 22 mm at X -60 and 55 mm at X -80. A flat cut throws all of that
+# away and leaves the ball nut and the gantry's whole outboard structure facing the limb
+# through a 66 mm wide slot running the length of the thigh.
+#
+# So cut with the LIMB instead of with a plane: a cylinder 3 mm proud of REF_Thigh, plus
+# the cuff's own solid. The shell then closes wherever there is room and opens only where
+# the leg or the cuff actually is -- and the resulting underside is a concave surface that
+# follows the limb, which is what a brace should look like anyway.
+# SKIRTS. 406_coverage.py fires rays from the skin and finds the gantry and the V-wheels
+# reachable at +/-14 degrees -- the band just either side of the extrusion, at X ~ +/-26.
+# Several of those rays report NO blocker at all between skin and gantry. The shell's own
+# wall there is only Z 82..85 and the leg cut takes most of it, while the rail does not
+# start until |X| 20, so there is a longitudinal slot down each side. These close it.
+#
+# They have to thread the gantry's own travel: web A occupies X -34.5..-32.5 and the belt
+# clamp X -43.8..-32.5, both sweeping the full stroke, and the wheels reach |X| 31 at
+# Z 106..117. So the skirts sit inboard of 31.5 and stop below Z 95.
+for sgn in (-1.0, 1.0):
+    sk0, sk1 = sorted((sgn * 20.4, sgn * 31.0))   # not lo/hi: `lo` is the outer loft
+    # They run past P21's own body to Y 206.5 -- P21 stops at 180 but the gantry's deck
+    # sweeps to 204, and a ray at +14 deg found P3_Carriage through that 24 mm. They
+    # cannot be grown onto P22 instead: the cap's bottom wall sits at Z 78..81 and the
+    # limb cut removes all of it, so a skirt there has nothing to attach to. 206.5 stops
+    # short of the drive bracket's end plate at 207.
+    f = f.fuse(bx(sk0, sk1, Y_KNEE, 206.5, 83.0, 95.0))
+f = f.removeSplitter()
+
+LEG_CLEAR = 3.0
+legcut = Part.makeCylinder(84.9 + LEG_CLEAR, 400.0, V(0., 10., 0.), V(0, 1, 0))
+f = f.cut(legcut)
+cuff = doc.getObject("P5_ThighCuff")
+if cuff is not None:
+    f = f.cut(cuff.Shape)
 f = f.cut(bx(-110., 80., 20., 50., 40., 96.))             # fork cheek sweeps to Z 94 here
+# ...and the YOKE, which the skirts above drove straight through. The 107-pose sweep flagged
+# P1_KneeYoke^P21 at 5.323 cm3 in two symmetric lumps, X +/-20.4..30.0 by Y 50..124 by
+# Z 82.6..88 -- i.e. the full skirt cross-section, for 74 mm of its length. The yoke is a
+# 12 mm plate at Z 76..88 spanning X -47..43 and reaching Y 124, and the skirts hang to
+# Z 83, so they interfere over the whole of their proximal half. Two printed parts that do
+# not fit together; the hand-written box above only covered Y 20..50.
+# The skirt is shortened rather than moved, because what it is closing is the sightline to
+# the gantry at +/-14 deg and the yoke itself blocks that band over exactly this Y range --
+# it is in the BLOCK list in 406_coverage.py for the same reason. Verified by re-running it.
+# The cut follows the YOKE, not its bounding box. A box spanning the yoke's X -47..43 by
+# Z 40..88.6 was the obvious first try and it cost three rays: it also removed the canopy's
+# own floor in that band -- the 0.7 mm of skin between the limb cut at r 87.9 and Z 88.6 --
+# and that floor was the only thing standing between the skin and the ball screw at -28 deg
+# over Y 76..112. 406_coverage.py went 0 -> 3 and named it. So dilate the yoke by translated
+# copies (cheap, and makeOffsetShape on a 131 cm3 gyroid part is neither) and cut that.
+yoke = doc.getObject("P1_KneeYoke")
+if yoke is not None:
+    CL = 0.6
+    dil = yoke.Shape
+    for d in (V(CL, 0, 0), V(-CL, 0, 0), V(0, CL, 0), V(0, -CL, 0),
+              V(0, 0, CL), V(0, 0, -CL)):
+        t = yoke.Shape.copy()
+        t.translate(d)
+        dil = dil.fuse(t)
+    dil = dil.removeSplitter()
+    v0 = f.Volume / 1000.0
+    f = f.cut(dil)
+    print("   yoke clearance: %.3f cm3 off P21 for a %.1f mm gap around the yoke"
+          % (v0 - f.Volume / 1000.0, CL))
 # MOUNTING. The first version of this put a full-width rib across the section at each end
 # to replace the spine, and the 107-pose sweep returned four flags for it: a rib spanning
 # X -100..60 at Z 92..98 cuts straight through the extrusion, BOTH belt strands and the
@@ -166,6 +232,8 @@ print("P21  X %6.1f..%5.1f  Y %6.1f..%5.1f  Z %5.1f..%5.1f  %5.1f cm3"
 print("     %.0f mm across, against 168 for the symmetric +/-84 shell it replaces"
       % (b.XMax - b.XMin))
 print("     knee standoff still Z %.0f = %.0f mm proud of a 52 mm knee" % (b.ZMax, b.ZMax - 52))
+print("     Underside CLOSED against the limb: cut by a cylinder %.0f mm proud of the" % LEG_CLEAR)
+print("     thigh rather than by a flat plane, so it shuts wherever there is room.")
 print("     NO SPINE. Three grommeted M5 into the POSTERIOR side face (P23a/b/c, proved")
 print("     clear over all 107 poses by 398_sidemounts.py), and nothing crossing the")
 print("     section. Still delivers ELECTRONICS.md section 9's top noise mitigation --")
@@ -195,6 +263,17 @@ for nm, sh in (("P21", f), ("P22", c)):
     v = 0.0 if k.isNull() else k.Volume / 1000.0
     print("     %s vs REF_Thigh: %.3f cm3" % (nm, v))
     assert v < 0.02, "%s intrudes into the leg by %.3f cm3" % (nm, v)
+# The skirts went through the yoke for 107 poses before the sweep was read carefully enough
+# to notice that this pair was not one of the deliberate bonds. Check it here, where it is
+# cheap, rather than at the end of a 20-minute sweep.
+for nm in ("P1_KneeYoke", "P2a_KneeHingePlate", "P20_KneeShroud"):
+    ob = doc.getObject(nm)
+    if ob is None:
+        continue
+    k = f.common(ob.Shape)
+    v = 0.0 if k.isNull() else k.Volume / 1000.0
+    print("     P21 vs %-20s %.3f cm3" % (nm, v))
+    assert v < 0.02, "P21 clashes with %s by %.3f cm3" % (nm, v)
 
 doc.recompute()
 doc.save()

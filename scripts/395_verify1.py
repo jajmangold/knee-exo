@@ -42,9 +42,9 @@ STAT = ["A1_Extrusion_20x60_VSlot", "P1_KneeYoke", "P5_ThighCuff", "REF_Thigh", 
         "A2_BallScrew_SFU1620", "A3_Motor_6374", "A6_Idler29T", "A7_DriveBox",
         "A7b_LinkBelt", "HW_PinB_10",
         "A5_Belt_HTD8M", "A5b_Belt_DriveRun", "A5c_Belt_TakeRun", "A5d_Belt_WrapIdler",
-        "P20_KneeShroud", "P21_ShellAnterior", "P22_DriveCap",
+        "P20_KneeShroud", "P21_ShellAnterior", "P22_DriveCap", "P25_MotorNacelle",
         "P23a_FairingMount", "P23b_FairingMount", "P23c_FairingMount",
-        "P25_MotorNacelle"]
+]
 
 O = lambda n: doc.getObject(n)
 ALL = [n for n in SHANK + GANTRY + STAT if O(n)]

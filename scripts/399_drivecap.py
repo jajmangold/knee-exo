@@ -1,28 +1,50 @@
 # -*- coding: utf-8 -*-
-"""STAGE 8: P22 as a lofted cap instead of a box.
+"""STAGE 8: the drive-end cover -- one continuous surface, split into two printed parts.
 
-393 and 397 built the drive cap as a rectangular box shell because it was quick and it
-swept clean. It looks terrible: every other cover on this device is an n=5.5 rounded
-rectangle lofted along Y -- the knee cap, the thigh canopy, the shank fairing -- and the
-drive end was a shoebox bolted to the end of it.
+HISTORY, because this went wrong twice and the reasons are worth keeping.
 
-Fixed by doing two things properly.
+v1 was a rectangular box. It looked like a shoebox bolted to the end of the canopy.
 
-1. THE CAP STARTS AS P21'S OWN SECTION. At Y 204 it is exactly the section P21 ends on
-   (centre X -19.5, a 76.5, b 28, zc 110), so the two are flush with no step, then it
-   swells over the motor and tapers closed at Y 406.
+v2 made the cap a lofted n=5.5 section flush with P21, and gave the motor a separate round
+nacelle. Much better, but still read as two objects.
 
-2. THE BRACKET IS TRIMMED TO THE CAP, NOT THE CAP GROWN TO THE BRACKET. A7's bounding box
-   is X -84..48 by Z 84.5..151.5, and a section big enough for those RECTANGULAR corners
-   needs to be 158 mm wide. But those corners are dead material on a plate that is mostly
-   a motor bore, so the cap's inner loft cuts them off instead -- 3.7 cm3 of aluminium,
-   and A7 drops 172.2 -> 168.5 cm3. 240_nut1610.py did the same thing to the carriage
-   against P21.
+v3 tried to merge them into ONE lofted section. It cannot be done, and the reason is
+arithmetic, not taste:
 
-The cap ends up 153 mm across, which is not smaller than the 144 mm box -- it is the same
-width as P21 (154 mm), because its widest station IS P21's section. That is the point: the
-canopy and the cap are now one continuous form instead of a canopy with a shoebox on the
-end. The two-screw cap was 190 mm.
+    motor axis sits 121.1 mm from the leg axis, can radius 31.5  -> can face at 89.6
+    thigh surface 84.9 + 3.0 comfort clearance                   -> 87.9
+    radial room for a cover between them                         -> 1.7 mm
+
+The motor is tucked so hard against the thigh that its cover has to be a tight tube there.
+A lofted section big enough to contain BOTH the motor and the lateral hardware has its
+floor 60 mm below the hardware, and the limb cut then removes that floor over the whole
+central span: at X -55, where the ball screw runs at Z 103, the small cap floor is at Z 78
+and survives (the limb cut reaches Z 68.6), while the merged section floor is at Z 22 and
+is deleted outright. 406_coverage.py scored the merge at 16 exposed rays against 0 for the
+pair -- the ball screw and the motor both became touchable. An n=5.5 section is also wider
+on its diagonals than a circle, so no superelliptical pod of any size clears the thigh at
+that bearing either.
+
+So the motor keeps its tube. What v4 changes is everything AROUND the tube:
+
+1. ONE SURFACE, NOT TWO SHELLS THAT INTERSECT. v2 built cap = lo-li-NAC_O and
+   nacelle = NAC_O-NAC_I-lo. Every point lying in BOTH walls was cut from BOTH -- a thin
+   void running the length of the seam, belonging to neither part. v4 builds the wall as
+   (lo U POD_O) - (li U POD_I): outer union minus inner union, which is the shell of the
+   combined cavity, and then SPLITS it for printing. The two parts tile it exactly, no void
+   and no overlap, and the printed seam is a real shared face.
+
+2. A FAIRED FOOT instead of a sawn-off tube. The tube enters the cap between bearings +33
+   and +78 deg about the motor axis (measured -- see the table this prints). v4 adds a
+   raised-cosine flare over +12..+100 deg, 12 mm at its peak, so the tube grows out of the
+   cap flank instead of piercing it. That window is chosen because a ray leaving the motor
+   axis above about +15 deg never reaches the thigh at all, so the flare is free there.
+   Flare that ends up inside the cap costs nothing: the union already contains it.
+
+3. A DOMED NOSE. The proximal end points up the thigh and is the one you see. v2 closed it
+   with a flat disc at Y 211. v4 tapers it over Y 209..214.5 to a 19 mm blunt dome. It has
+   to be at full radius by Y 217 because that is where the motor can starts, and that is
+   what sets the taper length.
 
 Send with:  python tools/fcsend.py scripts/399_drivecap.py
 """
@@ -39,6 +61,9 @@ Y0 = 180.0
 MOT_X, MOT_R, MOT_Z0 = -104.0, 31.5, 62.0
 SCR_X, SCR_Z = -62.0, 106.0
 LINK_R_MOT, LINK_R_SCR = 32 * 5.0 / (2 * math.pi) + 2.0, 20 * 5.0 / (2 * math.pi) + 2.0
+LEG_R = 84.9
+POD_R = MOT_R + 3.5                   # 35.0 -- the same tube radius as the v2 nacelle
+FLARE, FL0, FL1 = 12.0, 12.0, 100.0   # faired foot: amplitude mm, angular window deg
 
 
 def sell(y, xc, a, b, zc):
@@ -64,11 +89,36 @@ def inside(x, z, xc, a, b, zc):
     return (abs(x - xc) / a) ** N_EXP + (abs(z - zc) / b) ** N_EXP
 
 
-# outer stations: (y, xc, a, b, zc). Y 204 is P21's section verbatim.
-# The cap no longer has to swell over the motor: with the motor tucked anterior at
-# (X -104, Z 62) it is nowhere near this section, and a convex section reaching both it
-# and the lateral hardware would swallow the leg. The motor gets P25_MotorNacelle instead
-# and this stays close to P21's own profile the whole way.
+def win(deg):
+    """raised cosine over [FL0, FL1], zero outside -- the flare angular window."""
+    d = deg % 360.0
+    if not (FL0 < d < FL1):
+        return 0.0
+    return 0.5 - 0.5 * math.cos(2. * math.pi * (d - FL0) / (FL1 - FL0))
+
+
+def pod_r(deg, s, inset):
+    return (POD_R + FLARE * win(deg)) * s - inset
+
+
+def pod(y, s, inset=0.0, npts=96):
+    pts = []
+    for i in range(npts):
+        d = 360.0 * i / npts
+        t = math.radians(d)
+        r = pod_r(d, s, inset)
+        pts.append(V(MOT_X + r * math.cos(t), y, MOT_Z0 + r * math.sin(t)))
+    pts.append(pts[0])
+    return Part.makePolygon(pts)
+
+
+def pod_loft(st, inset):
+    return Part.makeLoft([pod(y, s, inset) for y, s in st], True, True)
+
+
+# ---------------------------------------------------------------- cap sections
+# Y 180 is the P21 section verbatim, so the canopy and this are one continuous form. The
+# cap does NOT swell over the motor -- see the docstring.
 OUT = [(180.0, -19.5, 76.5, 28.0, 110.0),
        (220.0, -21.0, 77.5, 29.0, 110.0),
        (300.0, -21.5, 78.0, 30.0, 108.0),
@@ -79,28 +129,54 @@ INN = [(y if 180.0 < y < 334.0 else (178.0 if y == 180.0 else 328.0),
         xc, a - WALL, b - WALL, zc) for y, xc, a, b, zc in OUT]
 
 print("=" * 76)
-print("SECTION CHECK -- what the cap's INNER surface has to contain")
-xc, a, b, zc = INN[3][1], INN[3][2], INN[3][3], INN[3][4]
-print("  widest inner section (Y 310): centre X %.1f, a %.1f, b %.1f, zc %.0f"
-      % (xc, a, b, zc))
-print("     -> spans X %.1f..%.1f, Z %.0f..%.0f" % (xc - a, xc + a, zc - b, zc + b))
-WORST = [("gantry, outboard corner", -84.0, 130.2),
-         ("gantry, far side", 32.0, 123.0),
-         ("A7 yoke corner", 46.5, 130.3),
-         ("A7 end plate corner", -46.5, 88.0),
-         ("belt strand outer", 41.124, 126.0),
-         ("ball screw top", -69.9, 113.9),
-         ("link belt, screw-end pulley", -62.0 - LINK_R_SCR, 106.0 + LINK_R_SCR)]
-for nm, x, z in WORST:
-    f = inside(x, z, xc, a, b, zc)
-    print("     %-22s X %7.1f Z %6.1f   %.3f %s"
-          % (nm, x, z, f, "" if f <= 1.0 else "OUTSIDE -- gets trimmed"))
-print("  (A7's motor mount disc and arm sit outside this on purpose -- they are under the")
-print("   nacelle, not the cap.)")
+print("WHERE THE TUBE MEETS THE CAP  (radius from the motor axis out to the cap outer")
+print("surface, by bearing; the tube itself is at %.0f)" % POD_R)
+xc, a, b, zc = OUT[1][1], OUT[1][2], OUT[1][3], OUT[1][4]
+
+
+def cap_hit(t):
+    prev, out = None, []
+    for i in range(1, 800):
+        r = i * 0.25
+        v = inside(MOT_X + r * math.cos(t), MOT_Z0 + r * math.sin(t), xc, a, b, zc)
+        if prev is not None and (prev - 1.) * (v - 1.) < 0:
+            out.append(r)
+        prev = v
+    return out
+
+
+seam = []
+for d in range(0, 101, 10):
+    h = cap_hit(math.radians(d))
+    inn = h[0] if h else None
+    print("   %+4d deg   cap outer at r %s   flare +%4.1f   %s"
+          % (d, ("%5.1f" % inn) if inn else "   -- ", FLARE * win(d),
+             "tube inside cap" if (inn and inn > POD_R) else "tube exposed"))
+    if inn and abs(inn - POD_R) < 12.0:
+        seam.append(d)
+print("   -> the seams sit near %s deg; the flare window %+.0f..%+.0f covers both."
+      % (seam, FL0, FL1))
+
+# the flare is only legal because it leans AWAY from the limb
+worst = min((math.hypot(MOT_X + pod_r(360. * k / 720., 1.0, 0.) * math.cos(2 * math.pi * k / 720),
+                        MOT_Z0 + pod_r(360. * k / 720., 1.0, 0.) * math.sin(2 * math.pi * k / 720)),
+             360. * k / 720.) for k in range(720))
+plain = math.hypot(MOT_X, MOT_Z0) - POD_R
+print("   flared pod closest approach to the leg axis %.1f at %+.0f deg; a plain tube is"
+      % (worst[0], worst[1]))
+print("   %.1f, so the flare costs %.2f mm of limb clearance." % (plain, plain - worst[0]))
+assert worst[0] > plain - 0.05, "the flare has eaten into the limb side of the pod"
+
+# ---------------------------------------------------------------- pod sections
+# Full radius by Y 217 because that is where the motor can starts; the nose taper has to
+# fit entirely proximal of it, which is what sets its 5.5 mm length.
+POD_O = [(209.0, 0.55), (212.0, 0.88), (214.5, 1.00), (320.0, 1.00)]
+POD_I = [(211.5, 0.55), (214.3, 0.88), (217.0, 1.00), (317.0, 1.00)]
+
 
 def stadium(r1, r2, y0, y1):
     """A radius at each pulley and a straight span between. NOT a bounding box: the belt
-    centreline passes 118 mm from the leg axis, but a box's inboard corner would be at 59,
+    centreline passes 118 mm from the leg axis, but a box inboard corner would be at 59,
     i.e. buried in the thigh."""
     p1 = Part.makeCylinder(r1, y1 - y0, V(MOT_X, y0, MOT_Z0), V(0, 1, 0))
     p2 = Part.makeCylinder(r2, y1 - y0, V(SCR_X, y0, SCR_Z), V(0, 1, 0))
@@ -113,112 +189,161 @@ def stadium(r1, r2, y0, y1):
     return p1.fuse(p2).fuse(mid).removeSplitter()
 
 
-NAC_O = Part.makeCylinder(MOT_R + 3.5, 109.0, V(MOT_X, 211.0, MOT_Z0), V(0, 1, 0))
-NAC_O = NAC_O.fuse(stadium(LINK_R_MOT + 4.0, LINK_R_SCR + 4.0, 296.0, 320.0)).removeSplitter()
-# The inner stops 3 mm SHORT of the outer at BOTH ends, so the nacelle is capped at each
-# end rather than being an open tube. The first version ran the inner out to Y 320 to match
-# the outer and left the proximal end open -- the Cycles render showed daylight straight
-# down the bore, past a spinning outrunner, which is the one thing this cover exists to
-# stop. Nothing has to pass through either end: the motor ends at Y 291 and the screw at
-# 314, both inside.
-NAC_I = Part.makeCylinder(MOT_R + 0.5, 104.0, V(MOT_X, 213.0, MOT_Z0), V(0, 1, 0))
-NAC_I = NAC_I.fuse(stadium(LINK_R_MOT + 1.0, LINK_R_SCR + 1.0, 298.0, 317.0)).removeSplitter()
+POD_OUT = pod_loft(POD_O, 0.0).fuse(
+    stadium(LINK_R_MOT + 4.0, LINK_R_SCR + 4.0, 296.0, 320.0)).removeSplitter()
+# The inner stops short of the outer at BOTH ends, so the pod is closed rather than being an
+# open tube. The first version ran the inner out to match and left the proximal end open --
+# the Cycles render showed daylight straight down the bore past a spinning outrunner, which
+# is the one thing this cover exists to stop. Nothing has to pass through either end: the
+# motor ends at Y 291 and the screw at 314, both inside.
+POD_INN = pod_loft(POD_I, WALL).fuse(
+    stadium(LINK_R_MOT + 1.0, LINK_R_SCR + 1.0, 298.0, 317.0)).removeSplitter()
+assert POD_OUT.isValid() and POD_INN.isValid(), "pod lofts invalid"
+k = POD_INN.cut(POD_OUT)
+sp = 0.0 if k.isNull() else k.Volume / 1000.
+print("   pod inner outside pod outer: %.4f cm3 (0 required -- the nose taper self-checks)" % sp)
+assert sp < 0.01, "the pod inner surface escapes its outer at the nose taper"
 
 lo, li = loft(OUT), loft(INN)
-# The cap and the nacelle interlock: each is trimmed back to the other's OUTER surface, so
-# they meet on a shared face with no overlap and no gap.
-c = lo.cut(li).cut(NAC_O)
-# open underneath where the leg is -- REF_Thigh's surface is Z 85 out to Y 300
-c = c.cut(bx(-110., 70., Y0 - 1., 300., 40., 88.))
-c = c.removeSplitter()
-assert len(c.Solids) == 1, "P22 solids=%d" % len(c.Solids)
-assert c.isValid(), "P22 invalid"
+
+# ------------------------------------------------- ONE wall, then split it for printing
+shell = lo.fuse(POD_OUT).cut(li.fuse(POD_INN)).removeSplitter()
+
+# Carve the limb. Two radii on purpose: 3.0 mm of comfort clearance everywhere the cover is
+# free to stand off, but the motor pod cannot have it -- the can face is only 1.7 mm clear
+# of the 87.9 cylinder, so a 3 mm standoff would leave a 1.2 mm wall there, which does not
+# print. Under the pod the cut drops to 0.1 mm clearance, which is where the v2 nacelle
+# already sat (closest approach 86.1 against a nominal thigh of 84.9). That the motor cover
+# skims the quadriceps is a consequence of tucking the motor this hard; it wants a tape
+# measure on the patient, not another boolean.
+POD_ZONE = Part.makeCylinder(62.0, 130.0, V(MOT_X, 200.0, MOT_Z0), V(0, 1, 0))
+legA = Part.makeCylinder(LEG_R + 3.0, 330.0, V(0., 10., 0.), V(0, 1, 0))
+legB = Part.makeCylinder(LEG_R + 0.1, 330.0, V(0., 10., 0.), V(0, 1, 0))
+legcut = legA.cut(POD_ZONE).fuse(legB.common(POD_ZONE)).removeSplitter()
+shell = shell.cut(legcut)
+for nm in ("P5_ThighCuff", "P21_ShellAnterior"):
+    ob = doc.getObject(nm)
+    if ob is not None:
+        shell = shell.cut(ob.Shape)
+shell = shell.removeSplitter()
+V_SHELL = shell.Volume / 1000.
+print("=" * 76)
+print("combined wall %.1f cm3 in %d solids before splitting" % (V_SHELL, len(shell.Solids)))
+
+SLIVER = 0.05
+
+
+def one(sh, nm):
+    sh = sh.removeSplitter()
+    keep = [t for t in sh.Solids if t.Volume / 1000.0 > SLIVER]
+    for t in sh.Solids:
+        if t.Volume / 1000.0 <= SLIVER:
+            b_ = t.BoundBox
+            print("   %s: dropped sliver %.4f cm3 at X %.1f..%.1f Z %.1f..%.1f"
+                  % (nm, t.Volume / 1000.0, b_.XMin, b_.XMax, b_.ZMin, b_.ZMax))
+    if len(keep) != 1:
+        raise AssertionError("%s has %d real solids: %s" % (nm, len(keep),
+            "; ".join("%.2f cm3 X%.0f..%.0f Y%.0f..%.0f Z%.0f..%.0f"
+                      % (t.Volume / 1000., t.BoundBox.XMin, t.BoundBox.XMax,
+                         t.BoundBox.YMin, t.BoundBox.YMax,
+                         t.BoundBox.ZMin, t.BoundBox.ZMax) for t in keep)))
+    assert keep[0].isValid(), "%s invalid" % nm
+    return keep[0]
+
+
+c = one(shell.cut(POD_OUT), "P22")
+nac = one(shell.common(POD_OUT), "P25")
+print("the two parts tile the wall: %.1f + %.1f = %.1f against %.1f cm3 (%.1f%% accounted)"
+      % (c.Volume / 1000., nac.Volume / 1000., (c.Volume + nac.Volume) / 1000., V_SHELL,
+         100.0 * (c.Volume + nac.Volume) / shell.Volume))
+k = c.common(nac)
+ov = 0.0 if k.isNull() else k.Volume / 1000.
+print("   P22 vs P25 overlap %.4f cm3 (the v2 pair left a VOID here instead)" % ov)
+assert ov < 0.02, "the split overlaps by %.3f cm3" % ov
+
 o = doc.getObject("P22_DriveCap")
 o.Shape = c
 o.Label = "P22_DriveCap"
-bb = c.BoundBox
-print("=" * 76)
-print("P22  X %6.1f..%5.1f  Y %6.1f..%5.1f  Z %5.1f..%5.1f  %5.1f cm3"
-      % (bb.XMin, bb.XMax, bb.YMin, bb.YMax, bb.ZMin, bb.ZMax, c.Volume / 1000.))
-print("     %.0f mm across -- the same as P21's %.0f, because its widest station IS P21's"
-      % (bb.XMax - bb.XMin, 154.0))
-print("     section. Flush at Y %.0f, no step. The two-screw cap was 190 mm." % Y0)
+for lbl, sh in (("P22", c), ("P25", nac)):
+    bb = sh.BoundBox
+    print("%s  X %6.1f..%5.1f  Y %6.1f..%5.1f  Z %5.1f..%5.1f  %5.1f cm3  %4.0f g PETG"
+          % (lbl, bb.XMin, bb.XMax, bb.YMin, bb.YMax, bb.ZMin, bb.ZMax,
+             sh.Volume / 1000., sh.Volume / 1000. * 1.27))
 
-# ------------------------------------------------- trim A7 to the cap's inner surface
+# ------------------------------------------------- trim A7 to the combined cavity
 a7 = doc.getObject("A7_DriveBox")
 v0 = a7.Shape.Volume / 1000.
-# GUARD: this trim is destructive and not idempotent. Run it twice without rebuilding
-# A7 from 393 in between and the second pass eats what the first one left -- which is
-# how the motor mount disappeared once already, silently, because a missing part is not
-# an interference and no sweep reports it. Fail loudly instead.
+# GUARD: this trim is destructive. It reaches a fixed point in practice -- a second pass on
+# the v4 cavity removes 0.0 cm3, because everything the first pass left is already inside it
+# -- but that is a property of this cavity, not of the operation, and it was NOT true of the
+# cavity that deleted the motor mount and took A7 from 366 g to 222 without a single sweep
+# flag, because a missing part is an absence, not an interference. XMin is the cheap tell:
+# the mount disc at X -104 +/- 31.5 is the furthest-anterior thing on the part, and nothing
+# else reaches -134.5.
 assert a7.Shape.BoundBox.XMin < MOT_X - MOT_R + 1.0, (
     "A7 has already been trimmed (XMin %.1f, expected < %.1f). Re-run 393_driveend.py "
     "first -- this script cannot rebuild what it removed."
     % (a7.Shape.BoundBox.XMin, MOT_X - MOT_R + 1.0))
-# Trim to the cap's inner surface OR the nacelle's -- not the cap alone. A7's motor
-# mount disc and its arm live at (X -104, Z 62), which is under the NACELLE and far
-# outside the cap's section, so trimming to the cap alone deleted them outright and took
-# A7 from 366 g to 222. No sweep catches that: a missing part is an absence, not an
-# interference. It showed up as an implausible mass.
-keep = a7.Shape.common(li.fuse(NAC_I))
+# Trim to the COMBINED cavity, not the cap alone. The A7 motor mount disc and its arm live
+# at (X -104, Z 62), which is inside the pod and far outside the cap section, so trimming to
+# the cap alone deleted them outright and took A7 from 366 g to 222. No sweep catches that:
+# a missing part is an absence, not an interference. It showed up as a mass that was too
+# good to be true.
+cav = li.fuse(POD_INN)
+keep = a7.Shape.common(cav)
 distal = a7.Shape.cut(bx(-200., 200., Y0, 500., 0., 300.))
-t = keep.fuse(distal).removeSplitter()
-assert len(t.Solids) == 1, "A7 solids=%d after trimming" % len(t.Solids)
-assert t.isValid(), "A7 invalid after trimming"
+t = one(keep.fuse(distal), "A7")
 a7.Shape = t
 bb = t.BoundBox
-# (v0 reads as already-trimmed if this script is re-run in the same session -- the shape
-#  is assigned before the checks below, so a failed run still leaves the trim applied.)
 print("A7   trimmed %.1f -> %.1f cm3 (%.0f -> %.0f g), now X %.1f..%.1f Z %.1f..%.1f"
       % (v0, t.Volume / 1000., v0 * 2.70, t.Volume / 1000. * 2.70,
          bb.XMin, bb.XMax, bb.ZMin, bb.ZMax))
-print("     What comes off is corner material on the mount plate; what must NOT come off")
-print("     is the motor mount itself, which is why the trim is against the cap fused")
-print("     with the nacelle rather than the cap alone.")
 mnt = t.common(Part.makeCylinder(MOT_R + 1.0, 12.0, V(MOT_X, 289.0, MOT_Z0), V(0, 1, 0)))
-print("     motor mount still present: %.2f cm3" % (0.0 if mnt.isNull() else mnt.Volume / 1000.))
-assert (0.0 if mnt.isNull() else mnt.Volume / 1000.) > 1.0, "the motor mount got trimmed away"
+mv = 0.0 if mnt.isNull() else mnt.Volume / 1000.
+print("     motor mount still present: %.2f cm3" % mv)
+assert mv > 1.0, "the motor mount got trimmed away"
+
+# ------------------------------------------------- P25
+o25 = doc.getObject("P25_MotorNacelle")
+if o25 is None:
+    o25 = doc.addObject("Part::Feature", "P25_MotorNacelle")
+    g = doc.getObject("C_Drive")
+    if g is not None:
+        g.addObject(o25)
+o25.Shape = nac
+o25.Label = "P25_MotorNacelle"
+# Match P22, or the renders show a bare grey can. A part recreated by addObject gets the
+# default grey, and P25 was recreated when the merge experiment deleted it -- which made
+# the drive-end shot look like an uncovered motor even though the coverage test said the
+# pod was closed. The geometry was right and the picture was wrong, which is the harder
+# kind of wrong to notice.
+try:
+    src = doc.getObject("P22_DriveCap").ViewObject
+    o25.ViewObject.ShapeColor = src.ShapeColor
+    o25.ViewObject.Transparency = src.Transparency
+    print("     P25 colour matched to P22 %s" % (tuple(round(c, 2) for c in src.ShapeColor),))
+except Exception as e:
+    print("     could not set P25 colour (%s) -- headless?" % e)
 
 # --------------------------------------------------------------------- checks
 print("=" * 76)
-for nm in ("REF_Thigh", "A3_Motor_6374", "A6_Idler29T", "A2_BallScrew_SFU1620",
-           "A5c_Belt_TakeRun", "A5d_Belt_WrapIdler", "P21_ShellAnterior"):
-    ob = doc.getObject(nm)
-    if ob is None:
-        continue
-    k = c.common(ob.Shape)
-    v = 0.0 if k.isNull() else k.Volume / 1000.
-    print("  P22 vs %-24s %.3f cm3 %s" % (ob.Label, v, "" if v < 0.02 else "<-- CLASH"))
-    assert v < 0.02, "P22 clashes with %s by %.3f cm3" % (nm, v)
-k = t.common(doc.getObject("A3_Motor_6374").Shape)
-print("  A7  vs A3_Motor                 %.3f cm3" % (0.0 if k.isNull() else k.Volume / 1000.))
-
-# ------------------------------------------------- P25 motor nacelle
-nac = NAC_O.cut(NAC_I).cut(lo).removeSplitter()
-assert nac.isValid(), "P25 invalid"
-o = doc.getObject("P25_MotorNacelle")
-if o is None:
-    o = doc.addObject("Part::Feature", "P25_MotorNacelle")
-    g = doc.getObject("C_Drive")
-    if g is not None:
-        g.addObject(o)
-o.Shape = nac
-o.Label = "P25_MotorNacelle"
-bb = nac.BoundBox
-print("P25  X %6.1f..%5.1f  Y %6.1f..%5.1f  Z %5.1f..%5.1f  %5.1f cm3, %d solids"
-      % (bb.XMin, bb.XMax, bb.YMin, bb.YMax, bb.ZMin, bb.ZMax,
-         nac.Volume / 1000., len(nac.Solids)))
-for nm, sh in (("P25", nac), ("P22", c)):
-    k = sh.common(REF)
-    v = 0.0 if k.isNull() else k.Volume / 1000.
-    print("     %s vs REF_Thigh: %.3f cm3" % (nm, v))
-    assert v < 0.02, "%s is inside the leg by %.3f cm3" % (nm, v)
-for nm in ("A3_Motor_6374", "A7b_LinkBelt", "A7_DriveBox", "P22_DriveCap"):
-    ob = doc.getObject(nm)
-    k = nac.common(ob.Shape)
-    v = 0.0 if k.isNull() else k.Volume / 1000.
-    print("     P25 vs %-22s %.3f cm3" % (ob.Label, v))
-    assert v < 0.02, "P25 clashes with %s by %.3f" % (nm, v)
+# How close each part actually gets to the limb. The relaxed cut inside POD_ZONE is meant
+# to apply to the pod only; if the cap also dips below 87.9 the zone is reaching too far.
+for lbl, sh in (("P22", c), ("P25", nac)):
+    rmin = min(math.hypot(v.Point.x, v.Point.z) for v in sh.Vertexes)
+    print("  %s closest approach to the leg axis %.1f  -> %+.1f mm off a %.1f thigh"
+          % (lbl, rmin, rmin - LEG_R, LEG_R))
+for lbl, sh in (("P22", c), ("P25", nac)):
+    for nm in ("REF_Thigh", "A3_Motor_6374", "A6_Idler29T", "A2_BallScrew_SFU1620",
+               "A5c_Belt_TakeRun", "A5d_Belt_WrapIdler", "A7b_LinkBelt", "A7_DriveBox",
+               "P21_ShellAnterior"):
+        ob = doc.getObject(nm)
+        if ob is None:
+            continue
+        k = sh.common(ob.Shape)
+        v = 0.0 if k.isNull() else k.Volume / 1000.
+        print("  %s vs %-24s %.3f cm3 %s" % (lbl, ob.Label, v, "" if v < 0.02 else "<-- CLASH"))
+        assert v < 0.02, "%s clashes with %s by %.3f cm3" % (lbl, nm, v)
 
 doc.recompute()
 doc.save()

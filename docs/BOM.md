@@ -116,6 +116,8 @@ gone — they became bought MGN7H blocks (S2a).
 | `P5_ThighCuff`, `P7_ShankCuff`, `P6_ShankSocket` | 1 each | 4 perimeters, 30% |
 | `P20_KneeCap` | 1 | 3 perimeters, 15%, cosmetic |
 | `P21_FairingThigh`, `P22_DriveCap`, `P24_FairingShank` | 1 each | 3 perimeters, 15%, cosmetic |
+| `P25_MotorNacelle` | 1 | 3 perimeters, 15%. Prints nose-down on its domed end, no supports |
+| `P23a/b/c_FairingMount` | 1 each | 4 perimeters, 40% — they carry the canopy |
 
 Roughly 1.8–2.2 kg of filament including supports.
 

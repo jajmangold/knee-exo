@@ -337,9 +337,42 @@ X = ±30 side. So the mounts are never swept.
 | Part | Covers |
 |---|---|
 | `P20_KneeCap` | an inverted-U channel — walls at X ±50, roof at Z 132 — enclosing both belt runs and both in-running nips |
-| `P21_FairingThigh` | one canopy, Y 28…**290**, over screws, nuts, carriages, both belt runs and the coupling |
-| `P22_DriveCap` | Y 290…399 over the drive box and the motor, section centre walking to xc = −20 to follow the motor |
+| `P21_FairingThigh` | one canopy, Y 28…180 with side skirts to 206, over the screw, the nut, the carriage and both belt runs |
+| `P22_DriveCap` | Y 180…334 over the bracket, the idler and the link belt. Its Y 180 station **is** P21's end section, so the two are flush with no step |
+| `P25_MotorNacelle` | Y 178…326 over the motor. A tube, because it has to be — see below |
 | `P24_FairingShank` | the shank member, Y −208…**−66** — the proximal tip tapers in width and height to duck under the knee shroud through the swing |
+
+`P22` and `P25` are **two printed parts of one surface**, not two shells that happen to
+meet. They are built as (cap outer ∪ pod outer) − (cap inner ∪ pod inner) and then split
+along the pod's outer face, so they tile that wall exactly: 160.2 + 82.9 = 243.1 cm³,
+100.0 % accounted, 0.0000 cm³ overlap. The earlier pair each cut itself back to the
+*other's outer* surface, which deleted every point lying in both walls from both parts — a
+thin void running the length of the seam, belonging to neither. Nothing caught it, because
+an interference sweep looks for material in two places at once and this was material in
+neither.
+
+The motor pod is a round tube and cannot be anything else:
+
+| | mm from the leg axis |
+|---|---|
+| motor axis | 121.1 |
+| can face (axis − 31.5) | 89.6 |
+| thigh surface + 3.0 comfort clearance | 87.9 |
+| **room for a cover between them** | **1.7** |
+
+An attempt to merge the cap and the pod into one lofted n=5.5 section failed on this. A
+section large enough to hold both lobes has its floor 60 mm below the hardware, and the
+limb cut then deletes that floor across the whole central span — at X −55, where the ball
+screw runs at Z 103, the small cap's floor is at Z 78 and survives the cut at Z 68.6, while
+the merged section's floor is at Z 22 and goes. `406_coverage.py` scored the merge at 16
+exposed rays against 0 for the pair: the screw and the motor both became touchable. An
+n=5.5 section is wider on its diagonals than a circle too, so no superelliptical pod of any
+size clears the thigh at that bearing either. What the pod got instead is a **faired foot**
+— a raised-cosine flare over the +12…+100° window about the motor axis, 12 mm at its peak,
+so the tube grows out of the cap's flank rather than piercing it — and a **domed nose**,
+tapered over Y 209…214.5 to a 19 mm blunt end. The window costs nothing: a ray leaving the
+motor axis above about +15° never reaches the thigh, and flare that ends up inside the cap
+is already in the union. Closest approach to the limb is unchanged at 86.1 mm.
 
 `P20` looks like a small nose piece in the renders and is easy to write off. The material
 map at Y=0 shows what it actually is:
@@ -360,12 +393,36 @@ the yoke at Z 88 and the shroud at Z 96.5, which no finger fits through.
 
 Honest limits, because they are the parts a photo hides:
 
-- The fairing is **open below Z = 92**. The thigh cuff tops out at 88 and the carriage
-  bottom is at 90 — there is no room for a wall between them. That underside faces the limb.
+- The fairing is **open below Z = 92 near the centreline**, where the limb is 3 mm away and
+  there is no room for a wall. It is *not* open further out: the undersides follow the limb
+  (a cylinder 3 mm proud of `REF_Thigh`, not a flat plane) and each side carries a skirt
+  down to Z 83, because `406_coverage.py` found the gantry and the V-wheels reachable at
+  ±14° through the longitudinal slot either side of the rail.
 - **Y −66…−46 is a moving gap** — 20 mm of bare hinge plate, down from 55. A rigid shell
   here has to sweep past the static thigh fairing, so the remainder can never be closed
   and wants a fabric gaiter. See below.
-- The motor at the hip is uncovered.
+- The motor cover **skims the quadriceps** — 1.2 mm off a nominal thigh against the 3.0 mm
+  the rest of the cladding gets. There is no way around it: see the table above.
+- `406_coverage.py` reports **0 of 187 rays** reaching a moving part first, at each of three
+  poses. That is the strongest statement available here, and it is still only 11 bearings ×
+  17 stations — it is a sampling, not a proof.
+
+A collision the sweep caught only once someone read its output properly: the skirts drove
+straight through `P1_KneeYoke` — 5.323 cm³ in two symmetric lumps at X ±20.4…30.0, Z 82.6…88,
+for 74 mm of their length. The yoke is a 12 mm plate at Z 76…88 reaching Y 124, the skirts
+hang to Z 83, and the hand-written box that was supposed to clear the fork cheek only covered
+Y 20…50. It had sat in the flagged-pairs list for a full 107-pose run looking like one of the
+deliberate bonds (`P21`↔`P23a/b/c`, 0.687 cm³ each, which are meant to merge).
+
+The first fix made it worse in a way worth recording. Cutting a *box* over the yoke's
+bounding extent also removed the canopy's own floor in that band — the 0.7 mm of skin
+between the limb cut at r 87.9 and Z 88.6 — and that floor was the only thing between the
+skin and the ball screw at −28° over Y 76…112. Coverage went 0 → 3 and named it. The cut now
+follows the yoke's actual shape, dilated 0.6 mm by translated copies, which costs 6.7 cm³ of
+skirt and leaves coverage at 0.
+
+`397_recladding.py` now checks `P21` against the yoke, the hinge plate and the shroud at
+build time, where it costs a second, rather than at the end of a twenty-minute sweep.
 
 ### Why the shank looks bare, and how much of that is necessary
 
@@ -373,7 +430,8 @@ A fair question to ask of the renders. Measured coverage along the limb axis:
 
 | | Hardware span | Faired | Coverage |
 |---|---|---|---|
-| Thigh | Y 0…388 (388 mm) | `P21` Y 28…312 | **73%** |
+| Thigh | Y 0…320 (320 mm) | `P21` 28…206, `P22` 180…334, `P25` 178…326 | **91%** |
+| Thigh, counting `P20_KneeShroud` over Y 0…28 | | | **100%** |
 | Shank | Y −328…35 (364 mm) | `P24` Y −208…−100 | **30%** |
 
 30% sounds bad and mostly is not, for three separate reasons that are worth keeping apart:

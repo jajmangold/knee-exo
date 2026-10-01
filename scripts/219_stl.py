@@ -15,11 +15,11 @@ for f in os.listdir(OUT):
 # and P3b, P11 are deleted with the second screw. See 390_onescrew_section.py.
 STRUCT=["P1_KneeYoke","P2a_KneeHingePlate","P5_ThighCuff",
         "P6_ShankSocket","P7_ShankCuff"]
-FAIR=["P20_KneeShroud","P21_ShellAnterior","P22_DriveCap","P24_FairingShank",
+FAIR=["P20_KneeShroud","P21_ShellAnterior","P22_DriveCap","P25_MotorNacelle","P24_FairingShank",
       # posterior side-face mounts; the only thing holding the canopy now that the
       # spine is gone (398_sidemounts.py)
       "P23a_FairingMount","P23b_FairingMount","P23c_FairingMount",
-      "P25_MotorNacelle"]
+]
 MACH=[]   # gibs -> MGN7H blocks (250_mgn7.py) -> mini V-wheels (396_fixes.py)
 ts=tf=0.
 for n in STRUCT+FAIR+MACH:

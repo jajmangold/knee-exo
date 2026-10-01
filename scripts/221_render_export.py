@@ -28,14 +28,12 @@ GANTRY=["P3_Carriage","A2b_BallNut_SFU1620",
 STAT=["A1_Extrusion_20x60_VSlot","P1_KneeYoke","P5_ThighCuff","A2_BallScrew_SFU1620",
       "A3_Motor_6374","A6_Idler29T","A7_DriveBox","A7b_LinkBelt","HW_PinB_10",
       "A5_Belt_HTD8M","A5b_Belt_DriveRun","A5c_Belt_TakeRun","A5d_Belt_WrapIdler",
-      "P20_KneeShroud","P21_ShellAnterior","P22_DriveCap","P25_MotorNacelle",
-      "P23a_FairingMount","P23b_FairingMount","P23c_FairingMount"]
+      "P20_KneeShroud","P21_ShellAnterior","P22_DriveCap","P25_MotorNacelle","P23a_FairingMount","P23b_FairingMount","P23c_FairingMount"]
 MAT={}
 for n in ("A1_Extrusion_20x60_VSlot","A4_Shank2020_VSlot"): MAT[n]="ALU"
 for n in ("P1_KneeYoke","P2a_KneeHingePlate","P5_ThighCuff","A6_Idler29T",
           "P6_ShankSocket","P7_ShankCuff"): MAT[n]="PETG"
-for n in ("P20_KneeShroud","P21_ShellAnterior","P22_DriveCap","P24_FairingShank",
-          "P25_MotorNacelle","P23a_FairingMount","P23b_FairingMount",
+for n in ("P20_KneeShroud","P21_ShellAnterior","P22_DriveCap","P25_MotorNacelle","P24_FairingShank","P23a_FairingMount","P23b_FairingMount",
           "P23c_FairingMount"): MAT[n]="FAIR"
 for n in ("A2_BallScrew_SFU1620","HW_PinB_10","HW_JointBolts"): MAT[n]="STEEL"
 MAT["A2b_BallNut_SFU1620"]="NUT"
