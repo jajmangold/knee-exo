@@ -32,10 +32,15 @@ DOCFILE = os.environ.get("KX_DOC", r"C:/Users/Josh/KneeExo_v6.FCStd").replace("\
 DOCS = ["README.md", "docs/BOM.md", "docs/PRINT.md", "docs/ASSEMBLY.md",
         "docs/ELECTRONICS.md", "docs/PRIOR_ART.md"]
 
-# Part names the docs mention precisely BECAUSE they are gone. Deleting these entries would be
-# deleting the explanation of why the mass figure changed.
+# Part names the docs mention precisely BECAUSE they are wrong or gone. A name quoted as an EXAMPLE
+# of an error is indistinguishable, to a regex, from a name asserted as fact -- this checker's own
+# paragraph in the README quotes `P2a_KneeHub` as the stale abbreviation it caught, and the checker
+# then dutifully caught itself. Two kinds of entry, kept apart because they are different claims:
+#   deleted  -- the part existed and was removed, and the docs explain why the mass figure moved
+#   quoted   -- the name is wrong and the surrounding text says so
 GHOSTS_OK = {"P3b_CarriageB", "P11_SprungAnchor", "P2b_RodClevisBlock", "P4_Rod_8mm",
-             "P8_RodEndHousing_PETG", "P3b_Carriage", "P2b_Clevis"}
+             "P8_RodEndHousing_PETG", "P3b_Carriage", "P2b_Clevis",
+             "P2a_KneeHub"}
 PRINTED = 15
 ALLOW_VOL = 0.05
 

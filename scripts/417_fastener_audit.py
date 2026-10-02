@@ -168,6 +168,49 @@ if unknown:
     print("  for something that is not a fastener, or a mistake:")
     for nm, d, n in unknown:
         print("     %-22s %.1f mm x %d" % (nm, d, n))
+# ---------------------------------------------------------------- bought bearings
+# A CLASS OF ERROR THE HOLE LIST CANNOT SEE: hardware the BOM specifies that the geometry has no
+# room for. Every bore below is the right size for what it was drawn for, so nothing above flags
+# anything -- and BOM K3 still asks for two M12 flanged bushings at the knee, which need a 14-16 mm
+# seat. The knee axis has none: it has three 12.3 mm bores, which is clearance for a bare 12 mm pin.
+# Found by asking whether an off-the-shelf part existed, not by any check in this repository.
+print()
+print("=" * 100)
+print("BOUGHT BEARINGS: DOES THE GEOMETRY HAVE ROOM?")
+print("=" * 100)
+KNEE_AXIS = [("P1_KneeYoke", 12.0), ("P2a_KneeHingePlate", 6.0), ("P2a_KneeHingePlate", 25.0)]
+BUSH_OD = (14.0, 16.0)      # igus JFM-1214 / JSM-1214 and the 16 mm bronze equivalents
+have = []
+for name in ("P1_KneeYoke", "P2a_KneeHingePlate"):
+    o = doc.getObject(name)
+    if o is None:
+        continue
+    for f in o.Shape.Faces:
+        sf = f.Surface
+        if sf.TypeId != "Part::GeomCylinder" or abs(sf.Axis.z) < 0.9:
+            continue
+        if (sf.Center.x ** 2 + sf.Center.y ** 2) ** 0.5 > 2.0:
+            continue
+        have.append((name, round(2 * sf.Radius, 2), round(f.BoundBox.ZLength, 1)))
+pin = [h for h in have if 12.0 <= h[1] <= 12.5]
+seat = [h for h in have if BUSH_OD[0] - 0.3 <= h[1] <= BUSH_OD[1] + 0.3]
+print("  bores on the knee axis: %s"
+      % ", ".join("%s %.1f x %.0f" % (n.split('_')[0], d, L) for n, d, L in sorted(have)))
+print("  %d of them are pin clearance (12.0-12.5), %d are a bushing seat (13.7-16.3)"
+      % (len(pin), len(seat)))
+if not seat:
+    print("  BOM K3 asks for 2 x M12 flanged bushing, OD 14-16. THERE IS NO SEAT FOR EITHER.")
+    print("  As drawn the steel pin runs directly in printed PETG: %.2f mm of radial clearance"
+          % ((pin[0][1] - 12.0) / 2 if pin else 0.0))
+    print("  over %.0f mm of total journal length. At the capstan's 764 N belt differential that is"
+          % sum(L for _, _, L in pin))
+    print("  about %.1f MPa of bearing pressure -- fine statically for PETG, and the wrong bearing"
+          % (764.0 / (12.0 * max(1.0, max(L for _, _, L in pin)))))
+    print("  for a cyclic journal on a 28.2 N.m joint. It polishes, then wears, then the knee axis")
+    print("  has play, which is the one place this design cannot absorb any.")
+    print("  UNRESOLVED, and it is a design decision rather than a bug to patch: see the README's")
+    print("  open items. Either the bores open to a bushing OD, or K3 comes out of the BOM.")
+
 print()
 print("  The pattern to expect: bolt holes on the BUILD axis get a quick twist of the right drill;")
 print("  cross-axis holes get drilled and reamed because layer stacking makes them oval; bearing")

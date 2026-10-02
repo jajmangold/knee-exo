@@ -91,8 +91,8 @@ drifting, and there is no adjustment for it. Each screw only needs **162 mm of t
 | # | Part | Qty | Notes | ~USD |
 |---|---|---|---|---|
 | K1 | HTD-8M **closed-loop** belt, 30 mm wide, **742 mm** | 1 | 2πR + 2·Y_idler. A closed loop, not an open strip: no end terminations, and it is tensioned by sliding the idler instead. 764 N differential over 30 mm = 25.5 N/mm | 25 |
-| K2 | M12 x 70 shoulder bolt or hardened dowel | 1 | The knee pin, in the flush counterbore. SF 5.9 | 10 |
-| K3 | M12 flanged bronze or igus bushing | 2 | One each side of the hub | 8 |
+| K2 | **ISO 7379 12 × 70** shoulder screw, or ISO 8734 ⌀12 × 70 hardened dowel | 1 | The knee pin, in the flush counterbore (modelled ⌀20 × 13). SF 5.9. **Not "M12 × 70"** — a shoulder screw is designated by its *shoulder*, so 12 × 70 carries an **M10** thread and an ⌀18 head, while an "M12 shoulder bolt" has a ⌀16 shoulder that will not enter the ⌀12.3 bore. The dowel is cheaper and needs axial retention; a part-threaded M12 hex bolt is the wrong answer, its shank is unground | 10 |
+| K3 | M12 flanged bronze or igus bushing (⌀12 bore, ⌀14 OD) | 2 | One each side of the hub — **but there is nowhere for them to sit.** The knee axis has three ⌀12.3 bores, which is clearance for a bare pin, and a ⌀12 bushing needs a ⌀14–16 seat. Do not order these until the bores are opened and the pin's retention is settled: see the README's open items, and [`417_fastener_audit.py`](../scripts/417_fastener_audit.py), which now checks for exactly this | 8 |
 | K4 | Compression spring, ~500 N/mm, 3 mm working travel | 1 | Now acts on the **idler carrier's slotted mount**, not a belt end. Same job — takes up belt bedding-in — one fewer printed part | 5 |
 
 ## 4. Structure
