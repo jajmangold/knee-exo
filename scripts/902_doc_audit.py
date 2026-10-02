@@ -166,8 +166,33 @@ for d in DOCS:
             unrecorded.append((d, line, rel))
         elif rec.get("geometry") != now_fp:
             stale_img.append((d, line, rel, rec.get("geometry"), rec.get("made", "?")))
+# ...and every image IN the repository, not only the ones a document embeds. The audit passed
+# clean while renders/extended_0deg held six images of superseded geometry, simply because no
+# document happened to <img> them. A published artefact is a claim whether or not it is linked.
+shipped_stale, shipped_unrec = [], []
+for root, _dirs, files in os.walk(os.path.join(REPO, "renders")):
+    for f in sorted(files):
+        if not f.lower().endswith((".png", ".gif")):
+            continue
+        rel = os.path.relpath(os.path.join(root, f), REPO).replace(chr(92), "/")
+        rec = man.get(rel)
+        if rec is None:
+            shipped_unrec.append(rel)
+        elif rec.get("geometry") != now_fp:
+            shipped_stale.append((rel, rec.get("geometry")))
 print("  7. images: %d broken, %d of unknown provenance, %d showing older geometry than the model"
       % (len(missing_img), len(unrecorded), len(stale_img)))
+print("     in renders/: %d files, %d unrecorded, %d of older geometry"
+      % (sum(1 for r, _d, fs in os.walk(os.path.join(REPO, "renders"))
+             for f in fs if f.lower().endswith((".png", ".gif"))),
+         len(shipped_unrec), len(shipped_stale)))
+for rel in shipped_unrec:
+    print("       NO RECORD  %s" % rel)
+for rel, g in shipped_stale:
+    print("       STALE      %s -- geometry %s" % (rel, g))
+fail += ["renders/ holds %s with no provenance" % r for r in shipped_unrec]
+fail += ["renders/ holds %s, rendered from geometry %s, model is %s" % (r, g, now_fp)
+         for r, g in shipped_stale]
 print("     model geometry fingerprint is %s" % now_fp)
 for d, l, t in missing_img:
     print("       MISSING   %-14s line %-5d %s" % (d, l, t))

@@ -78,6 +78,17 @@ SHOTS = [
 # beside the STLs), so it describes the geometry actually rendered rather than whatever the model
 # happens to be now. 902_doc_audit.py compares it against the live model and fails if they differ.
 def record(images):
+    """Record what was ACTUALLY written, by its real path.
+
+    This used to map every shot to "renders/<pose>/<name>.png" no matter where KX_OUT pointed, so
+    a 15% scale diagnostic run -- rendered into a scratch directory to reproduce a crash -- wrote
+    manifest entries vouching for six full-quality images in the repository that it had never
+    touched. The audit then passed on geometry those files did not show. A provenance record that
+    can be written by something other than the act of rendering is not provenance.
+
+    So: key by the real output path, and let tools/install_renders.py carry the record across when
+    the files are copied into renders/.
+    """
     fpf = os.path.join(SRC, "fingerprint.txt")
     fp = open(fpf).read().strip() if os.path.exists(fpf) else "unknown"
     path = r"C:/Users/Josh/knee-exo/renders/manifest.json"
@@ -168,6 +179,5 @@ for name, direction, clad, (rx, ry), margin, focus in SHOTS:
           % (name, rx, ry, "clad" if clad else "open", time.time() - t))
 show(SHELLS, True)
 print("STILLS: %d images in %.1f min" % (len(SHOTS), (time.time() - t0) / 60.0))
-POSE = "flexed_40deg" if "p40" in SRC else "extended_0deg"
-record(["renders/%s/%s.png" % (POSE, n) for n, _, _, _, _, _ in SHOTS
+record([os.path.join(OUT, n + ".png").replace(chr(92), "/") for n, _, _, _, _, _ in SHOTS
         if not ONLY or any(n.startswith(x) for x in ONLY)])
