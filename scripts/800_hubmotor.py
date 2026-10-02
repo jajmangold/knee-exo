@@ -171,8 +171,9 @@ print("  own. A belt-only train at %.1f:1 reflects %.3f kg.m2, %.2fx the limb --
          J_ROTOR * (180.0 / FACE_PD) ** 2 / J_LIMB))
 print("  the low ratio is doing that, not the motor. Direct drive reflects %.3f kg.m2 (%.3fx):"
       % (J_ROTOR, J_ROTOR / J_LIMB))
-print("  power off, the knee is essentially free. For a post-operative limb that is the single")
-print("  most valuable property on this page.")
+print("  power off, the knee is essentially free. That is the best thing the hub offers -- but")
+print("  section 6 is what decides the architecture, and it goes the other way: the ratio that")
+print("  makes a train transparent is the same ratio that makes it expensive to hold a load.")
 print()
 print("  COGGING cuts the other way, and it is why a big ratio is not simply better. %.2f N.m"
       % COG)
@@ -237,3 +238,83 @@ print("  sensors only. Hall commutation gives 6 states per electrical revolution
 print("  per mechanical turn -- fine for traction, coarse for a joint held still against")
 print("  gravity. Plan on an encoder on the knee pulley for position, with the Halls for")
 print("  commutation startup; the XDRIVE/ODrive in the BOM already supports that combination.")
+
+# ======================================================================================
+# 6.  WHICH IS ACTUALLY BETTER -- and the answer turns on heat, not torque
+# ======================================================================================
+# The question "can the hub motor make 28.2 N.m" is the easy one; both can. The question that
+# decides it is what each one spends to HOLD that torque, because this is an assist for a
+# post-operative knee: sit-to-stand is seconds of near-static load, and standing support is
+# minutes of it. Copper loss for a given joint torque goes as R / (N * Kt)^2 -- the ratio enters
+# SQUARED, which is why a 14.5:1 train with a cheap little motor beats a 2.8:1 train with a good
+# big one, even though the hub is the better motor by every static measure.
+print()
+print("=" * 94)
+print("6.  SCREW TRAIN vs HUB + ONE BELT: WHAT IT COSTS TO HOLD THE KNEE")
+print("=" * 94)
+KT_6374 = 9.5493 / 170.0        # 170 Kv, the motors actually on hand
+R_6374 = 0.025                  # ASSUME ohm/phase -- typical C6374; measure it
+N_SCREW, ETA_SCREW_TRAIN = 14.5, 0.90 * 0.97
+N_HUB, ETA_HUB_TRAIN = 180.0 / FACE_PD, 0.97
+COG_6374 = 0.05                 # ASSUME N.m -- an open outrunner cogs much less than a hub
+
+
+def loss_for(tau_joint, n, kt, r, eta):
+    i = tau_joint / (n * kt * eta)
+    return i, 3.0 * (i / math.sqrt(2.0)) ** 2 * r
+
+
+def tau_at_loss(p, n, kt, r, eta):
+    i = math.sqrt(p / (3.0 * r)) * math.sqrt(2.0)
+    return i * n * kt * eta
+
+
+print("  Motor constant Km = Kt / sqrt(R), how much torque a motor makes per watt of heat:")
+print("    C6374 170 Kv   Kt %.4f  R %.3f  ->  Km %.3f N.m/sqrt(W)"
+      % (KT_6374, R_6374, KT_6374 / math.sqrt(R_6374)))
+print("    hub motor      Kt %.4f  R %.3f  ->  Km %.3f N.m/sqrt(W)   %.1fx better"
+      % (KT, R_PHASE, KT / math.sqrt(R_PHASE),
+         (KT / math.sqrt(R_PHASE)) / (KT_6374 / math.sqrt(R_6374))))
+print("  The hub is the better motor. Then the ratio squares, and the comparison inverts:")
+print()
+print("  %-28s %8s %9s %10s" % ("holding 28.2 N.m at the knee", "current", "copper", "vs screw"))
+i_s, p_s = loss_for(TAU_PEAK, N_SCREW, KT_6374, R_6374, ETA_SCREW_TRAIN)
+i_h, p_h = loss_for(TAU_PEAK, N_HUB, KT, R_PHASE, ETA_HUB_TRAIN)
+print("  %-28s %6.1f A %7.0f W %10s" % ("screw train, 14.5:1", i_s, p_s, "--"))
+print("  %-28s %6.1f A %7.0f W %9.1fx" % ("hub + one belt, %.2f:1" % N_HUB, i_h, p_h, p_h / p_s))
+print()
+print("  Turned round: the joint torque each can hold at a sustainable loss. A 6374 inside the")
+print("  sealed P25 nacelle and a sealed hub shell are both bad at losing heat; call it 40 W for")
+print("  the smaller motor and 80 W for the hub's 0.1 m2 of aluminium.")
+print()
+print("  %-28s %10s %14s" % ("", "loss budget", "holds at the knee"))
+print("  %-28s %8.0f W %11.1f N.m" % ("screw train, 14.5:1", 40.0,
+      tau_at_loss(40.0, N_SCREW, KT_6374, R_6374, ETA_SCREW_TRAIN)))
+print("  %-28s %8.0f W %11.1f N.m" % ("hub + one belt, %.2f:1" % N_HUB, 80.0,
+      tau_at_loss(80.0, N_HUB, KT, R_PHASE, ETA_HUB_TRAIN)))
+print("  %-28s %8.0f W %11.1f N.m" % ("hub, direct drive", 80.0,
+      tau_at_loss(80.0, 1.0, KT, R_PHASE, 1.0)))
+print()
+print("  So the screw train holds the full %.1f N.m on a 40 W budget with margin, the hub needs"
+      % TAU_PEAK)
+print("  %.0f W to do the same, and direct drive cannot do it at all. For a device whose hardest"
+      % p_h)
+print("  duty is a slow stand from a chair, that is the whole argument.")
+print()
+print("  WHERE THE HUB STILL WINS, honestly:")
+print("    reflected inertia   %.3f kg.m2 (%.2fx limb) against the screw's 0.065 (0.22x)"
+      % (J_ROTOR * N_HUB ** 2, J_ROTOR * N_HUB ** 2 / J_LIMB))
+print("    part count          deletes screw, nut, rail, carriage, 4 V-wheels, the link belt")
+print("    maintenance         no grease, no wiper seal, no lead-angle wear at the nut")
+print("    cost                the wheels are already owned; so is the 6374, so this is a wash")
+print("  AND WHERE IT LOSES:")
+print("    holding heat        %.1fx the copper loss for the same joint torque" % (p_h / p_s))
+print("    mass               %+.0f g, concentrated at the knee rather than along the thigh"
+      % (si - so))
+print("    width at the knee   a %.0f mm disc at the one place that catches chairs and doorways"
+      % (RIM_PD + 25))
+print("    cogging             %.2f N.m at the knee against the 6374 train's %.2f -- near a wash"
+      % (COG * N_HUB, COG_6374 * N_SCREW))
+print("    feedback            Hall-only commutation, 90 steps/turn, on a joint held static")
+print("    schedule            a verified device exists today; this is a napkin with six")
+print("                        unmeasured numbers in it")
