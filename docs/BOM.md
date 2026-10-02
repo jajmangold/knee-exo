@@ -116,30 +116,44 @@ drifting, and there is no adjustment for it. Each screw only needs **162 mm of t
 
 ## 5. Printed parts
 
-All 15 in [`stl/`](../stl). Blue PETG as rendered, 0.2 mm layers. The Delrin gibs are
-gone — they became bought MGN7H blocks (S2a).
+**15 per leg, 30 for the pair** — [`stl/`](../stl) is the left leg and [`stl_R/`](../stl_R) the
+right. They are not 15 parts printed twice: every one is chiral, and a left part will appear to fit
+the right leg while putting the drive on the wrong side of the limb. The engraved number is how you
+tell: `P5L` against `P5R`.
 
-| Part | Qty | Suggested |
+Blue PETG, 0.2 mm layers. Perimeters and infill per part, with the orientation, support area,
+filament and time each one actually needs, are in **[`PRINT.md`](PRINT.md)**, which is generated from
+the exported STLs by [`900_print_list.py`](../scripts/900_print_list.py) rather than typed here —
+this table used to list `P3_Carriage`, `P3b_CarriageB` and `P11_SprungAnchor`, of which the first
+became a bought aluminium plate (S2d) and the other two were deleted with the second ball screw.
+
+| Part | Qty/leg | Suggested |
 |---|---|---|
-| `P1_KneeYoke` | 1 | 5 perimeters, 60% gyroid — carries the full 18.5 N·m reaction |
+| `P1_KneeYoke` | 1 | 5 perimeters, 60% gyroid — carries the full knee reaction |
 | `P2a_KneeHub_Pulley29T` | 1 | 6 perimeters, 60%. The tooth flanks want a fresh nozzle |
-| `P3_Carriage`, `P3b_CarriageB` | 1 each | 5 perimeters, 50% |
-| `P11_SprungAnchor` | 1 | 5 perimeters, 60% |
 | `P5_ThighCuff`, `P7_ShankCuff`, `P6_ShankSocket` | 1 each | 4 perimeters, 30% |
 | `P20_KneeCap` | 1 | 3 perimeters, 15%, cosmetic |
 | `P21_FairingThigh`, `P22_DriveCap`, `P24_FairingShank` | 1 each | 3 perimeters, 15%, cosmetic |
 | `P25_MotorNacelle` | 1 | 3 perimeters, 15%. Prints nose-down on its domed end, no supports |
-| `P23a/b/c_FairingMount` | 1 each | 4 perimeters, 40% — they carry the canopy |
+| `P23a/b/c_FairingMount` | 3 | 4 perimeters, 40% — they carry the canopy. All three are the **same part**, so they share one mark |
 | `P30_InterfaceProx`, `P31_InterfaceDist` | 1 each | **KX-1 module interface.** 6 perimeters, 60% — structural. 6 × M5 heat-set inserts + 2 × ⌀5 dowels. Printed here because standalone this module needs 1.2 MPa of bearing; the same six holes in 6 mm aluminium carry the 1472 N load-to-ground case ([`501_interface.py`](../scripts/501_interface.py)) |
 
-Roughly 1.8–2.2 kg of filament including supports.
+**~1.38 kg of filament and ~86 printer-hours per leg**, so 2.76 kg and about a week of printing for
+the pair. Both figures are models rather than measurements — nothing has been printed yet — and
+[`PRINT.md`](PRINT.md) states the models so they can be corrected against the first real print.
 
-**14 of the 15 parts are engraved with their part number**
-([`412_engrave.py`](../scripts/412_engrave.py)) — 0.8 mm recessed, 8 mm Arial Bold, on a face
-that is **verified hidden**, not assumed to be. `P2a_KneeHub_Pulley29T` carries no mark:
-[`414_remark.py`](../scripts/414_remark.py) searched 16 stations × 36 bearings and found
-nowhere covered, because it is the knee hub at an open joint. It is the 143 cm³ 29T pulley and
-nothing else resembles it.
+**Hardware does not fit a printed hole as drawn.** A hole comes off the bed 0.1–0.3 mm undersize,
+and almost every hole here runs along the knee axis while most parts build along their length, so
+most print slightly oval too. 102 holes, what fits each and what to do about it:
+[`417_fastener_audit.py`](../scripts/417_fastener_audit.py), summarised as a drill list at the top
+of [`ASSEMBLY.md`](ASSEMBLY.md).
+
+**14 of the 15 parts are engraved with their part number and leg letter**
+([`412_engrave.py`](../scripts/412_engrave.py)) — 0.8 mm recessed, Arial Bold at 8 mm where it fits
+and 5 or 4 mm where the suffix made it not, on a face that is **verified hidden** and **verified to
+read forwards**. `P2a_KneeHub_Pulley29T` carries no mark: 16 stations × 36 bearings found nowhere
+covered, because it is the knee hub at an open joint. It is the 143 cm³ 29T pulley and nothing else
+resembles it.
 
 *Verified* matters here. The first placement rule was "the first surface a ray from the limb
 axis meets", which is an **inner surface** — not the same property as **hidden**, and nothing

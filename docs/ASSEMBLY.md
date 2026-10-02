@@ -1,0 +1,180 @@
+# Assembly
+
+Written to be followed with the parts in front of you, in the order they go together. Every printed
+part carries its number engraved on a hidden face — `P5L` for the left leg, `P5R` for the right —
+which is the only way to tell apart the two cuffs, the two halves of the drive shell and the three
+identical fairing mounts once they are off the bed.
+
+> [!WARNING]
+> This is a **powered** device applying up to **28.2 N·m** to a post-operative knee. Two things are
+> not optional: the side-release buckles in the strap loop (S5c), so the whole thing comes off in one
+> squeeze, and a bench run through the full range of motion with the limb **out** of it before it
+> goes on anybody. There is no FEA behind any printed part — only hand calculations
+> ([`400_bracket_stress.py`](../scripts/400_bracket_stress.py),
+> [`401_vwheel_load.py`](../scripts/401_vwheel_load.py),
+> [`408_cuff_loads.py`](../scripts/408_cuff_loads.py)) and a 107-pose interference sweep.
+
+Do not mix legs. The two sets are mirror images, not duplicates: a left shell will appear to fit the
+right leg and will put the drive on the wrong side of the limb.
+
+---
+
+## 0. Before anything fits: finish the parts
+
+Printed holes come off the bed 0.1–0.3 mm undersize, and in this device almost every hole runs
+along the knee axis while most parts build along their length — so most holes print slightly oval
+as well. Budget an hour per leg for this and do all of it before you pick up a bolt.
+
+| Do this | To these |
+|---|---|
+| Drill 4.3 | every ⌀4.2 — `P1`, `P6` (16 of them), `P30`, `P31` |
+| Drill 5.3 | every ⌀5.2 — `P1`, `P2a`, `P5`, `P7`, `P21` (19), `P23a/b/c`, `P24` |
+| **Ream** 5.0 H7 | the ⌀5.0 dowel holes in `P30` and `P31` — these set the interface alignment, so ream, do not drill |
+| Ream 12.3, on a drill press | the ⌀12.3 knee-pin holes in `P1` and `P2a`. This is the joint axis; a hole drilled crooked by hand becomes a knee that binds at one end of its travel |
+| Melt in M5 heat-set inserts | the ⌀6.4 holes — 4 in `P6`, 6 each in `P30` and `P31`. Leave the holes as printed; an M5 insert is ⌀7.0 and wants 6.4 |
+| Leave alone | the ⌀10.4 counterbores on `P5` and `P7` — the cap heads sit in them |
+
+Then dry-fit the knee: `P1L` and `P2aL` on the M12 pin, no belt, and swing it. It must move freely
+through **−2° to +104°** with no tight spot. Fix that here, not later.
+
+Full table: [`scripts/417_fastener_audit.py`](../scripts/417_fastener_audit.py), 102 holes.
+
+---
+
+## 1. Thigh spine and gantry
+
+1. Cut the **20×40 V-slot** (S1) to **156 mm**, which is Y 51…207 on the model's axis. Deburr the
+   slots or the T-nuts will not slide.
+2. Fit the four **mini V-wheels** (S2) to the aluminium **gantry plate** (S2d, `P3_GantryPlate_Alu`
+   — bought/cut, not printed), two on eccentric spacers. Wheels sit on the |X| 20 corners, **70 mm
+   apart in Y**, not 50: the Hertz contact at 50 mm is 107 MPa against a ~101 MPa yield onset
+   ([`401_vwheel_load.py`](../scripts/401_vwheel_load.py)).
+   **Mini wheels only.** A solid V-wheel reaches |X| 37.6 and fouls the belt at 35.55.
+3. Slide the plate onto the extrusion and set the eccentrics until it rolls with no rock and no
+   drag. Check again after the belt is tensioned — tension changes it.
+4. Mount the **ball screw** (D1, SFU1610 RH, 330 mm) on its axis at **X = −62** with the two bearing
+   blocks (D8). The nut (D3) is **flangeless and trapped axially** between two plates on the gantry,
+   not clamped radially: a 36.4 mm bore through a 40 mm housing would sever it, and the load is
+   along Y anyway.
+
+> The screw is **right-hand on both legs**. Do not look for a left-hand one for the right leg — the
+> reflection is absorbed by one sign in firmware (step 9).
+
+## 2. Drive bracket, motor, link belt
+
+5. Bolt the **aluminium drive bracket** (S2e) to the top of the extrusion. It carries three things:
+   the 29T idler, the screw's upper bearing, and the motor.
+6. Fit the **29T HTD-8M idler** (S2b) on the centreline at **X 0, Y 255**, supported top and bottom.
+   Its axle reaction is up to **1828 N — the largest single load in the machine**, so both bearings,
+   both ends, no exceptions.
+7. Mount the **C6374 motor** (D5) with the **32T** pulley, and the **20T** on the screw. That is a
+   **1:1.6 overdrive**, not 1:1 — it is what puts the total ratio at 14.5:1
+   ([`404_link_ratio.py`](../scripts/404_link_ratio.py)). Close the **HTD-5M 15 mm** link belt (D6)
+   over them at 61 mm centres.
+8. Fit `P30L` (**KX-1 proximal interface**) to the bracket's top plate on its 4 × M4, with the
+   6 × M5 inserts and 2 dowels facing out. It is the module interface; it does nothing in a
+   single-knee build except exist for the next one.
+
+## 3. Knee joint
+
+9. `P1L_KneeYoke` to the lower end of the thigh spine. `P2aL_KneeHub_Pulley29T` is the shank-side
+   capstan and the 29T the main belt wraps — handle its tooth flanks carefully, they are printed.
+10. **M12 × 70 shoulder bolt** (K2) through `P1L` and `P2aL`, into the flush counterbore. This is
+    the knee axis. Nothing about the device is right if this is not square.
+11. Swing the joint again, now loaded by the yoke: −2° to +104°, free throughout.
+
+## 4. The main belt
+
+12. Route the **HTD-8M closed loop** (D4) over the knee capstan and the idler, and clamp both ends
+    to the gantry plate. The loop is what makes **one** screw do both directions.
+13. Tension it. The capstan loop carries up to **764 N** differential at peak torque; the belt land
+    is 30 mm wide. Tension to the belt's spec, not by feel — this is the one place a slack belt
+    looks fine and loses position under load.
+14. Re-check the eccentrics (step 3) and run the gantry end to end by hand. **68.3 mm of stroke**,
+    no binding, no belt climb.
+
+## 5. Shank side
+
+15. Cut the **20×20 V-slot** (A4) for the shank and clamp `P6L_ShankSocket` to it — 16 × M4. This is
+    the part that transfers everything into the calf.
+16. Fit `P31L_InterfaceDist` under `P6L` on its 6 × M4, dowels first. Its number is engraved on the
+    **underside**, which beds on `P6L`: that is deliberate, it was the only covered face
+    ([`413_mark_visibility.py`](../scripts/413_mark_visibility.py)).
+
+## 6. Cuffs and the only parts that touch him
+
+17. Put the **3 mm neoprene sleeves** (S5) on first, thigh and calf. They are the skin interface and
+    a consumable. **Closed, dry incision only — ask whoever runs his rehab.** Neoprene contact
+    dermatitis is common enough that a nylon-faced fallback is worth having on hand.
+18. `P5L_ThighCuff` and `P7L_ShankCuff` on their 4 × M5 each. Both are **conical**, matched to the
+    limb's taper, which is why they bear across their whole width at **12.5 and 12.2 kPa** instead of
+    40 kPa on one narrow band ([`409_cuffs.py`](../scripts/409_cuffs.py)). They sit **4.00 mm** off
+    the limb all over; that gap is the sleeve plus air, and it is uniform by construction.
+19. Thread the **38 mm nylon webbing** (S5a) through the slots, **2:1 through the D-ring** into the
+    cam buckle (S5b), with the **side-release buckle** (S5c) in the loop. Target **21 N** of strap
+    tension with the neoprene on — about **12 N at your hand** through the 2:1. That is what holds
+    the 3.52 N·m of roll torque the device's own mass applies.
+20. **Practise the release.** Squeeze both side-release buckles; the whole device should come off in
+    about two seconds. Do this before it is ever powered.
+
+## 7. Fairings, last
+
+21. `P23aL`, `P23bL`, `P23cL` into the extrusion's **posterior** side slot at Y 88, 124 and 160 —
+    one M5 each, on rubber grommets (S4a), isolating rather than rigid. All three are the same part;
+    they are interchangeable, which is why they share the mark `P23L`.
+22. `P21L_FairingThigh` onto those three mounts, 19 × M5.
+23. `P22L_DriveCap` and `P25L_MotorNacelle` — **these two are one wall split in two**, 160.9 + 85.0
+    cm³ tiling the same shell with **zero overlap and no void between them**. P22 goes on first; the
+    nacelle closes over the motor pod.
+24. `P20L_KneeCap` over the knee, `P24L_FairingShank` over the shank rail.
+25. Check the cladding does what it is for: with everything on, no moving part should be reachable
+    from the limb's side. That is verified in CAD at three poses with 187 rays
+    ([`406_coverage.py`](../scripts/406_coverage.py)) and takes thirty seconds to confirm with a
+    finger.
+
+## 8. Electronics
+
+See [`ELECTRONICS.md`](ELECTRONICS.md). In short: XDRIVE MINI / ODrive, the motor's own Hall sensors
+for commutation, and an encoder for joint position. Route the motor phases and the encoder cable
+**apart**, and keep the encoder cable off the belt run.
+
+## 9. The one thing that differs between legs
+
+**Invert the joint direction sign for the right leg.** Both legs use a right-hand ball screw, so for
+a given motor direction the nut travels the same way — which means the knee goes the opposite way:
+
+| | +motor rotation | nut travels | knee |
+|---|---|---|---|
+| left | + | distal | **extends** |
+| right | + | distal | **flexes** |
+
+One constant, in one place — the joint direction in firmware, or the axis map in the gait
+controller. Getting this wrong drives the knee the wrong way under a 28.2 N·m assist, which is not a
+subtle failure. [`700_handedness.py`](../scripts/700_handedness.py).
+
+## 10. First power
+
+In this order, with the limb out of the device:
+
+1. ODrive motor and encoder calibration, device clamped to a bench.
+2. **Unpowered** full-ROM sweep by hand. Listen for the belt and feel for a tight spot.
+3. Powered, current limited to a quarter: command 10° steps across the whole range.
+4. Full current, no limb, full range, and watch the knee axis for wander.
+5. Only then, on the limb, with the straps at step 19's tension and a hand on the release.
+
+---
+
+## What is not verified
+
+Honest list, so it is not discovered at the bench:
+
+- **No FEA.** Hand calculations and a 107-pose interference sweep. The printed parts have margins
+  computed by hand, not by simulation.
+- **Nothing has been printed yet,** so the filament and time figures in [`PRINT.md`](PRINT.md) are
+  models, and no hole has been tested against real hardware.
+- **The motor's hip clearance is measured against nothing** — the reference limb model ends at the
+  hip (Y = 300) and the motor sits there. Check it on the patient before printing the shells.
+- **Acoustics are unmeasured.** Ball nut recirculation around 290 Hz is the likely source and the
+  fairing the likely radiator. [`ELECTRONICS.md`](ELECTRONICS.md) §9.
+- **Belt tooth-shear figures come from continuous-duty ratings** that carry high-speed fatigue
+  derating. A slow capstan can run closer to the cord limit; check the actual belt's data.

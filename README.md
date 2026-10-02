@@ -587,12 +587,25 @@ cover lives in*, which is a question the original analysis never posed.
 
 ## Verification
 
-[`scripts/231_verify.py`](scripts/231_verify.py) runs a **full pairwise interference sweep
-with no skip list** — 107 poses, every part against every other part, in twelve chunks of
-nine (the sweep exceeds FreeCAD's 90 s GUI dispatch limit in a single call).
+[`tools/sweep.py`](tools/sweep.py) runs a **full pairwise interference sweep with no skip list** —
+107 poses, every part against every other, across ten headless FreeCAD processes in **2.5 minutes**.
+The GUI-driven version it replaced ([`231_verify.py`](scripts/231_verify.py)) took about 32 minutes
+in twelve chunks, because the RPC server times out at 90 s per call; `freecadcmd` has no such limit
+and poses are independent, so they shard.
 
-**Current state: zero hard-part clashes.** The only remaining overlaps are the reference
-limb cones intersecting each other, and 0.84 cm³ of thigh-cuff foam compression.
+**Current state, both legs: zero unintended overlaps.** Six pairs report contact and all six are
+meant to: the three reference limb segments intersecting each other, and the three fairing mounts
+bonded into the thigh shell.
+
+The other three checks, all of which have caught something nothing else did:
+
+| Check | What it asks | Current result |
+|---|---|---|
+| [`406_coverage.py`](scripts/406_coverage.py) | from the skin, looking out, is any moving part reachable? | **0 of 187 rays** at 0°, 30° and 104° |
+| [`411_printability.py`](scripts/411_printability.py) | bed, overhangs, mean wall, closed mesh | 15 of 15 watertight, all inside 220 × 220 |
+| [`413_mark_visibility.py`](scripts/413_mark_visibility.py) | is each engraved number actually hidden? | **14 of 14 covered**, both legs |
+| [`tools/readmark.py`](tools/readmark.py) | …and does it read forwards? | 28 of 28 marks, after 12 were found mirrored |
+| [`417_fastener_audit.py`](scripts/417_fastener_audit.py) | does the hardware fit the holes? | 102 holes, all identified, all ≥ 2 mm |
 
 > [!IMPORTANT]
 > A skip list hid **six real clashes** earlier in this project, including a carriage bore
@@ -639,6 +652,14 @@ a boolean.
 ---
 
 ## Guides, and why the layout spends the axis it does
+
+> [!NOTE]
+> **This section is history.** It reasons towards MGN7H blocks and a table below still says
+> "MGN7H — built"; what is actually built is **four mini V-wheels** on the extrusion's corners, and
+> both carriages, both MGN7 rails and the sprung belt anchor went with the second ball screw. Kept
+> because the reasoning about mounting faces — and about what an interference sweep cannot ask — is
+> what led to the current layout. Current state: [`396_fixes.py`](scripts/396_fixes.py).
+
 
 The carriage guides were Delrin L-gibs running in the extrusion's slots, and are now
 MGN7H recirculating blocks. The load case is
@@ -770,35 +791,58 @@ leaves a free-swinging passive brace, not a locked leg. That property is worth p
 ## Repository
 
 ```
-docs/        BOM.md — build list and the screw-lead decision
-             ELECTRONICS.md — ODrive, ESP32, control, safety, bring-up
-model/       FreeCAD source (internal document name is KneeExo_v4)
-stl/         12 printed parts (PETG)
+docs/        BOM.md         what to buy, and the screw-lead decision
+             PRINT.md       the print list — generated from the STLs, not written by hand
+             ASSEMBLY.md    how it goes together, in order, by engraved part number
+             ELECTRONICS.md ODrive, ESP32, control, safety, bring-up
+             PRIOR_ART.md   what exists already, and why this is not that
+model/       KneeExo_v6.FCStd (left) · KneeExo_v6_R.FCStd (right) · *.marks.json
+stl/         15 printed parts, left leg        stl_R/  the same 15, right leg
 kinematics/  kin_low.json — current pose law; legacy slider-crank kept for reference
-renders/     cad/ FreeCAD viewport captures; Cycles stills and animation GIFs
-scripts/     chronological build and verification scripts, over FreeCAD's XML-RPC
+renders/     cad/ FreeCAD viewport captures; Cycles stills and animation GIFs  (STALE,
+             see Open items — they predate both the drive-cover rework and the engraving)
+scripts/     chronological build and verification scripts
+tools/       the things that are run repeatedly rather than once
 ```
 
-Scripts are numbered in the order they were run. The live chain for the current design is:
+**If you are building one:** [`docs/BOM.md`](docs/BOM.md) to order,
+[`docs/PRINT.md`](docs/PRINT.md) to print, [`docs/ASSEMBLY.md`](docs/ASSEMBLY.md) to assemble.
+
+Scripts are numbered in the order they were run, so the numbering is history, not structure.
+Earlier numbers include all four rejected architectures above. The part of it that is still live:
 
 ```
-194_layout → 195_knee → 196_carr → 197_belt → 203_makeroom → 206_fix
-           → 210_flush → 217_fairing → 232_covers → 240_nut1610
-           → 241_fixups → 250_mgn7
+geometry      194_layout → 195_knee → 196_carr → 197_belt → 203_makeroom → 206_fix
+              → 210_flush → 217_fairing → 232_covers → 240_nut1610 → 241_fixups → 250_mgn7
+
+the current    393_driveend → 394_lighten_merge → 396_fixes → 397_recladding
+build chain    → 398_sidemounts → 399_drivecap → 409_cuffs → 502_interface_build
+               run as one headless process by tools/build_headless.py, 3.4 min
+
+marking        412_engrave (place and cut) · 416_unmark (take back out)
+               · 702_mirror_marks (reflect the left leg's onto the right)
+
+the pair       701_mirror_build  — left document → right document, Z → −Z
 ```
 
-then [`231_verify.py`](scripts/231_verify.py) to sweep, `219_stl.py` to export,
-`223_cad_shots.py` for the CAD screenshots, `221_render_export.py` for the Cycles stills
-and `222_anim_export.py` for the animation frames. Earlier numbers are the design history,
-including all four rejected architectures above.
+**Run the build chain headless, not through the GUI.** The RPC server's 90 s dispatch limit is not a
+clean failure: `397` and `409` both exceed it, and on timeout the call returns an error *while the
+work carries on in the background*, leaving a half-built document the next stage reads as finished.
+Every half-applied state in this project came from that. `freecadcmd` has no such limit.
 
-`231_verify.py` supersedes `vlow.py`: same sweep, but it also carries the fairings, the
-drive cap and the guide rails. It runs in **twelve chunks of nine poses** — eighteen no
-longer fits inside FreeCAD's 90 s GUI dispatch limit now that the model carries the
-covers and guides, and when a chunk times out the RPC returns an error *while the work
-carries on in the background*, which silently corrupts the accumulator.
+| Tool | What it is for |
+|---|---|
+| [`tools/build_headless.py`](tools/build_headless.py) | the whole build chain in one headless process, un-posing first |
+| [`tools/sweep.py`](tools/sweep.py) | the 107-pose interference sweep, 10 shards, 2.5 min |
+| [`tools/unpose.py`](tools/unpose.py) | clear a leftover animation pose — the one corruption that passes every other check |
+| [`tools/markframe.py`](tools/markframe.py), [`tools/marktool.py`](tools/marktool.py) | which way a part number points, and what it is cut with |
+| [`tools/readmark.py`](tools/readmark.py) | print each mark as ASCII, as the reader sees it |
+| [`tools/restyle.py`](tools/restyle.py) | put colours and visibility back after a headless rebuild |
+| [`tools/snapshot.py`](tools/snapshot.py) | copy the documents, registries and STLs into the repository |
+| [`tools/fcsend.py`](tools/fcsend.py) | send Python to the running GUI instance (XML-RPC, port 9880) |
 
-[`scripts/fc.py`](scripts/fc.py) is the FreeCAD client (XML-RPC, `PORT = 9880`).
+[`scripts/fc.py`](scripts/fc.py) is the older FreeCAD client; `tools/fcsend.py` supersedes it and
+adds the pose check.
 
 ### Images
 
@@ -1054,14 +1098,18 @@ quietly leave one leg's STLs under names that look like a complete set.
   last eight stages; the ~290 before them ran in an order that exists nowhere, so `model/*.FCStd`
   is tracked as source rather than as an artifact. Whether that is worth unpicking depends on
   whether this design gets built a second time.
-- **Screw lead unsettled** — see the drivetrain table. 10 mm is the right answer and it
-  fits at X = ±58 as drawn; only the CAD nut needs redrawing from OD 28 to OD 36.
-- **Printed mass ~1.59 kg** is the largest unresolved issue: 1038 cm³ structural at
-  1319 g, plus 395 cm³ of fairings which at two walls and low infill come to ~276 g rather
-  than the 501 g they would weigh solid. The structural candidates for a diet are
-  `P6_ShankSocket` (165 cm³), `P3_Carriage` (156 cm³), `P5_ThighCuff` (148 cm³),
-  `P3b_CarriageB` (146 cm³), `P2a_KneeHub` (143 cm³) and `P1_KneeYoke` (131 cm³).
-- **Carriage guides are sliding, not rolling** — see below. Not changed yet.
+- ~~**Screw lead unsettled**~~ — **settled and built.** 10 mm, and the CAD nut is now the OD 36
+  SFU1610 flangeless (`A2b_BallNut_SFU1610`, 36 × 42 × 36 in the model), on the axis at X = −62.
+- **Printed mass ~1.38 kg per leg**, 2.76 kg for the pair, over 15 parts and about 86 printer-hours
+  each — see [`docs/PRINT.md`](docs/PRINT.md), which is generated from the STLs rather than written
+  by hand. Down from the 1.59 kg this line used to claim, and for an uninteresting reason: two of the
+  parts it counted no longer exist. `P3b_CarriageB` and `P11_SprungAnchor` went with the second ball
+  screw, and `P3_Carriage` became a bought aluminium plate. The remaining candidates for a diet are
+  `P5_ThighCuff` (161 cm³), `P21_FairingThigh` (165 cm³), `P22_DriveCap` (154 cm³),
+  `P2a_KneeHub` (143 cm³) and `P1_KneeYoke` (131 cm³).
+- ~~**Carriage guides are sliding, not rolling**~~ — **changed.** Four **mini** V-wheels
+  (`P10a-d_VWheel_Mini`, OD 15.23) on the extrusion's corners, 70 mm apart in Y. A solid wheel
+  reaches |X| 37.6 and fouls the belt at 35.55; a mini reaches 31.0. [`396_fixes.py`](scripts/396_fixes.py)
 - **The motor sits at the hip**, where the reference limb model ends (Y = 300). Its 100 mm
   clearance is measured against nothing and needs a fitting check on the patient.
 - **Belt tooth-shear figures come from continuous-duty power ratings**, which carry fatigue
