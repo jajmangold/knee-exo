@@ -159,8 +159,8 @@ if "L" not in data:
 # the post-processing list, by part, from the audit's own classifier
 sys.path.insert(0, os.path.join(REPO, "scripts"))
 HOLES = {
-    "P1_KneeYoke": "2 x M4 clearance, 6 x M5 clearance, 1 x M12 knee pin",
-    "P2a_KneeHub_Pulley29T": "3 x M5 clearance, 2 x M12 knee pin",
+    "P1_KneeYoke": "2 x M4 clearance, 6 x M5 clearance, 1 x dia 28 bearing seat (bore 28.2, bond)",
+    "P2a_KneeHub_Pulley29T": "3 x M5 clearance, 2 x dia 12.3 pin bore (clamped, not a journal)",
     "P5_ThighCuff": "4 x M5 clearance with cap head counterbores",
     "P6_ShankSocket": "16 x M4 clearance, 4 x M5 heat-set insert",
     "P7_ShankCuff": "4 x M5 clearance with cap head counterbores",
@@ -241,7 +241,9 @@ w("| ⌀5.0 | 5.0 H7 | locating dowel — ream, do not drill |")
 w("| ⌀5.2 | 5.3 | M5 clearance |")
 w("| ⌀6.4 | leave as printed | M5 heat-set insert, OD ~7.0, melted in |")
 w("| ⌀10.4 | leave as printed | cap head counterbore |")
-w("| ⌀12.3 | 12.3 | M12 knee pin — this is the joint axis, so do it on a mill or a drill press |")
+w("| ⌀12.3 | 12.3 | knee pin through the hub — the joint axis, so do it on a drill press |")
+w("| ⌀28 | 28.2 | the 6001 seat in the yoke. 28.2, not 28.0: the bearing is **bonded**, and that |")
+w("| | | 0.2 is the bond line. A press fit into PETG creeps and lets go within months |")
 w("")
 w("| Part | Holes |")
 w("|---|---|")

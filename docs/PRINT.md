@@ -35,7 +35,7 @@ load case, not from a global profile:
 
 | Part | Orientation | Footprint | Height | Support | Volume | Est. filament | Est. time |
 |---|---|---|---|---|---|---|---|
-| `P1_KneeYoke` | -Y up, 0° | 90 x 12 mm | 167 mm | 4.9% | 131 cm³ | 132 g | 8.2 h |
+| `P1_KneeYoke` | -Y up, 0° | 90 x 12 mm | 167 mm | 5.5% | 125 cm³ | 127 g | 8.0 h |
 | `P20_KneeCap` | +Y up, 0° | 116 x 36 mm | 74 mm | 8.8% | 31 cm³ | 39 g | 2.4 h |
 | `P21_FairingThigh` | +Y up, 0° | 154 x 56 mm | 178 mm | 2.0% | 165 cm³ | 176 g | 11.0 h |
 | `P22_DriveCap` | -Y up, 0° | 156 x 61 mm | 154 mm | 7.3% | 154 cm³ | 161 g | 10.1 h |
@@ -50,11 +50,11 @@ load case, not from a global profile:
 | `P5_ThighCuff` | -Y up, 0° | 120 x 178 mm | 140 mm | 0.8% | 161 cm³ | 195 g | 12.2 h |
 | `P6_ShankSocket` | -Y up, 0° | 60 x 55 mm | 110 mm | 7.2% | 161 cm³ | 122 g | 7.6 h |
 | `P7_ShankCuff` | -Y up, 0° | 86 x 126 mm | 160 mm | 2.2% | 136 cm³ | 159 g | 9.9 h |
-| | | | | **333 cm² total** | | **1378 g** | **86 h** |
+| | | | | **335 cm² total** | | **1373 g** | **86 h** |
 
 The right leg is the mirror image and measures the same to within meshing noise: 
-1275 cm³ against 1275 cm³, a 0.01% difference, all of it in facet placement.
-So budget **2756 g of filament and 172 printer-hours for the pair**, plus supports.
+1269 cm³ against 1269 cm³, a 0.01% difference, all of it in facet placement.
+So budget **2747 g of filament and 172 printer-hours for the pair**, plus supports.
 
 ## Before you assemble anything: holes
 
@@ -70,11 +70,13 @@ to finish to, from [`scripts/417_fastener_audit.py`](../scripts/417_fastener_aud
 | ⌀5.2 | 5.3 | M5 clearance |
 | ⌀6.4 | leave as printed | M5 heat-set insert, OD ~7.0, melted in |
 | ⌀10.4 | leave as printed | cap head counterbore |
-| ⌀12.3 | 12.3 | M12 knee pin — this is the joint axis, so do it on a mill or a drill press |
+| ⌀12.3 | 12.3 | knee pin through the hub — the joint axis, so do it on a drill press |
+| ⌀28 | 28.2 | the 6001 seat in the yoke. 28.2, not 28.0: the bearing is **bonded**, and that |
+| | | 0.2 is the bond line. A press fit into PETG creeps and lets go within months |
 
 | Part | Holes |
 |---|---|
-| `P1_KneeYoke` | 2 x M4 clearance, 6 x M5 clearance, 1 x M12 knee pin |
+| `P1_KneeYoke` | 2 x M4 clearance, 6 x M5 clearance, 1 x dia 28 bearing seat (bore 28.2, bond) |
 | `P20_KneeCap` | none |
 | `P21_FairingThigh` | 19 x M5 clearance |
 | `P22_DriveCap` | none |
@@ -83,7 +85,7 @@ to finish to, from [`scripts/417_fastener_audit.py`](../scripts/417_fastener_aud
 | `P23c_FairingMount` | 1 x M5 clearance (on the build axis) |
 | `P24_FairingShank` | 3 x M5 clearance |
 | `P25_MotorNacelle` | none |
-| `P2a_KneeHub_Pulley29T` | 3 x M5 clearance, 2 x M12 knee pin |
+| `P2a_KneeHub_Pulley29T` | 3 x M5 clearance, 2 x dia 12.3 pin bore (clamped, not a journal) |
 | `P30_InterfaceProx` | 4 x M4 clearance, 2 x 5 mm dowel H7, 6 x M5 heat-set insert |
 | `P31_InterfaceDist` | 6 x M4 clearance, 2 x 5 mm dowel H7, 6 x M5 heat-set insert |
 | `P5_ThighCuff` | 4 x M5 clearance with cap head counterbores |

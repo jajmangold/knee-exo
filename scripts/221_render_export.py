@@ -52,7 +52,7 @@ for n in ("P1_KneeYoke","P2a_KneeHingePlate","P5_ThighCuff","A6_Idler29T",
           "P6_ShankSocket","P7_ShankCuff"): MAT[n]="PETG"
 for n in ("P20_KneeShroud","P21_ShellAnterior","P22_DriveCap","P25_MotorNacelle","P30_InterfaceProx","P31_InterfaceDist","P24_FairingShank","P23a_FairingMount","P23b_FairingMount",
           "P23c_FairingMount"): MAT[n]="FAIR"
-for n in ("A2_BallScrew_SFU1620","HW_PinB_10","HW_JointBolts"): MAT[n]="STEEL"
+for n in ("A2_BallScrew_SFU1620","HW_PinB_10","HW_JointBolts","HW_Bearing_6001"): MAT[n]="STEEL"
 MAT["A2b_BallNut_SFU1620"]="NUT"
 for n in ("A5_Belt_HTD8M","A5b_Belt_DriveRun","A5c_Belt_TakeRun",
           "A5d_Belt_WrapIdler","A7b_LinkBelt"): MAT[n]="BELT"
@@ -79,7 +79,18 @@ for th,tag in ((40.,"p40"),(0.,"p00")):
         if f.endswith(".stl"): os.remove(os.path.join(OUT,f))
     pose(th); doc.recompute()
     cnt=0; tri=0
-    for n in SHANK+GANTRY+STAT:
+    # EVERY solid, not three hand-maintained lists. SHANK and GANTRY still drive the POSE, but
+    # the export used to iterate SHANK+GANTRY+STAT, so a part absent from all three was silently
+    # left out of every render -- which is what happened to HW_Bearing_6001 the moment it was
+    # added. A render that quietly omits a part is worse than one that is out of date, because
+    # nothing about it looks wrong.
+    _all = [o.Name for o in doc.Objects
+            if o.isDerivedFrom("Part::Feature") and o.Shape and not o.Shape.isNull()
+            and o.Shape.Solids and not o.Name.startswith("REF_")]
+    _untagged = [n for n in _all if n not in MAT]
+    if _untagged:
+        print("  no material tag, exported as MISC: %s" % ", ".join(sorted(_untagged)))
+    for n in _all:
         o=O(n)
         if not o: continue
         m=MeshPart.meshFromShape(Shape=o.Shape,LinearDeflection=0.04,

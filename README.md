@@ -1158,27 +1158,20 @@ quietly leave one leg's STLs under names that look like a complete set.
 
 ## Open items
 
-- **The knee bushings have nowhere to sit.** BOM K3 specifies *two M12 flanged bushings, one each
-  side of the hub*; a 12 mm-bore bushing has a 14–16 mm OD, and the knee axis has three ⌀12.3 bores —
-  clearance for a bare ⌀12 pin. `PIN_R = 6.15` has been hardcoded in `195_knee.py`, `203_makeroom.py`
-  and `206_fix.py` since the knee was first drawn, so the bushings were specified in the BOM and
-  never modelled. As drawn, a steel pin runs directly in printed PETG on 0.15 mm of radial clearance
-  over 43 mm of journal: about 2.5 MPa at the capstan's 764 N belt differential, which PETG takes
-  statically and will not take as a cyclic journal on a 28.2 N·m joint. It polishes, then wears, and
-  play at the knee axis is the one place this design cannot absorb any.
-  **It is a decision, not a patch**, because the pin's collars currently bear on the hub's outer
-  faces — which clamps the hub to the pin and puts the only rotating interface in the yoke:
-  - *clamp to the hub, journal in the yoke* — one ⌀12×14 flanged bushing in `P1`, 12 mm of journal,
-    5.3 MPa. Fewest parts, matches the modelled retention, contradicts K3's "two".
-  - *clamp to the yoke, journal in the hub* — two bushings in `P2a`'s 6 and 25 mm lugs, 2.0 MPa and
-    a wider span to resist cocking. What K3 means, but the pin needs its collars moved to bear on
-    `P1` instead, which is a different pin.
+- ~~**The knee bushings have nowhere to sit**~~ — **fixed, with a bearing instead of a bushing.**
+  BOM K3 asked for two M12 flanged bushings; a ⌀12-bore bushing needs a 14–16 mm seat and the knee
+  axis had only ⌀12.3 pin clearance, so they had never been modelled and a steel pin ran directly in
+  printed PETG. A plain bearing was the wrong part anyway: at 764 N it puts a **0.69 N·m friction
+  deadband** at the hinge against **0.007 N·m** for a sealed ball — a stiff hinge on a limb that is
+  supposed to swing freely when the device is off, which is the property the whole 14.5:1 drivetrain
+  was sized around. [`418_knee_bearing.py`](scripts/418_knee_bearing.py) seats a **6001** (28 × 12 × 8,
+  SF 3.1) in `P1_KneeYoke`, where the hub straddles it so the load is symmetric and it sees no cocking
+  moment — the one place it could go, since the yoke is solid out to r 43–55 and the pulley rim is at
+  r 35.5, so no bolt circle could ever have passed between two hub halves. Bonded, not pressed: PETG
+  creeps and a press fit is gone in months. The remaining ⌀12.3 bores are in the hub, which the pin's
+  collars **clamp** — nothing printed turns against steel any more, and
+  [`417_fastener_audit.py`](scripts/417_fastener_audit.py) now checks that as a standing question.
 
-  Found by asking whether `HW_PinB_M12_KneePin` was an off-the-shelf part. Flagged by
-  [`417_fastener_audit.py`](scripts/417_fastener_audit.py) now, which is also where the answer to
-  that question lives: it is **ISO 7379 12 × 70** if a shoulder screw — shoulder ⌀12 h8, thread
-  **M10**, head ⌀18 — and *not* an "M12 shoulder bolt", which has a ⌀16 shoulder and will not enter
-  the bore. An ISO 8734 ⌀12 × 70 hardened dowel is the other stocked option, with retention added.
 - **No FEA.** Hand calculations only.
 - **The document is not rebuildable from the scripts.** `tools/build_headless.py` reproduces the
   last eight stages; the ~290 before them ran in an order that exists nowhere, so `model/*.FCStd`
