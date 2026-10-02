@@ -909,11 +909,24 @@ filename prefix [`221_render_export.py`](scripts/221_render_export.py) writes in
 > always claimed it did. And its source directory was hardcoded to the animation export, so the
 > still export could not be fed to it without editing the file; `KX_SRC` chooses now.
 
-Animation: also Cycles, 96 samples. 32 poses on `θ = 52 − 52·cos(2πi/32)`, so the cycle is smooth and loops
-seamlessly with no duplicated end frame. 96 samples, three cameras per frame, rig transform
-computed **once** from the union of the two extreme poses and then held fixed — otherwise
-the per-frame bounding box moves and the whole device jitters instead of the shank swinging
-about a stationary knee.
+Animation: also Cycles, 96 samples, 32 frames on `θ = 52 − 52·cos(2πi/32)` — smooth, and it loops
+with no duplicated end frame because the law already returns to its start. The camera is framed
+**once**, on the widest pose, and then held: refit per frame and the bounding box moves, so the whole
+device appears to breathe instead of the shank swinging about a stationary knee.
+
+[`b7_anim.py`](scripts/b7_anim.py) replaces `b4_anim.py`, which animated an architecture that no
+longer exists — it reads a September `kinematics.json` carrying `rod_len`, `Dx/Dy` and `phi`, and
+keyframes a rod end, a clevis and a slider-crank through them. The rod linkage became a belt over a
+capstan; `b4`'s part lists still name `P2b_RodClevisBlock` and `P4_Rod_8mm` and omit every piece of
+cladding added since, so the fairings, the drive wall, the three mounts and both interface bosses
+would have stood still while the leg bent.
+
+What replaced all of it is two expressions, because that is what the mechanism now is: the shank side
+rotates by θ about the knee axis, and the gantry slides by `(A0 − R·θ) − A0` along the limb. Both are
+the same lines `406_coverage.py` and `601_verify_fast.py` use, and the **part lists are 601's** — so a
+part added to the interference sweep is animated too, instead of drifting in a sixth hand-maintained
+pose list. That drift is the trap two sections below: a part can be in a check's list and never be
+posed.
 
 ```bash
 python scripts/300_drivetrain.py               # every drivetrain number, no FreeCAD needed

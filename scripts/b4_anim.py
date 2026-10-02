@@ -1,3 +1,13 @@
+# -*- coding: utf-8 -*-
+"""SUPERSEDED by b7_anim.py. Kept as history; do not run against the current model.
+
+This animates the ROD LINKAGE: it reads KneeExo_anim/kinematics.json (September, carrying rod_len,
+Dx/Dy and phi) and keyframes a rod end, a clevis and a slider-crank through it. That mechanism was
+replaced by a belt over a 29T capstan, so the motion law here is wrong, and the part lists below
+still name P2b_RodClevisBlock and P4_Rod_8mm while omitting every piece of cladding added since --
+the fairings, the two-part drive wall, the three mounts and both interface bosses would stand still
+while the leg bent. b7_anim.py does it in two expressions, with 601's part lists.
+"""
 import bpy, json, math, mathutils as mu
 SRC=r"C:/Users/Josh/KneeExo_anim"
 K=json.load(open(SRC+"/kinematics.json"))

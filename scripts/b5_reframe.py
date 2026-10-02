@@ -1,3 +1,8 @@
+# -*- coding: utf-8 -*-
+"""SUPERSEDED by b7_anim.py, which frames its camera once on the widest pose. Kept for the camera
+direction it records -- (0.62, -0.76, 0.22) -- which with b3_frame's and anim_common's is the only
+viewpoint this project ever wrote down.
+"""
 import bpy, math, mathutils as mu, time
 sc=bpy.context.scene
 def swept_bbox(frames):

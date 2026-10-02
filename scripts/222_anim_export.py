@@ -1,4 +1,12 @@
 # -*- coding: utf-8 -*-
+"""LARGELY SUPERSEDED by b7_anim.py. Kept because exporting posed frames is still the right answer
+if the motion ever stops being expressible as one rotation plus one translation.
+
+This writes 32 directories of posed STLs -- about 1100 files -- because the Blender side used to
+rebuild the scene per frame. It does not any more: b7_anim.py imports ONE export
+(221_render_export.py's) and keyframes the shank rotation and the gantry translation, which is what
+the current mechanism is. One export, 34 files.
+"""
 """Export a full flexion cycle as posed STLs, one directory per frame, for the Blender
 animation. Same material-tag filename scheme as 221_render_export.py.
 
