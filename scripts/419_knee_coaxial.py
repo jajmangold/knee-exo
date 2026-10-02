@@ -89,8 +89,11 @@ old_v = hub.Shape.Volume
 #                                                    boss and its 12.3 pin bore with it
 #   dia 52 across the bearing band                   the outer-race seat
 new_hub = hub.Shape.cut(cz(COLLAR_D + 1.0, STUB_Z0, BELT_Z[1] + 1.0))
-# the lower lug has nothing left to do: it existed to carry the other end of the pin
-new_hub = new_hub.cut(Part.makeBox(200, 200, YOKE_Z[0] - 60.0, V(-100, -100, 60.0)))
+# The lower lug has nothing left to do -- it existed to carry the other end of the pin -- but
+# remove ONLY the lug. A box across everything below Z 76 also takes 6 mm off the full 165 mm
+# length of the shank plate, which lives at Z 70..94: a 24 mm member quietly becomes 18 mm.
+# The lug is the material near the axis, so a cylinder is what removes it.
+new_hub = new_hub.cut(cz(COLLAR_D + 1.0, YOKE_Z[0] - 20.0, YOKE_Z[0]))
 
 # THE SHANK NOW HAS TO WRAP AROUND THE STUB, and this is a consequence of the architecture rather
 # than a detail: the 165 mm plate's only path to the toothed rim ran straight up the middle, through
@@ -105,7 +108,17 @@ collar = cz(OUTER, STUB_Z0, BELT_Z[0]).cut(cz(COLLAR_D + 1.0, STUB_Z0 - 1.0, BEL
 wall = cz(OUTER, SEAT_Z[0] - 3.5, SEAT_Z[1] + 3.5).cut(cz(B_OD, SEAT_Z[0] - 4.5, SEAT_Z[1] + 4.5))
 new_hub = new_hub.fuse(collar).fuse(wall)
 new_hub = new_hub.cut(cz(B_OD, SEAT_Z[0], SEAT_Z[1]))
-new_hub = new_hub.removeSplitter()
+# removeSplitter() tidies the coplanar seams the fuses leave, and on this part it turns a clean
+# solid into a self-intersecting one -- every step above checks clean, and only the tidy fails.
+# Third time today: P24's fill did it, 409's cuff inverted a solid outright, and here. Prefer the
+# tidy result, keep the raw one when it does not survive a check.
+tidy = new_hub.removeSplitter()
+try:
+    tidy.check(True)
+    new_hub = tidy
+    _how = "merged"
+except Exception:
+    _how = "raw fuse (removeSplitter self-intersected)"
 if new_hub.Volume < 0:
     new_hub.reverse()
 new_hub.check(True)
@@ -114,8 +127,8 @@ hub.Shape = new_hub
 hub.Label = "P2a_KneeHub_Coaxial29T"
 print("  pulley: dia %.0f stub clearance, dia %.0f seat, lower lug gone, skirt added around the stub"
       % (COLLAR_D + 1.0, B_OD))
-print("          %.1f cm3, was %.1f -- the rim, the teeth and the shank plate are untouched"
-      % (new_hub.Volume / 1000.0, old_v / 1000.0))
+print("          %.1f cm3, was %.1f -- rim, teeth and the 165 mm shank plate untouched (%s)"
+      % (new_hub.Volume / 1000.0, old_v / 1000.0, _how))
 
 # ---------------------------------------------------------------- the yoke, with its stub
 yoke = doc.getObject("P1_KneeYoke")
@@ -124,7 +137,13 @@ oldy = yoke.Shape.Volume
 y = yoke.Shape.fuse(cz(28.0, YOKE_Z[0], YOKE_Z[1])).removeSplitter()
 stub = cz(COLLAR_D, STUB_Z0, SEAT_Z[0]).fuse(cz(B_ID, SEAT_Z[0], SEAT_Z[1] + 3.0))
 stub = stub.cut(cz(20.0, YOKE_Z[0] - 1.0, SEAT_Z[1] + 4.0))     # hollow: cable pass-through
-y = y.fuse(stub).removeSplitter()
+y = y.fuse(stub)
+_t = y.removeSplitter()
+try:
+    _t.check(True)
+    y = _t
+except Exception:
+    pass
 if y.Volume < 0:
     y.reverse()
 y.check(True)

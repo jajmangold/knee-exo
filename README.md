@@ -1172,6 +1172,24 @@ quietly leave one leg's STLs under names that look like a complete set.
   collars **clamp** — nothing printed turns against steel any more, and
   [`417_fastener_audit.py`](scripts/417_fastener_audit.py) now checks that as a standing question.
 
+- **A better knee exists and is not built.** The pin-and-6001 joint is sound, but the bearing sits
+  beside the belt rather than in it, and the pin still passes through the hub's plastic (clamped, so
+  it does not rub — but it is three parts and a clamp stack where one bearing would do).
+  [`419_knee_coaxial.py`](scripts/419_knee_coaxial.py) models the alternative in its own document:
+  a **6808-2RS (40 × 52 × 7) nested inside the toothed ring**, in the plane of the belt. The tooth
+  root circle is ⌀64.3, so a bearing under about ⌀62 fits inside it with 6.2 mm of rim — and the belt
+  pull then passes straight through the bearing plane instead of 20 mm to one side of it, which on a
+  single 6815 beside the teeth would have been 764 N × 0.020 = **15.3 N·m of moment on one raceway**.
+  It passes the 107-pose sweep, keeps the full belt land, is **47 g lighter**, and opens a **⌀20 hole
+  straight through the knee** for cabling — which is worth more to the exoskeleton than to this
+  device.
+
+  Not built because it still needs coverage, printability, re-engraving and the mirror, and because
+  `v6` is print-ready today. Two things it taught that the sketch did not: cutting the stub clearance
+  **split the pulley in two**, since the 165 mm shank plate's only path to the rim ran up the middle
+  where the stub now goes (so the shank has to wrap the stub — which is what "the bearing is the only
+  thing crossing the joint" looks like drawn); and a fuse needs real interference, because two
+  attempts left 0.1 and 0.05 mm gaps and the solids merely touched.
 - **No FEA.** Hand calculations only.
 - **The document is not rebuildable from the scripts.** `tools/build_headless.py` reproduces the
   last eight stages; the ~290 before them ran in an order that exists nowhere, so `model/*.FCStd`
