@@ -122,7 +122,17 @@ def desplit(sh):
     """
     out = sh.removeSplitter()
     if out.Volume > 0.0:
-        return out
+        # Inversion is one way removeSplitter breaks a solid; producing a positive-volume shape
+        # that fails BOP is another, and this guard only ever checked the first. When the drive
+        # bracket's plates went 4 -> 6 mm for printing, the thigh cuff's clearance cut against it
+        # started coming back with BOPAlgo_InvalidCurveOnSurface -- valid(), closed, one solid,
+        # right volume, and rejected by check(). Same cure as everywhere else in this repository:
+        # prefer the tidied shape, keep the untidied one when it does not survive a check.
+        try:
+            out.check(True)
+            return out
+        except Exception:
+            return sh
     return sh
 
 

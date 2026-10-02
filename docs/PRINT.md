@@ -4,7 +4,7 @@
 hand.** Every number here is measured off the exported STLs in `stl/` and `stl_R/`; the mass and
 time figures are models, stated below, and should be corrected against the first real print.
 
-15 parts per leg, **30 for the pair**. They are not 15 parts printed twice: each one is chiral,
+17 parts per leg, **34 for the pair**. They are not 15 parts printed twice: each one is chiral,
 so a left part cannot be used on the right leg. The engraved number says which — `P5L` against
 `P5R` — and that is the only thing distinguishing two parts that otherwise look identical.
 
@@ -15,6 +15,7 @@ load case, not from a global profile:
 
 | Part | Perimeters | Infill | Why |
 |---|---|---|---|
+| `A7_DriveBracket_Idler` | 6 | 60% | holds the idler at 1828 N; the heaviest load path |
 | `P1_KneeYoke` | 5 | 60% | carries the full knee reaction |
 | `P20_KneeCap` | 3 | 15% | cosmetic |
 | `P21_FairingThigh` | 3 | 15% | cosmetic |
@@ -27,6 +28,7 @@ load case, not from a global profile:
 | `P2a_KneeHub_Pulley29T` | 6 | 60% | the 29T capstan; tooth flanks want a fresh nozzle |
 | `P30_InterfaceProx` | 6 | 60% | KX-1 interface, 1.2 MPa of bearing standalone |
 | `P31_InterfaceDist` | 6 | 60% | KX-1 interface, 1.2 MPa of bearing standalone |
+| `P3_GantryPlate_Printed` | 6 | 50% | drags the whole gantry; in-plane loads only |
 | `P5_ThighCuff` | 4 | 30% | pressure vessel, not a beam |
 | `P6_ShankSocket` | 4 | 30% | structural but bulky |
 | `P7_ShankCuff` | 4 | 30% | pressure vessel, not a beam |
@@ -35,6 +37,7 @@ load case, not from a global profile:
 
 | Part | Orientation | Footprint | Height | Support | Volume | Est. filament | Est. time |
 |---|---|---|---|---|---|---|---|
+| `A7_DriveBracket_Idler` | +X up, 0° | 92 x 102 mm | 182 mm | 10.0% | 135 cm³ | 171 g | 10.7 h |
 | `P1_KneeYoke` | -Y up, 0° | 90 x 12 mm | 167 mm | 5.5% | 125 cm³ | 127 g | 8.0 h |
 | `P20_KneeCap` | +Y up, 0° | 116 x 36 mm | 74 mm | 8.8% | 31 cm³ | 39 g | 2.4 h |
 | `P21_FairingThigh` | +Y up, 0° | 154 x 56 mm | 178 mm | 2.0% | 165 cm³ | 176 g | 11.0 h |
@@ -45,16 +48,17 @@ load case, not from a global profile:
 | `P24_FairingShank` | -Y up, 0° | 48 x 29 mm | 142 mm | 4.0% | 42 cm³ | 47 g | 2.9 h |
 | `P25_MotorNacelle` | +Y up, 0° | 97 x 91 mm | 119 mm | 10.2% | 85 cm³ | 95 g | 6.0 h |
 | `P2a_KneeHub_Pulley29T` | +Y up, 0° | 71 x 56 mm | 185 mm | 10.5% | 143 cm³ | 169 g | 10.6 h |
-| `P30_InterfaceProx` | +Y up, 0° | 80 x 10 mm | 56 mm | 6.9% | 27 cm³ | 35 g | 2.2 h |
+| `P30_InterfaceProx` | -Y up, 0° | 80 x 10 mm | 56 mm | 6.7% | 27 cm³ | 34 g | 2.1 h |
 | `P31_InterfaceDist` | +Y up, 0° | 40 x 10 mm | 56 mm | 9.9% | 20 cm³ | 25 g | 1.6 h |
-| `P5_ThighCuff` | -Y up, 0° | 120 x 178 mm | 140 mm | 0.8% | 161 cm³ | 195 g | 12.2 h |
+| `P3_GantryPlate_Printed` | +Y up, 0° | 116 x 41 mm | 84 mm | 11.7% | 71 cm³ | 91 g | 5.7 h |
+| `P5_ThighCuff` | -Y up, 0° | 120 x 180 mm | 140 mm | 0.8% | 161 cm³ | 195 g | 12.2 h |
 | `P6_ShankSocket` | -Y up, 0° | 60 x 55 mm | 110 mm | 7.2% | 161 cm³ | 122 g | 7.6 h |
 | `P7_ShankCuff` | -Y up, 0° | 86 x 126 mm | 160 mm | 2.2% | 136 cm³ | 159 g | 9.9 h |
-| | | | | **335 cm² total** | | **1373 g** | **86 h** |
+| | | | | **429 cm² total** | | **1635 g** | **102 h** |
 
 The right leg is the mirror image and measures the same to within meshing noise: 
-1269 cm³ against 1269 cm³, a 0.01% difference, all of it in facet placement.
-So budget **2747 g of filament and 172 printer-hours for the pair**, plus supports.
+1475 cm³ against 1475 cm³, a 0.01% difference, all of it in facet placement.
+So budget **3269 g of filament and 204 printer-hours for the pair**, plus supports.
 
 ## Before you assemble anything: holes
 
@@ -71,11 +75,13 @@ to finish to, from [`scripts/417_fastener_audit.py`](../scripts/417_fastener_aud
 | ⌀6.4 | leave as printed | M5 heat-set insert, OD ~7.0, melted in |
 | ⌀10.4 | leave as printed | cap head counterbore |
 | ⌀12.3 | 12.3 | knee pin through the hub — the joint axis, so do it on a drill press |
+| ⌀26 | 26.2 | the two idler bearing seats in the bracket. Bonded, same reason |
 | ⌀28 | 28.2 | the 6001 seat in the yoke. 28.2, not 28.0: the bearing is **bonded**, and that |
 | | | 0.2 is the bond line. A press fit into PETG creeps and lets go within months |
 
 | Part | Holes |
 |---|---|
+| `A7_DriveBracket_Idler` | 4 x M4 clearance, 2 x dia 26 idler bearing seats (bond), screw bore |
 | `P1_KneeYoke` | 2 x M4 clearance, 6 x M5 clearance, 1 x dia 28 bearing seat (bore 28.2, bond) |
 | `P20_KneeCap` | none |
 | `P21_FairingThigh` | 19 x M5 clearance |
@@ -88,6 +94,7 @@ to finish to, from [`scripts/417_fastener_audit.py`](../scripts/417_fastener_aud
 | `P2a_KneeHub_Pulley29T` | 3 x M5 clearance, 2 x dia 12.3 pin bore (clamped, not a journal) |
 | `P30_InterfaceProx` | 4 x M4 clearance, 2 x 5 mm dowel H7, 6 x M5 heat-set insert |
 | `P31_InterfaceDist` | 6 x M4 clearance, 2 x 5 mm dowel H7, 6 x M5 heat-set insert |
+| `P3_GantryPlate_Printed` | NONE DRAWN -- see Open items; it cannot be bolted as it stands |
 | `P5_ThighCuff` | 4 x M5 clearance with cap head counterbores |
 | `P6_ShankSocket` | 16 x M4 clearance, 4 x M5 heat-set insert |
 | `P7_ShankCuff` | 4 x M5 clearance with cap head counterbores |
@@ -97,6 +104,8 @@ to finish to, from [`scripts/417_fastener_audit.py`](../scripts/417_fastener_aud
 Support fraction is of TOTAL surface area, so 10% is a few bosses rather than a disaster. What
 matters is a part that cannot be oriented below the threshold at all. Measured, per part over 8%:
 
+* **`A7_DriveBracket_Idler`** — 10% of its surface, 57.1 cm², overhangs past 45° in its best orientation
+  (+X up, 0°).
 * **`P20_KneeCap`** — 9% of its surface, 25.6 cm², overhangs past 45° in its best orientation
   (+Y up, 0°).
 * **`P23a_FairingMount`** — 13% of its surface, 4.4 cm², overhangs past 45° in its best orientation
@@ -110,6 +119,8 @@ matters is a part that cannot be oriented below the threshold at all. Measured, 
 * **`P2a_KneeHub_Pulley29T`** — 10% of its surface, 49.6 cm², overhangs past 45° in its best orientation
   (+Y up, 0°).
 * **`P31_InterfaceDist`** — 10% of its surface, 7.5 cm², overhangs past 45° in its best orientation
+  (+Y up, 0°).
+* **`P3_GantryPlate_Printed`** — 12% of its surface, 37.2 cm², overhangs past 45° in its best orientation
   (+Y up, 0°).
 
 The three fairing mounts are one part printed three times, and 4.0 of their 4.4 cm² is in the

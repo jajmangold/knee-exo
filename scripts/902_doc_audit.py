@@ -45,7 +45,7 @@ DOCS = ["README.md", "docs/BOM.md", "docs/PRINT.md", "docs/ASSEMBLY.md",
 GHOSTS_OK = {"P3b_CarriageB", "P11_SprungAnchor", "P2b_RodClevisBlock", "P4_Rod_8mm",
              "P8_RodEndHousing_PETG", "P3b_Carriage", "P2b_Clevis",
              "P2a_KneeHub"}
-PRINTED = 15
+PRINTED = 17      # 15 + the drive bracket and gantry plate, printed since 802
 ALLOW_VOL = 0.05
 
 _BASE = DOCFILE.rsplit("/", 1)[-1]

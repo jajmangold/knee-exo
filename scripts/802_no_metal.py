@@ -81,36 +81,44 @@ print("  a 10 mm axle through a 4 mm plastic plate is %.0f MPa and will bed in. 
 print("  in the BOM -- S2c is 'idler axle + 2 bearings', and a 6000's 26 mm outer race spreads the")
 print("  same load over 2.6x the area. Seat the bearings in the plates instead of the axle, take")
 print("  the plates to 8 mm, and every number above is under 5 MPa.")
+print()
+print("  EXCEPT THERE IS NOWHERE TO PUT 8 MM. Measured: the top plate sits at Z 126.3..130.3 with")
+print("  the belt band ending at 126.0 underneath and P22_DriveCap only 3.0..5.5 mm above it, and")
+print("  P30_InterfaceProx bolted flat on top. The whole corridor is about 7.3 mm.")
+print("  So: 6 mm plates, which fit, with the idler bearings seated in them:")
+print("    plate bending  %.1f MPa      axle through the bearing's 26 mm race  %.1f MPa"
+      % ((F_PLATE * 83.0 / 4.0) / (6.0 * 44.0 ** 2 / 6.0), F_PLATE / (26.0 * 6.0)))
+print("  Both comfortably under 15, and nothing else in the drive end has to move.")
 
 # ----------------------------------------------------------------- the gantry plate
 print()
 print("=" * 94)
 print("S2d  GANTRY PLATE  --  carries the ball nut's thrust into the belt clamp")
 print("=" * 94)
-W, OFFSET = 84.0, 25.0
+W = 84.0
+OFF_X, OFF_Z = 25.0, 5.0     # nut-to-clamp offset: 25 mm in X, about 5 in Z
+print("  The nut pushes along Y at X = -62; the belt clamp pulls back along Y at |X| 36..41.")
+print("  Both forces are along Y, so the 25 mm offset between them is IN the plate's plane and")
+print("  bends it about Z. The out-of-plane moment comes only from the ~5 mm of Z offset between")
+print("  the nut's axis and the belt's mid-height. An earlier version of this script applied the")
+print("  25 mm out of plane and got 38 MPa, which condemned a 6 mm plate on the wrong load path.")
+print()
 print("  %-46s %9s %s" % ("load path", "in PETG", "verdict"))
-for t in (6.0, 10.0, 14.0):
-    A = W * t
-    print("  %-46s %7.1f MPa  %s" % ("direct tension, %.0f mm thick" % t, F_BELT / A, "fine"))
-for t in (6.0, 10.0, 14.0):
+for t in (6.0, 10.0):
+    print("  %-46s %7.1f MPa  fine" % ("direct tension, %.0f mm" % t, F_BELT / (W * t)))
+for t in (6.0, 10.0):
     S_in = t * W ** 2 / 6.0
-    print("  %-46s %7.1f MPa  %s" % ("bending IN plane (nut to clamp, %.0f mm)" % t,
-                                     F_BELT * OFFSET / S_in, "fine"))
-for t in (6.0, 10.0, 14.0):
+    print("  %-46s %7.1f MPa  fine" % ("bending in plane, 25 mm offset, %.0f mm" % t,
+                                       F_BELT * OFF_X / S_in))
+for t in (6.0, 10.0):
     S_out = W * t ** 2 / 6.0
-    sig = F_BELT * OFFSET / S_out
-    print("  %-46s %7.1f MPa  %s" % ("bending OUT of plane, %.0f mm" % t, sig,
+    sig = F_BELT * OFF_Z / S_out
+    print("  %-46s %7.1f MPa  %s" % ("bending out of plane, 5 mm offset, %.0f mm" % t, sig,
                                      "fine" if sig < ALLOW_XY else "TOO HIGH"))
 print()
-print("  In plane the plate is nowhere near anything -- 1.5 MPa in tension at 6 mm. Out of plane")
-print("  at 6 mm it is %.0f MPa, which is the number that matters, because an out-of-plane moment"
-      % (F_BELT * OFFSET / (W * 36.0 / 6.0)))
-print("  is exactly what a belt clamp offset from the nut applies. At 14 mm it drops to %.1f."
-      % (F_BELT * OFFSET / (W * 196.0 / 6.0)))
-print("  14 mm of PETG at 1.27 g/cm3 against 6 mm of aluminium at 2.70: %.0f g against %.0f g,"
-      % (116 * 84 * 14 * 1.27e-3, 116 * 84 * 6 * 2.7e-3))
-print("  so the printed plate is HEAVIER unless it is ribbed rather than solid. Ribs are free in")
-print("  a printed part and expensive in a milled one, which is the whole trade.")
+print("  And the plate is not a plate: 392_gantry.py builds decks, webs, a top bridge and a spine")
+print("  at different heights -- a box structure, which is far stiffer out of plane than any")
+print("  single section here suggests. These numbers are a floor, not a model of it.")
 
 # ----------------------------------------------------------------- the honest caveats
 print()

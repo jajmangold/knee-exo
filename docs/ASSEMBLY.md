@@ -47,8 +47,10 @@ Full table: [`scripts/417_fastener_audit.py`](../scripts/417_fastener_audit.py),
 
 1. Cut the **20×40 V-slot** (S1) to **156 mm**, which is Y 51…207 on the model's axis. Deburr the
    slots or the T-nuts will not slide.
-2. Fit the four **mini V-wheels** (S2) to the aluminium **gantry plate** (S2d, `P3_GantryPlate_Alu`
-   — bought/cut, not printed), two on eccentric spacers. Wheels sit on the |X| 20 corners, **70 mm
+2. Fit the four **mini V-wheels** (S2) to the **gantry plate** (`P3_GantryPlate_Printed` — printed,
+   not aluminium: [`802_no_metal.py`](../scripts/802_no_metal.py) puts it at 1.5–7.6 MPa in PETG),
+   two on eccentric spacers. **Note:** its bolt pattern is not drawn yet — see the README's open
+   items. You will be setting those holes out yourself for now. Wheels sit on the |X| 20 corners, **70 mm
    apart in Y**, not 50: the Hertz contact at 50 mm is 107 MPa against a ~101 MPa yield onset
    ([`401_vwheel_load.py`](../scripts/401_vwheel_load.py)).
    **Mini wheels only.** A solid V-wheel reaches |X| 37.6 and fouls the belt at 35.55.
@@ -64,7 +66,10 @@ Full table: [`scripts/417_fastener_audit.py`](../scripts/417_fastener_audit.py),
 
 ## 2. Drive bracket, motor, link belt
 
-5. Bolt the **aluminium drive bracket** (S2e) to the top of the extrusion. It carries three things:
+5. Bolt the **drive bracket** (`A7_DriveBracket_Idler` — printed, 6 mm plates) to the top of the
+   extrusion. **Bond the two idler bearings into their ⌀26 seats first**: a bare 10 mm axle through
+   6 mm of PETG is 15.2 MPa and will bed in, where the bearing's race spreads the same 914 N to
+   5.9. That substitution is what lets this part be printed at all. It carries three things:
    the 29T idler, the screw's upper bearing, and the motor.
 6. Fit the **29T HTD-8M idler** (S2b) on the centreline at **X 0, Y 255**, supported top and bottom.
    Its axle reaction is up to **1828 N — the largest single load in the machine**, so both bearings,

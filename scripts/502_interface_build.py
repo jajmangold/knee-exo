@@ -22,7 +22,7 @@ before the ankle. A lap joint on the outboard face costs zero axial length and c
 bending without relying on bolt tension, which is what a leg that takes body weight needs.
 
 WHERE THEY GO, from the free-space probe:
-  proximal  on A7's top plate at Z 130.3, centred Y 270. Inside the drive shell, so P22 gets
+  proximal  on A7's top plate at Z 132.3, centred Y 270. Inside the drive shell, so P22 gets
             a port -- a structural interface has to pass through cladding, and the boss fills
             the port so nothing is exposed behind it.
   distal    on P6_ShankSocket's top face at Z 123, centred Y -280. Clear space, no port.
@@ -130,7 +130,11 @@ print("=" * 84)
 # pattern has to fit inside it. The first layout put two of its four M4 holes straight into a
 # window: the boss would have been held by two bolts and the aggregate "0.13 cm3 removed"
 # looked entirely plausible. Only the per-hole engagement check below caught it.
-JOBS = [("P30_InterfaceProx", 0.0, 255.0, 130.3, "A7_DriveBox", "C_Drive",
+# Z 132.3, not 130.3: the bracket's top plate went from 4 mm to 6 for printing (393), and this
+# boss sits ON that plate. Leaving it at the old height is not a near miss -- it puts the boss
+# 2 mm inside the plate it bolts to, which 502's own clash check catches as "interface plates
+# clash". A mounting height that is really "the host's top face" should not be a literal.
+JOBS = [("P30_InterfaceProx", 0.0, 255.0, 132.3, "A7_DriveBox", "C_Drive",
          (-15.0, 15.0), 34.0, 3.0),
         ("P31_InterfaceDist", 0.0, -275.0, 123.0, "P6_ShankSocket", "C_Shank",
          (-25.0, 25.0), 20.0, 0.0)]

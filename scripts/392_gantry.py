@@ -98,8 +98,11 @@ def cy(r, y0, y1, x=0.0, z=0.0):
 
 
 assert WEB_A_X[0] > -BIN, "web A is inside the belt band"
-assert WEB_B_X[1] < -BOUT, "web B is inside the belt band"
-assert BRIDGE[1] < BZ[0], "the bridge is inside the belt band"
+# WEB_B_X and BRIDGE were checked here and defined nowhere in this repository -- they came from
+# an older two-carriage layout and survived only because the GUI session still had them in scope.
+# Same failure as vs_leg() in 396 and SUFFIX in 412: it worked because the session remembered.
+# The current gantry has no web B and no bridge; it has WEB_A, TOPBR, DECK_A/B, OUT and SPINE,
+# every one of which is asserted below.
 assert SPINE_X[1] < SCR_X - NUT_R, "the spine is inside the nut"
 
 PY, PYy = A0 - PLATE_HALF, A0 + PLATE_HALF
@@ -153,11 +156,15 @@ assert len(g.Solids) == 1, "P3 solids=%d" % len(g.Solids)
 assert g.isValid(), "P3 invalid"
 o = doc.getObject("P3_Carriage")
 o.Shape = g
-o.Label = "P3_GantryPlate_Alu"
+# Printed, not aluminium: 802_no_metal.py puts this structure at 1.5-7.6 MPa in PETG
+# against a 15 MPa sustained allowable, and 71 cm3 of PETG is 91 g where the same
+# volume of 6061 was 192. The build has no way to fabricate aluminium.
+o.Label = "P3_GantryPlate_Printed"
 b = g.BoundBox
 print("P3  X %.1f..%.1f  Y %.1f..%.1f  Z %.1f..%.1f"
       % (b.XMin, b.XMax, b.YMin, b.YMax, b.ZMin, b.ZMax))
-print("    %.1f cm3 -> %.0f g in 6061, against %.0f g of printed twin carriages"
-      % (g.Volume / 1000., g.Volume / 1000. * 2.70, 191. * 2))
+print("    %.1f cm3 -> %.0f g PRINTED in PETG, against 192 g if it were 6061"
+      % (g.Volume / 1000., g.Volume / 1000. * 1.27))
 doc.recompute()
-print("STAGE 2 DONE")
+doc.save()
+print("STAGE 2 DONE, saved.")

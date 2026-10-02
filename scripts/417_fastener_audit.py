@@ -37,7 +37,9 @@ except StopIteration:
 PRINTED = ["P1_KneeYoke", "P2a_KneeHingePlate", "P5_ThighCuff", "P6_ShankSocket", "P7_ShankCuff",
            "P30_InterfaceProx", "P31_InterfaceDist", "P20_KneeShroud", "P21_ShellAnterior",
            "P22_DriveCap", "P25_MotorNacelle", "P24_FairingShank",
-           "P23a_FairingMount", "P23b_FairingMount", "P23c_FairingMount"]
+           "P23a_FairingMount", "P23b_FairingMount", "P23c_FairingMount",
+           # printed since 802_no_metal.py: these were the only two fabricated aluminium parts
+           "P3_Carriage", "A7_DriveBox"]
 
 # Diameter -> what it is. Ranges are generous because a lofted shell's bolt bosses are drawn by
 # cylinder cuts whose nominal is whatever the script that made them used.
@@ -67,6 +69,9 @@ CLASS = [
     (6.15, 6.28, "pocket, 3.5 mm deep (not a fastener)", "nothing to do"),
     (6.56, 6.80, "M6 clearance", "ream 6.4"),
     (7.80, 8.20, "8 mm shaft / rod", "ream 8.0 H7 if it must rotate"),
+    # the SFU1610 shaft is 16 mm; these are its running clearances through the gantry and the
+    # bracket, not holes for hardware
+    (16.40, 17.00, "ball screw running clearance", "nothing to do; the screw passes through"),
     # 10.4 appears four times on each cuff, each one directly over a 5.2 clearance: that is a cap
     # head recess, not a hole for hardware of its own.
     (10.30, 10.60, "M5/M6 cap head counterbore", "nothing to do; the head sits in it"),
@@ -76,9 +81,17 @@ CLASS = [
     (12.80, 13.20, "13 mm OD bearing seat (695)", "press fit: print 12.9 and face it"),
     (18.80, 19.20, "19 mm OD bearing seat (6800)", "press fit: print 18.9 and face it"),
     (21.80, 22.20, "22 mm OD bearing seat (6900)", "press fit: print 21.9 and face it"),
+    # the idler's two bearings, seated in the bracket's plates so the 914 N per plate presses on
+    # a 26 mm race instead of a 10 mm axle -- 5.9 MPa instead of 15.2, which is what lets the
+    # bracket be printed at all (802_no_metal.py)
+    # 26 and 28 are both knee/idler bearing features and mean different things in different
+    # parts, so they are resolved by name below rather than by diameter alone.
+    (25.80, 26.30, "26 mm bore", "see the per-part note"),
+    (27.80, 28.30, "28 mm bore", "see the per-part note"),
 ]
 # Best build orientation per part, from 411's own search -- a hole parallel to this prints round.
-UP = {"P1_KneeYoke": (0, -1, 0), "P2a_KneeHingePlate": (0, 1, 0), "P5_ThighCuff": (0, -1, 0),
+UP = {"P3_Carriage": (0, 1, 0), "A7_DriveBox": (1, 0, 0),
+      "P1_KneeYoke": (0, -1, 0), "P2a_KneeHingePlate": (0, 1, 0), "P5_ThighCuff": (0, -1, 0),
       "P6_ShankSocket": (0, -1, 0), "P7_ShankCuff": (0, -1, 0), "P30_InterfaceProx": (0, 1, 0),
       "P31_InterfaceDist": (0, 1, 0), "P20_KneeShroud": (0, 1, 0), "P21_ShellAnterior": (0, 1, 0),
       "P22_DriveCap": (0, -1, 0), "P25_MotorNacelle": (0, 1, 0), "P24_FairingShank": (0, -1, 0),
@@ -86,7 +99,18 @@ UP = {"P1_KneeYoke": (0, -1, 0), "P2a_KneeHingePlate": (0, 1, 0), "P5_ThighCuff"
       "P23c_FairingMount": (0, 0, -1)}
 
 
-def classify(d):
+# Where a diameter means two things, the part says which.
+BY_PART = {
+    ("P1_KneeYoke", 28.0): ("6001 seat, knee pivot", "bore 28.2 and BOND -- do not press into PETG"),
+    ("P1_KneeYoke", 26.0): ("6001 outer-race abutment", "nothing to do; the race stops against it"),
+    ("A7_DriveBox", 26.0): ("idler bearing seat", "bond it; this is what lets the bracket print"),
+}
+
+
+def classify(d, name=None):
+    hit = BY_PART.get((name, round(d, 1)))
+    if hit:
+        return hit
     for lo, hi, what, note in CLASS:
         if lo <= d <= hi:
             return what, note
@@ -123,9 +147,14 @@ for name in PRINTED:
         if d > 60.0:                  # the shell itself, not a hole
             continue
         # P2a is a 29T pulley with a lightening pattern, so its 16/20/28/36/48/56 mm cylinders are
-        # the pattern and the belt land, not holes anything goes through. Anything over 13 mm that
-        # is not the knee pin is geometry, and listing it as "unclassified hardware" is noise.
-        if d > 13.5:
+        # the pattern and the belt land, not holes anything goes through -- listing those as
+        # unclassified hardware is noise. But the filter was written for that part and applied to
+        # every part, which then hid the 26 mm idler bearing seats in the drive bracket: the one
+        # feature that lets the bracket be printed at all. Skip big cylinders only where they are
+        # known to be shape rather than hole.
+        if d > 13.5 and name in ("P2a_KneeHingePlate", "P5_ThighCuff", "P7_ShankCuff"):
+            continue
+        if d > 60.0:
             continue
         ax = s.Axis
         ax = (abs(ax.x), abs(ax.y), abs(ax.z))
@@ -138,7 +167,7 @@ for name in PRINTED:
     first = True
     for (d, along), n in sorted(holes.items()):
         total_holes += n
-        what, note = classify(d)
+        what, note = classify(d, name)
         axname = "XYZ"[along]
         on_build = abs(up[along]) > 0.5
         if what is None:
@@ -176,6 +205,31 @@ if unknown:
 #
 # The question this now asks is the general one: wherever a printed part has a shaft running in it,
 # is there a BOUGHT bearing between them, or is steel turning against PETG?
+# A part with NO fastener hole cannot be fastened, and no diameter table can notice that: a table
+# only reports what is there. P3_Carriage carries the ball nut and rides on four V-wheels, and has
+# exactly two cylinders in it -- both ball-screw clearance. The wheels and the nut are modelled as
+# separate solids that happen to sit in the right place, and nothing bolts to anything.
+bare = []
+for _n in PRINTED:
+    _o = doc.getObject(_n)
+    if _o is None:
+        continue
+    if not any(_f.Surface.TypeId == "Part::GeomCylinder" and 3.0 < 2 * _f.Surface.Radius < 7.0
+               for _f in _o.Shape.Faces):
+        bare.append(_n)
+print()
+print("=" * 100)
+print("PARTS THAT CANNOT BE BOLTED TO ANYTHING AS DRAWN")
+print("=" * 100)
+if bare:
+    for _n in bare:
+        print("  %-24s no fastener hole of any size" % _n)
+    print("  These need their mounting patterns drawn before anything can be assembled.")
+else:
+    print("  none -- every printed part has at least one fastener hole")
+print()
+print("=" * 100)
+
 print()
 print("=" * 100)
 print("THE KNEE PIVOT: is there a bearing between the pin and the plastic?")

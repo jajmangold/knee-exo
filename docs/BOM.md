@@ -104,8 +104,8 @@ drifting, and there is no adjustment for it. Each screw only needs **162 mm of t
 | S2a | Eccentric spacers + wheel bolts | 4 | Two eccentric, two fixed, the usual V-slot gantry arrangement | 10 |
 | S2b | **29T HTD-8M idler pulley**, 30 mm wide | 1 | **The same part as the knee capstan.** On the centreline at X = 0, Y 255, which is what makes the two strands land at exactly ±36.92 | 25 |
 | S2c | Idler axle + 2 bearings | 1 | Supported top and bottom by the drive bracket. Reaction is 2·T_b, **up to 1828 N — the largest single load in the machine** | 10 |
-| S2d | Aluminium gantry plate, 6 mm, ~116 × 84 | 1 | 71 cm³, 192 g, replacing 383 g of printed twin carriages. Crosses **over** the belt at Z 126.3, not under it — the 2.9 mm corridor between the nut and the belt is not a place for structure. Owned | 15 |
-| S2e | Aluminium drive bracket | 1 | Holds the idler, the screw's top bearing and the motor. 121 cm³, **326 g — still the heaviest fabricated part.** 4 mm plates and 5 mm cheeks, sized by [`400_bracket_stress.py`](../scripts/400_bracket_stress.py) at 18 MPa against 240 MPa yield; it was 465 g when it was sized by eye | 25 |
+| ~~S2d~~ | ~~Aluminium gantry plate~~ → **printed, see §5** | 0 | 71 cm³, 192 g, replacing 383 g of printed twin carriages. Crosses **over** the belt at Z 126.3, not under it — the 2.9 mm corridor between the nut and the belt is not a place for structure. Owned | 15 |
+| ~~S2e~~ | ~~Aluminium drive bracket~~ → **printed, see §5** | 0 | Holds the idler, the screw's top bearing and the motor. 121 cm³, **326 g — still the heaviest fabricated part.** 4 mm plates and 5 mm cheeks, sized by [`400_bracket_stress.py`](../scripts/400_bracket_stress.py) at 18 MPa against 240 MPa yield; it was 465 g when it was sized by eye | 25 |
 | S3 | M5 T-nuts + button head cap screws | ~40 | Everything mounts to the slots | 12 |
 | S4 | M3 / M4 cap screws, assorted | ~40 | Fairings, cuffs, electronics | 10 |
 | S4a | **Rubber grommets, M5**, + shoulder screws | 3 | The fairing's only mounts. Isolating rather than rigid — `ELECTRONICS.md` §9 names the rigid spine as the likely structure-borne noise path | 6 |
@@ -116,8 +116,14 @@ drifting, and there is no adjustment for it. Each screw only needs **162 mm of t
 
 ## 5. Printed parts
 
-**15 per leg, 30 for the pair** — [`stl/`](../stl) is the left leg and [`stl_R/`](../stl_R) the
-right. They are not 15 parts printed twice: every one is chiral, and a left part will appear to fit
+**17 per leg, 34 for the pair** — [`stl/`](../stl) is the left leg and [`stl_R/`](../stl_R) the
+right. Seventeen, not fifteen, because the **drive bracket and the gantry plate are printed now**:
+they were the only two parts in this build needing a workshop, and
+[`802_no_metal.py`](../scripts/802_no_metal.py) shows neither was ever sized by load. The bracket
+was 50× overbuilt in aluminium (4.3 MPa against 240), so in PETG the governing rule becomes creep
+and bearing rather than yield — 6 mm plates at 9.8 MPa, with the idler's bearings seated in them so
+the 914 N per plate presses on a 26 mm race (5.9 MPa) instead of a 10 mm axle (15.2, which beds in).
+Printing both **saves 241 g**: PETG at 1.27 g/cm³ against 2.70 beats the extra section. They are not 15 parts printed twice: every one is chiral, and a left part will appear to fit
 the right leg while putting the drive on the wrong side of the limb. The engraved number is how you
 tell: `P5L` against `P5R`.
 
@@ -136,10 +142,13 @@ became a bought aluminium plate (S2d) and the other two were deleted with the se
 | `P21_FairingThigh`, `P22_DriveCap`, `P24_FairingShank` | 1 each | 3 perimeters, 15%, cosmetic |
 | `P25_MotorNacelle` | 1 | 3 perimeters, 15%. Prints nose-down on its domed end, no supports |
 | `P23a/b/c_FairingMount` | 3 | 4 perimeters, 40% — they carry the canopy. All three are the **same part**, so they share one mark |
+| `A7_DriveBracket_Idler` | 1 | 6 perimeters, 60% — the heaviest load path in the machine, 1828 N through the idler. **Seat the two idler bearings in its plates and bond them**; a bare axle through 6 mm of PETG is 15.2 MPa and beds in |
+| `P3_GantryPlate_Printed` | 1 | 6 perimeters, 50% — in-plane loads only, 1.5–7.6 MPa. **Has no bolt holes drawn yet**, see the README's open items |
 | `P30_InterfaceProx`, `P31_InterfaceDist` | 1 each | **KX-1 module interface.** 6 perimeters, 60% — structural. 6 × M5 heat-set inserts + 2 × ⌀5 dowels. Printed here because standalone this module needs 1.2 MPa of bearing; the same six holes in 6 mm aluminium carry the 1472 N load-to-ground case ([`501_interface.py`](../scripts/501_interface.py)) |
 
-**~1.38 kg of filament and ~86 printer-hours per leg**, so 2.76 kg and about a week of printing for
-the pair. Both figures are models rather than measurements — nothing has been printed yet — and
+**~1.64 kg of filament and ~102 printer-hours per leg**, so 3.3 kg and about ten days of printing
+for the pair — up from 1.38 kg because the bracket and gantry plate joined the printed set, and
+down 241 g in total device mass because they left the fabricated one. Both figures are models rather than measurements — nothing has been printed yet — and
 [`PRINT.md`](PRINT.md) states the models so they can be corrected against the first real print.
 
 **Hardware does not fit a printed hole as drawn.** A hole comes off the bed 0.1–0.3 mm undersize,

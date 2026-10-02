@@ -34,10 +34,15 @@ if not os.path.isdir(OUT):
     os.makedirs(OUT)
 for f in os.listdir(OUT):
     if f.endswith(".stl"): os.remove(os.path.join(OUT,f))
-# P3 is no longer printed -- it is a bought aluminium V-wheel gantry (392_gantry.py) --
 # and P3b, P11 are deleted with the second screw. See 390_onescrew_section.py.
+# P3 and A7 were "fabricated aluminium" and so were never exported. They are printed now
+# (802_no_metal.py): the bracket at 6 mm plates with the idler bearings seated in them, the
+# gantry plate as drawn. Printing both SAVES 241 g, because PETG is 1.27 g/cm3 against 2.70
+# and the sections barely had to grow -- the parts were sized by what was convenient to fuse,
+# not by load.
 STRUCT=["P1_KneeYoke","P2a_KneeHingePlate","P5_ThighCuff",
-        "P6_ShankSocket","P7_ShankCuff","P30_InterfaceProx","P31_InterfaceDist"]
+        "P6_ShankSocket","P7_ShankCuff","P30_InterfaceProx","P31_InterfaceDist",
+        "P3_Carriage","A7_DriveBox"]
 FAIR=["P20_KneeShroud","P21_ShellAnterior","P22_DriveCap","P25_MotorNacelle","P24_FairingShank",
       # posterior side-face mounts; the only thing holding the canopy now that the
       # spine is gone (398_sidemounts.py)
@@ -72,9 +77,12 @@ for n in STRUCT+FAIR+MACH:
           ("PETG fairing" if n in FAIR else "Delrin")))
 print("\nstructural %.0f cm3 (~%.0f g) + fairings %.0f cm3 (~%.0f g at 2-wall/low infill)"%(
     ts,ts*1.27,tf,tf*0.55))
-ALU = [("P3 gantry", 192.), ("A7 drive bracket", 286.)]
-print("total ~%.0f g PETG + %.0f g of 2040 rail + %.0f g of aluminium (%s)"
-      % (ts * 1.27 + tf * 0.55, 164., sum(m for _, m in ALU),
-         ", ".join("%s %.0f" % (n, m) for n, m in ALU)))
-print("      -- the one-screw build moves the two structural carriages out of PETG and")
-print("      into a bought plate. See 390_onescrew_section.py.")
+# No fabricated aluminium left. P3 and A7 were the only two parts needing a workshop and both
+# print: 802_no_metal.py sizes them against PETG's ~15 MPa sustained allowable instead of
+# aluminium's 240 MPa yield, and they come out 241 g LIGHTER between them because the density
+# ratio beats the extra section. The only metal in the build is now bought: extrusion, screw,
+# nut, bearings, pulleys, motor, fasteners.
+print("total ~%.0f g PETG + %.0f g of 2040 rail; NO fabricated metal -- every metal part is bought"
+      % (ts * 1.27 + tf * 0.55, 164.))
+print("      P3 gantry plate 91 g printed against 192 as aluminium; A7 bracket 171 against 311.")
+print("      See 802_no_metal.py: they were never sized by load, so plastic costs only section.")

@@ -1190,6 +1190,22 @@ quietly leave one leg's STLs under names that look like a complete set.
   where the stub now goes (so the shank has to wrap the stub — which is what "the bearing is the only
   thing crossing the joint" looks like drawn); and a fuse needs real interference, because two
   attempts left 0.1 and 0.05 mm gaps and the solids merely touched.
+- **Four printed parts have no fastener holes drawn.** `P3_GantryPlate_Printed` carries the ball nut
+  and rides on four V-wheels, and contains exactly two cylinders — both ball-screw clearance. The
+  wheels and the nut are modelled as separate solids that happen to sit in the right place, and
+  nothing bolts to anything. `P20_KneeShroud`, `P22_DriveCap` and `P25_MotorNacelle` are the same,
+  though they are cladding rather than structure. No diameter table could notice this, because a
+  table only reports what is there; [`417_fastener_audit.py`](scripts/417_fastener_audit.py) now
+  asks the absence question too. **The gantry plate is the one that blocks assembly** — the other
+  three need a decision about whether they clip, bond or bolt.
+- ~~**The two fabricated aluminium parts**~~ — **gone; both print.** `S2d` and `S2e` were the only
+  parts in this build needing a workshop, and neither was ever sized by load:
+  [`400_bracket_stress.py`](scripts/400_bracket_stress.py) had the bracket 50× overbuilt at 4.3 MPa
+  against aluminium's 240. In PETG the governing rule is creep and bearing, not yield, and
+  [`802_no_metal.py`](scripts/802_no_metal.py) puts 6 mm plates at 9.8 MPa with the idler bearings
+  seated in them at 5.9 — where a bare 10 mm axle through plastic would be 15.2 and bed in.
+  Printing both **saves 241 g**, because 1.27 g/cm³ against 2.70 beats the extra section. Every
+  metal part left in the build is bought: extrusion, screw, nut, bearings, pulleys, motor, fasteners.
 - **No FEA.** Hand calculations only.
 - **The document is not rebuildable from the scripts.** `tools/build_headless.py` reproduces the
   last eight stages; the ~290 before them ran in an order that exists nowhere, so `model/*.FCStd`

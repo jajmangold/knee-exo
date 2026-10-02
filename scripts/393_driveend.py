@@ -62,8 +62,19 @@ BR_X = 46.5
 CHEEK = 41.5
 END_Y = (207.0, 217.0)
 BODY_Y = (217.0, 298.0)
-BOT_Z = (88.0, 92.0)
-TOP_Z = (126.3, 130.3)
+# 6 mm plates, not 4, because this bracket is PRINTED. 400_bracket_stress.py sized 4 mm against
+# aluminium's 240 MPa; 802_no_metal.py sizes it against PETG, where creep governs at about 15 MPa
+# sustained and the binding constraint is bearing, not bending. At 6 mm: 9.8 MPa in bending and
+# 5.9 MPa where the idler bearing's 26 mm outer race presses on the plate.
+#
+# 6 and not 8, because there is nowhere to put 8. Measured: the belt band ends at Z 126.0 under
+# the top plate and P22_DriveCap is only 3.0..5.5 mm above it, with P30_InterfaceProx bolted flat
+# on top -- about 7.3 mm of corridor in total. Both plates therefore thicken INWARD, into the
+# 4 mm of air between each plate and the belt.
+BOT_Z = (88.0, 94.0)
+TOP_Z = (126.3, 132.3)
+IDL_BEARING_OD = 26.0          # 6000-series outer race, seated in the plate rather than a bare
+IDL_BEARING_W = 6.0            # 10 mm axle through 6 mm of PETG: 15.2 MPa and it beds in
 # MOTOR ON THE FRONT OF THE THIGH (402_motor_anterior.py). On the centreline it had to
 # queue behind the idler's belt wrap and cost 74 mm of PROXIMAL length, which is the one
 # budget that had run out -- Y 412 is past the hip on a 1.65 m patient. Anterior, it shares
@@ -142,6 +153,13 @@ for sgn in (-1.0, 1.0):
 # Motor mount: a disc no bigger than the motor's own face (a 6374 bolts on a ~25 mm
 # circle), because any flange larger than the can would reach back inside the thigh --
 # the motor is only 4.6 mm off it. An arm carries the disc back to the yoke.
+# THE IDLER BEARINGS SIT IN THE PLATES. S2c is already "idler axle + 2 bearings" in the BOM, and
+# seating their outer races here is what takes the 914 N per plate off a 10 mm hole in plastic
+# (15.2 MPa, which beds in) and spreads it over a 26 mm race (5.9 MPa, which does not).
+for _z0, _z1 in (BOT_Z, TOP_Z):
+    a = a.cut(Part.makeCylinder(IDL_BEARING_OD / 2.0, IDL_BEARING_W + 0.2,
+                                V(0.0, IDL_Y, _z0 - 0.1), V(0, 0, 1)))
+
 mp = cy(MOT_R, MP_Y[0], MP_Y[1], MOT_X, MOT_Z0)
 mp = mp.cut(cy(6.0, MP_Y[0] - 1, MP_Y[1] + 1, MOT_X, MOT_Z0))
 a = a.fuse(mp)
