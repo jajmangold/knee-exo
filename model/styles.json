@@ -129,6 +129,16 @@
   "transparency": 0,
   "visible": true
  },
+ "HW_Bearing_6808": {
+  "color": [
+   0.72,
+   0.73,
+   0.76,
+   1.0
+  ],
+  "transparency": 0,
+  "visible": true
+ },
  "HW_JointBolts": {
   "color": [
    0.7215686440467834,

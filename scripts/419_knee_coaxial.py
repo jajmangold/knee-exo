@@ -155,12 +155,15 @@ print("        %.1f cm3 (was %.1f)" % (y.Volume / 1000.0, oldy / 1000.0))
 
 # ---------------------------------------------------------------- the bearing, and the old pin
 ring = cz(B_OD, SEAT_Z[0], SEAT_Z[1]).cut(cz(B_ID, SEAT_Z[0] - 1.0, SEAT_Z[1] + 1.0))
-o = doc.getObject("HW_Bearing_6001")
-if o is None:
-    o = doc.addObject("Part::Feature", "HW_Bearing_6808")
+# A different bearing deserves a different object, not the 6001's with a new label: an object whose
+# NAME says 6001 and whose LABEL says 6808 is the kind of thing that reads fine in a tree view and
+# wrong in a script, and this project has already spent a session on Name-versus-Label confusion.
+old = doc.getObject("HW_Bearing_6001")
+if old is not None:
+    doc.removeObject(old.Name)
+o = doc.getObject("HW_Bearing_6808") or doc.addObject("Part::Feature", "HW_Bearing_6808")
 o.Shape = ring
 o.Label = "HW_Bearing_6808_KneePivot"
-o.Name if False else None
 pin = doc.getObject("HW_PinB_10")
 if pin is not None:
     doc.removeObject(pin.Name)

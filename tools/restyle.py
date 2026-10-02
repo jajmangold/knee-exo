@@ -24,7 +24,11 @@ import FreeCAD
 # a relative path resolved from it lands in the FreeCAD Mod directory and the open() fails.
 STYLE_JSON = os.environ.get("KX_STYLES", r"C:/Users/Josh/knee-exo/model/styles.json")
 REF = os.environ.get("KX_STYLE_REF", r"C:/Users/Josh/KneeExo_v6.guistale.FCStd")
-TARGETS = ["KneeExo_v6", "KneeExo_v6_R"]
+# EVERY open document except the style source, rather than a hardcoded pair. The list said
+# KneeExo_v6 and KneeExo_v6_R, so when the coaxial experiment was opened it came up unstyled and
+# half-hidden -- the same hand-maintained-list failure as the render exporter's three part lists
+# and the animation's pose lists.
+TARGETS = None
 # The reference limbs are context, not parts. They were shown translucent while fitting and
 # are in the way of everything else, so default them off rather than inheriting whatever state
 # the reference document happened to be left in.
@@ -62,7 +66,9 @@ else:
     print("harvested %d styles from %s and wrote %s"
           % (len(style), ref.Name, os.path.basename(STYLE_JSON)))
 
-for nm in TARGETS:
+names = TARGETS or [d.Name for d in FreeCAD.listDocuments().values()
+                    if not d.Name.endswith("guistale")]
+for nm in names:
     try:
         doc = FreeCAD.getDocument(nm)
     except Exception:
