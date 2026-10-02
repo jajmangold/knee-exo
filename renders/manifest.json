@@ -83,6 +83,42 @@
   "made": "2026-10-01T22:43:28",
   "src": "KneeExo_v6"
  },
+ "renders/extended_0deg/01_hero_clad.png": {
+  "by": "b6_stills.py",
+  "geometry": "6d4eb38f",
+  "made": "2026-10-02T00:34:56",
+  "src": "p00"
+ },
+ "renders/extended_0deg/02_hero_open.png": {
+  "by": "b6_stills.py",
+  "geometry": "6d4eb38f",
+  "made": "2026-10-02T00:34:56",
+  "src": "p00"
+ },
+ "renders/extended_0deg/03_knee_clad.png": {
+  "by": "b6_stills.py",
+  "geometry": "6d4eb38f",
+  "made": "2026-10-02T00:34:56",
+  "src": "p00"
+ },
+ "renders/extended_0deg/04_knee_open.png": {
+  "by": "b6_stills.py",
+  "geometry": "6d4eb38f",
+  "made": "2026-10-02T00:34:56",
+  "src": "p00"
+ },
+ "renders/extended_0deg/05_drive_clad.png": {
+  "by": "b6_stills.py",
+  "geometry": "6d4eb38f",
+  "made": "2026-10-02T00:34:56",
+  "src": "p00"
+ },
+ "renders/extended_0deg/06_drive_open.png": {
+  "by": "b6_stills.py",
+  "geometry": "6d4eb38f",
+  "made": "2026-10-02T00:34:56",
+  "src": "p00"
+ },
  "renders/flexed_40deg/01_hero_clad.png": {
   "by": "b6_stills.py",
   "geometry": "6d4eb38f",
