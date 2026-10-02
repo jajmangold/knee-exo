@@ -1,0 +1,226 @@
+{
+ "P1_KneeYoke": {
+  "axis": "r",
+  "height": 8.0,
+  "mode": "r",
+  "normal": [
+   0.0,
+   0.0,
+   -1.0
+  ],
+  "point": [
+   0.0,
+   55.0,
+   -78.4
+  ],
+  "text": "P1R"
+ },
+ "P20_KneeShroud": {
+  "axis": "r",
+  "height": 5.0,
+  "mode": "r",
+  "normal": [
+   0.342,
+   0.0,
+   -0.9397
+  ],
+  "point": [
+   47.33,
+   15.0,
+   -130.039
+  ],
+  "text": "P20R"
+ },
+ "P21_ShellAnterior": {
+  "axis": "r",
+  "height": 8.0,
+  "mode": "r",
+  "normal": [
+   0.0,
+   0.0,
+   -1.0
+  ],
+  "point": [
+   0.0,
+   70.0,
+   -134.916
+  ],
+  "text": "P21R"
+ },
+ "P22_DriveCap": {
+  "axis": "r",
+  "height": 8.0,
+  "mode": "r",
+  "normal": [
+   0.0,
+   0.0,
+   -1.0
+  ],
+  "point": [
+   0.0,
+   205.0,
+   -135.553
+  ],
+  "text": "P22R"
+ },
+ "P23a_FairingMount": {
+  "axis": "P",
+  "height": 8.0,
+  "mode": "p",
+  "normal": [
+   1.0,
+   0.0,
+   -0.0
+  ],
+  "point": [
+   47.0,
+   88.0,
+   -109.0
+  ],
+  "text": "P23R"
+ },
+ "P23b_FairingMount": {
+  "axis": "P",
+  "height": 8.0,
+  "mode": "p",
+  "normal": [
+   1.0,
+   0.0,
+   -0.0
+  ],
+  "point": [
+   47.0,
+   124.0,
+   -109.0
+  ],
+  "text": "P23R"
+ },
+ "P23c_FairingMount": {
+  "axis": "P",
+  "height": 8.0,
+  "mode": "p",
+  "normal": [
+   1.0,
+   0.0,
+   -0.0
+  ],
+  "point": [
+   47.0,
+   160.0,
+   -109.0
+  ],
+  "text": "P23R"
+ },
+ "P24_FairingShank": {
+  "axis": "r",
+  "height": 4.0,
+  "mode": "r",
+  "normal": [
+   0.0,
+   0.0,
+   -1.0
+  ],
+  "point": [
+   0.0,
+   -170.0,
+   -122.0
+  ],
+  "text": "P24R"
+ },
+ "P25_MotorNacelle": {
+  "axis": "r",
+  "height": 8.0,
+  "mode": "r",
+  "normal": [
+   1.0,
+   0.0,
+   -0.0
+  ],
+  "point": [
+   -72.0,
+   250.0,
+   -62.0
+  ],
+  "text": "P25R"
+ },
+ "P30_InterfaceProx": {
+  "axis": "P2",
+  "height": 5.0,
+  "mode": "p",
+  "normal": [
+   1.0,
+   0.0,
+   -0.0
+  ],
+  "point": [
+   20.0,
+   255.0,
+   -137.0
+  ],
+  "text": "P30R"
+ },
+ "P31_InterfaceDist": {
+  "axis": "P3",
+  "height": 5.0,
+  "mode": "p",
+  "normal": [
+   0.0,
+   0.0,
+   1.0
+  ],
+  "point": [
+   0.0,
+   -275.0,
+   -123.0
+  ],
+  "text": "P31R"
+ },
+ "P5_ThighCuff": {
+  "axis": "r",
+  "height": 5.0,
+  "mode": "r",
+  "normal": [
+   0.342,
+   0.0,
+   -0.9397
+  ],
+  "point": [
+   25.886,
+   135.0,
+   -71.12
+  ],
+  "text": "P5R"
+ },
+ "P6_ShankSocket": {
+  "axis": "r",
+  "height": 8.0,
+  "mode": "r",
+  "normal": [
+   0.0,
+   0.0,
+   -1.0
+  ],
+  "point": [
+   0.0,
+   -260.0,
+   -68.0
+  ],
+  "text": "P6R"
+ },
+ "P7_ShankCuff": {
+  "axis": "r",
+  "height": 5.0,
+  "mode": "r",
+  "normal": [
+   0.5,
+   0.0,
+   0.866
+  ],
+  "point": [
+   22.833,
+   -320.0,
+   39.548
+  ],
+  "text": "P7R"
+ }
+}

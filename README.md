@@ -1022,6 +1022,25 @@ inflation 1.0 the volume came back exactly right and the solid was still broken 
 rebuilt blank from its own generator instead, which meant making `217_fairing.py` and
 `232_covers.py` run headless. A part that resists booleans is better regenerated than repaired.
 
+### What is in the repository, and what the repository is missing
+
+`model/` holds both documents and both mark registries; `stl/` is the left leg and `stl_R/` the
+right. They are COPIES — the working files live at `C:/Users/Josh/KneeExo_v6*.FCStd` because ~300
+scripts hardcode that path — so [`tools/snapshot.py`](tools/snapshot.py) copies them in and, run
+without `--write`, says what has drifted. It is worth running before every commit: after both legs
+were re-engraved, `model/` and `stl/` still held the previous commit's parts, the ones whose
+numbers were mirror images, and nothing said so.
+
+The `<doc>.marks.json` registries are tracked because they are inputs, not logs. `702` reads the
+left leg's to place the right leg's marks, `413` reads it to know what to test, `416` reads it to
+take a mark back out, and `readmark` reads it to print what each one says.
+
+The binary `.FCStd` is tracked too, in a repository whose whole point is that the scripts are the
+source, because **the document is not reproducible from the scripts alone** — it is ~300 of them run
+in an order recorded nowhere, over weeks. `tools/build_headless.py` reproduces the last eight
+stages in 3.4 minutes; everything before that exists only in the file. That is a real gap, not a
+convention, and it is on the open-items list.
+
 ### Two documents means two of everything downstream
 
 STLs export to a directory named after the document (`KneeExo_v6_STL`, `KneeExo_v6_R_STL`), one
@@ -1031,6 +1050,10 @@ quietly leave one leg's STLs under names that look like a complete set.
 ## Open items
 
 - **No FEA.** Hand calculations only.
+- **The document is not rebuildable from the scripts.** `tools/build_headless.py` reproduces the
+  last eight stages; the ~290 before them ran in an order that exists nowhere, so `model/*.FCStd`
+  is tracked as source rather than as an artifact. Whether that is worth unpicking depends on
+  whether this design gets built a second time.
 - **Screw lead unsettled** — see the drivetrain table. 10 mm is the right answer and it
   fits at X = ±58 as drawn; only the CAD nut needs redrawing from OD 28 to OD 36.
 - **Printed mass ~1.59 kg** is the largest unresolved issue: 1038 cm³ structural at
