@@ -1278,6 +1278,20 @@ quietly leave one leg's STLs under names that look like a complete set.
   where the stub now goes (so the shank has to wrap the stub — which is what "the bearing is the only
   thing crossing the joint" looks like drawn); and a fuse needs real interference, because two
   attempts left 0.1 and 0.05 mm gaps and the solids merely touched.
+- **The three fairing mounts are not anchored where the documents say.** BOM S2b's neighbours and
+  ASSEMBLY step 22 both describe `P23a/b/c` going "into the extrusion's posterior side slot at
+  Y 88, 124 and 160 — one M5 each, on rubber grommets, isolating rather than rigid". Each mount
+  does have exactly one M5, and it is **vertical at X 25** — outside the rail, which spans
+  X −20…20, so it cannot enter the posterior slot at any Z. What it actually passes through is
+  `P1_KneeYoke` (mounts a and b) and up into `P21_ShellAnterior`. So the canopy's three mounts are
+  tied to the yoke and the canopy, not to the rail, and the grommet isolation the documents
+  describe is not in the model.
+  **This is a design decision, not a defect to patch**: anchoring to the rail's posterior slot and
+  anchoring to the yoke are different answers about how vibration reaches the shell, and the
+  second one leaves `P23c` at Y 160 with no yoke under it (the yoke ends at Y 124). Decide which,
+  then draw it. Found by [`420_mockup_audit.py`](scripts/420_mockup_audit.py)'s question applied
+  to a part the table had already passed on "a bolt into the extrusion slot ≥ 1".
+
 - ~~**Four printed parts have no fastener holes drawn**~~ — **fixed.** `P3_GantryPlate_Printed`
   carried the ball nut and rode on four V-wheels while containing exactly two cylinders, both
   ball-screw clearance: the wheels and the nut were separate solids that happened to sit in the

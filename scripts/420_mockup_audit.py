@@ -112,6 +112,25 @@ def rail_bolts_aligned(sh, rail_z=98.0, margin=2.0):
     return n
 
 
+def motor_bolts(sh, reach=25.0):
+    """M5-size holes along the motor's axis and close to it -- its mounting pattern, or not"""
+    mot = doc.getObject("A3_Motor_6374")
+    if mot is None:
+        return 0
+    b = mot.Shape.BoundBox
+    cx, cz = 0.5 * (b.XMin + b.XMax), 0.5 * (b.ZMin + b.ZMax)
+    n = 0
+    for f in sh.Faces:
+        s = f.Surface
+        if s.TypeId != "Part::GeomCylinder" or not (4.8 <= 2 * s.Radius <= 5.6):
+            continue
+        if abs(s.Axis.y) < 0.9:
+            continue
+        if ((s.Center.x - cx) ** 2 + (s.Center.z - cz) ** 2) ** 0.5 < reach:
+            n += 1
+    return n
+
+
 def outer_radius(sh, z, cx=0.0, cy=0.0, r0=20.0, r1=60.0, n=72):
     """the largest outer radius at one height -- the tip circle of a toothed pulley"""
     best = None
@@ -179,8 +198,14 @@ CHECKS = [
      "a flangeless nut in a round pocket spins with the screw"),
     ("A7_DriveBox", "idler bearing seats",
      lambda sh: cyls(sh, 25.8, 26.3) >= 2, "printed, so the axle load must land on a race"),
-    ("A7_DriveBox", "a motor bolt pattern",
-     lambda sh: cyls(sh, 3.0, 5.6) >= 4, "the C6374 bolts to this face"),
+    # THE THIRD TIME A HOLE COUNT WAS FOOLED. "cyls(sh, 3.0, 5.6) >= 4" passed on A7's four M4 --
+    # which are the KX-1 interface's fixings at X +-34, Z 118.3, on the top plate, 56 mm from the
+    # motor and facing the wrong way. The C6374 is on the axis X -104, Z 62 and had nothing
+    # holding it at all. So ask WHERE the bolts are, not how many: four M5-size holes along the
+    # motor's own axis, within 25 mm of it.
+    ("A7_DriveBox", "a motor bolt pattern around the motor's axis",
+     lambda sh: motor_bolts(sh) >= 4,
+     "the C6374 bolts to this face, and four holes elsewhere are not that"),
     # EXPECTATION CORRECTED. Probing the screw axis showed the bracket is AIR at every Y from 210
     # to 296 -- there was no screw boss for a KP08 to bolt to, and no support of any kind for the
     # screw's upper end. 422 builds the boss and seats a 608 (8 x 22 x 7) in it, which is one
