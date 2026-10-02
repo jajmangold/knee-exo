@@ -84,9 +84,13 @@ for th,tag in ((40.,"p40"),(0.,"p00")):
     # left out of every render -- which is what happened to HW_Bearing_6001 the moment it was
     # added. A render that quietly omits a part is worse than one that is out of date, because
     # nothing about it looks wrong.
+    # TEST_* is excluded for the opposite reason to REF_*: not because it is scenery, but because
+    # it is not part of the machine at all. The tooth coupon is a three-tooth arc modelled at the
+    # origin to be printed on its own and pushed onto a real belt, and exporting it put a small
+    # grey fragment floating beside the knee in every published still.
     _all = [o.Name for o in doc.Objects
             if o.isDerivedFrom("Part::Feature") and o.Shape and not o.Shape.isNull()
-            and o.Shape.Solids and not o.Name.startswith("REF_")]
+            and o.Shape.Solids and not o.Name.startswith(("REF_", "TEST_"))]
     _untagged = [n for n in _all if n not in MAT]
     if _untagged:
         print("  no material tag, exported as MISC: %s" % ", ".join(sorted(_untagged)))
