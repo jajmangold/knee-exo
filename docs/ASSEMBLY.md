@@ -39,7 +39,7 @@ Then dry-fit the knee: `P1L` and `P2aL` on the pin — **bearing not yet bonded*
 it. It must move freely through **−2° to +104°** with no tight spot. Fix that here, not later: once
 the 6001 is bonded in, getting back out of the seat means destroying the bearing.
 
-Full table: [`scripts/417_fastener_audit.py`](../scripts/417_fastener_audit.py), 128 holes.
+Full table: [`scripts/417_fastener_audit.py`](../scripts/417_fastener_audit.py), 136 holes.
 
 ---
 

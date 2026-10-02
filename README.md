@@ -606,7 +606,7 @@ The other three checks, all of which have caught something nothing else did:
 | [`411_printability.py`](scripts/411_printability.py) | bed, overhangs, mean wall, closed mesh | **18 of 18 watertight** (17 parts + the tooth coupon), all inside 220 × 220 |
 | [`413_mark_visibility.py`](scripts/413_mark_visibility.py) | is each engraved number actually hidden? | **16 of 16 covered**, both legs |
 | [`tools/readmark.py`](tools/readmark.py) | …and does it read forwards? | **32 of 32 marks**, after 12 were found mirrored |
-| [`417_fastener_audit.py`](scripts/417_fastener_audit.py) | does the hardware fit the holes? | **128 holes**, all identified; no printed part is left unbolted |
+| [`417_fastener_audit.py`](scripts/417_fastener_audit.py) | does the hardware fit the holes? | **136 holes**, every one identified; no printed part left unbolted |
 | [`420_mockup_audit.py`](scripts/420_mockup_audit.py) | **is each part the part, or only its shape?** | 22 features, all present — 8 were missing |
 | [`902_doc_audit.py`](scripts/902_doc_audit.py) | **do these documents still describe this model?** | 6 documents, 0 stale claims |
 

@@ -87,6 +87,7 @@ drifting, and there is no adjustment for it. Each screw only needs **162 mm of t
 | D7 | HTD-5M **32T** pulley (motor) + **20T** pulley (screw), 8 mm bore | 1 each | **A 1:1.6 OVERDRIVE, not 1:1.** This is what puts the total ratio at 14.5:1 with the SFU1610 — see [`404_link_ratio.py`](../scripts/404_link_ratio.py). Gearing here is nearly free because this belt sits on the motor side of the screw's advantage and carries 85 N, not the 764 N the capstan loop carries | 14 |
 | D8 | KP08 / KFL08 bearing block | 1 | The screw's **lower** end only | 5 |
 | D8a | **608-2RS bearing** (8 × 22 × 7) | 1 | The screw's **upper** end. This line used to be a second KP08 bolted to "the drive bracket's screw boss" — [`420_mockup_audit.py`](../scripts/420_mockup_audit.py) went looking for the boss and found the bracket was **air at every Y from 210 to 296** along the screw axis: there was no boss, no bolt pattern, and nothing supporting the screw's top at all, so the screw was a cantilever off its bottom block. [`422_missing_features.py`](../scripts/422_missing_features.py) builds a ⌀32 × 12 boss at Y 286…298 and seats this bearing in it — one bought part instead of a pillow block and two bolts, and the same answer that made the idler and the knee printable. **Bond it, do not press it** | 3 |
+| D4a | **M5 × 16 motor bolts** | 4 | The C6374 to the drive bracket's end plate, on a **25 mm square** about the shaft. ⌀5.2 clearance takes M4 or M5. **MEASURE YOUR MOTOR FIRST**: 19 mm and 30 mm patterns exist on motors sold under similar names, the model's motor is a featureless cylinder, and nothing in CAD can confirm the spacing. Until 428_motor_mount.py the motor had no bolts at all and 420's hole count was satisfied by the KX-1 interface's four M4, 56 mm away on another face | 2 |
 | D9 | Rigid shaft coupler 8 to 10 mm | 1 | Only if you mount the motor coaxial with screw A instead of belting it | 8 |
 
 ## 3. Knee transmission
@@ -157,7 +158,7 @@ down 241 g in total device mass because they left the fabricated one. Both figur
 
 **Hardware does not fit a printed hole as drawn.** A hole comes off the bed 0.1–0.3 mm undersize,
 and almost every hole here runs along the knee axis while most parts build along their length, so
-most print slightly oval too. 132 holes, what fits each and what to do about it:
+most print slightly oval too. 136 holes, what fits each and what to do about it:
 [`417_fastener_audit.py`](../scripts/417_fastener_audit.py), summarised as a drill list at the top
 of [`ASSEMBLY.md`](ASSEMBLY.md).
 
