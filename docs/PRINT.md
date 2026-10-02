@@ -83,8 +83,8 @@ to finish to, from [`scripts/417_fastener_audit.py`](../scripts/417_fastener_aud
 
 | Part | Holes |
 |---|---|
-| `A7_DriveBracket_Idler` | 4 x M4 clearance, 2 x dia 26 idler bearing seats (bond), screw bore |
-| `P1_KneeYoke` | 2 x M4 clearance, 6 x M5 clearance, 1 x dia 28 bearing seat (bore 28.2, bond) |
+| `A7_DriveBracket_Idler` | 4 x M4 motor clearance, 2 x dia 26 idler bearing seats (bond), dia 22 x 7 seat for the screw's 608 (bond), dia 9.2 screw bore, 2 x M5 along Y into the rail's end |
+| `P1_KneeYoke` | 2 x M4 clearance, 4 x M5 into the rail at X +-10, 4 x M5 clearance for the canopy's lip at X +-20, 1 x dia 28 bearing seat (bore 28.2, bond) |
 | `P20_KneeCap` | none |
 | `P21_FairingThigh` | 19 x M5 clearance |
 | `P22_DriveCap` | none |
@@ -93,10 +93,10 @@ to finish to, from [`scripts/417_fastener_audit.py`](../scripts/417_fastener_aud
 | `P23c_FairingMount` | 1 x M5 clearance (on the build axis) |
 | `P24_FairingShank` | 3 x M5 clearance |
 | `P25_MotorNacelle` | none |
-| `P2a_KneeHub_Pulley29T` | 3 x M5 clearance, 2 x dia 12.3 pin bore (clamped, not a journal) |
+| `P2a_KneeHub_Pulley29T` | 3 x M5 clearance, 2 x dia 12.3 pin bore (clamped, not a journal), and 29 HTD-8M grooves on the dia 72.48 belt land |
 | `P30_InterfaceProx` | 4 x M4 clearance, 2 x 5 mm dowel H7, 6 x M5 heat-set insert |
 | `P31_InterfaceDist` | 6 x M4 clearance, 2 x 5 mm dowel H7, 6 x M5 heat-set insert |
-| `P3_GantryPlate_Printed` | NONE DRAWN -- see Open items; it cannot be bolted as it stands |
+| `P3_GantryPlate_Printed` | 4 x M5 V-wheel clearance, 2 x M5 radial set screws onto the ball nut, 2 x M4 belt-clamp legacy, and the 5-tooth HTD-8M belt land -- no reaming, the land prints as drawn |
 | `P5_ThighCuff` | 4 x M5 clearance with cap head counterbores |
 | `P6_ShankSocket` | 16 x M4 clearance, 4 x M5 heat-set insert |
 | `P7_ShankCuff` | 4 x M5 clearance with cap head counterbores |

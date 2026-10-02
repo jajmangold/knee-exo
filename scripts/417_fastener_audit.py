@@ -104,6 +104,17 @@ BY_PART = {
     ("P1_KneeYoke", 28.0): ("6001 seat, knee pivot", "bore 28.2 and BOND -- do not press into PETG"),
     ("P1_KneeYoke", 26.0): ("6001 outer-race abutment", "nothing to do; the race stops against it"),
     ("A7_DriveBox", 26.0): ("idler bearing seat", "bond it; this is what lets the bracket print"),
+    # 22 mm OD is a 6900 (10 x 22 x 6) AND a 608 (8 x 22 x 7), and the diameter cannot tell them
+    # apart. This one takes the ball screw's machined 8 mm end, so it is the 608 -- BOM D8a. A
+    # table someone orders parts from should not guess between two bearings with the same seat.
+    ("A7_DriveBox", 22.0): ("608 seat, the screw's upper end",
+                            "bond it; the screw's 8 mm journal runs in it (BOM D8a)"),
+    ("A7_DriveBox", 32.0): ("the screw boss's outside", "nothing to do; it is not a hole"),
+    ("A7_DriveBox", 9.2): ("screw-end clearance through the boss",
+                           "nothing to do; the 8 mm journal passes through"),
+    # On the motor axis (X -104, Z 62), through the plate the C6374 bolts to: its 8 mm shaft
+    # passes here to reach the 32T link pulley on the far side.
+    ("A7_DriveBox", 12.0): ("motor shaft clearance", "nothing to do; the 8 mm shaft passes through"),
 }
 
 

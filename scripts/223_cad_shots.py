@@ -74,7 +74,12 @@ FAIR = ["P20_KneeShroud", "P21_ShellAnterior", "P22_DriveCap", "P25_MotorNacelle
         "P24_FairingShank"]
 REFS = ["REF_Thigh", "REF_Knee", "REF_Shank"]
 O = lambda n: doc.getObject(n)
-ALL = [o.Name for o in doc.Objects if o.TypeId.startswith("Part::")]
+# TEST_* is not part of the device. The tooth coupon is a three-tooth arc modelled at the origin
+# to be printed on its own, and "show everything" put it in the middle of the knee detail shot as a
+# small grey fragment floating beside the capstan.
+ALL = [o.Name for o in doc.Objects
+       if o.TypeId.startswith("Part::") and not o.Name.startswith("TEST_")]
+TESTS = [o.Name for o in doc.Objects if o.Name.startswith("TEST_")]
 
 # flat, legible, deliberately not photoreal -- these should read as CAD
 COL = {}
@@ -149,13 +154,33 @@ def show(names, on):
                 o.ViewObject.Visibility = bool(on)
 
 
+def activate():
+    """Make the document being captured the one the camera is pointing at.
+
+    saveImage photographs Gui.ActiveDocument.ActiveView, and nothing here ever set it: whichever
+    document the GUI happened to have in front was the one that got photographed. Reopening both
+    legs left the RIGHT leg active, so a whole run of eleven captures came back as a blank grey
+    viewport -- and reported "11 captures, all parts visible", because every check in this file
+    asks about the document it is posing, not about the window it is photographing.
+    """
+    gd = Gui.getDocument(doc.Name)
+    assert gd is not None, "no GUI document for %s -- is this running headless?" % doc.Name
+    Gui.ActiveDocument = gd
+    if gd.ActiveView is None:
+        gd.createView("Gui::View3DInventor")
+    assert Gui.ActiveDocument.Document.Name == doc.Name,         "the active view belongs to %s, not %s" % (Gui.ActiveDocument.Document.Name, doc.Name)
+    return gd.ActiveView
+
+
 def prep(theta, fair=True, refs=True, cam="tq", focus=None, ortho=False):
+    activate()
     pose(theta)
     doc.recompute()
     show(ALL, True)
+    show(TESTS, False)
     show(FAIR, fair)
     show(REFS, refs)
-    v = Gui.ActiveDocument.ActiveView
+    v = activate()
     try:
         Gui.ActiveDocument.resetEdit()     # a live dragger gets baked into saveImage
         v.setAxisCross(False)
@@ -177,21 +202,39 @@ def prep(theta, fair=True, refs=True, cam="tq", focus=None, ortho=False):
 
 _SHOT_FP = _fp(doc)
 _MADE = []
+_EMPTY = []
 
 
 def save(name, w, h):
     if not os.path.isdir(OUT):
         os.makedirs(OUT)
     p = os.path.join(OUT, name + ".png")
-    Gui.ActiveDocument.ActiveView.saveImage(p, w, h, 'Current')
-    _MADE.append("renders/cad/%s.png" % name)
-    print("%-16s %7d bytes" % (name, os.path.getsize(p)))
+    activate().saveImage(p, w, h, 'Current')
+    # A BLANK VIEWPORT COMPRESSES TO ALMOST NOTHING. These are flat-shaded technical views of a
+    # 1.5 kg machine; the smallest real one is ~40 kB at these sizes, and an empty grey frame is
+    # under 12 kB whatever its dimensions. It is a crude test and it is the one that would have
+    # caught eleven blank captures being recorded as current geometry.
+    n = os.path.getsize(p)
+    floor = max(14000, (w * h) // 170)
+    bad = n < floor
+    _MADE.append(p.replace(chr(92), "/"))
+    print("%-16s %7d bytes%s" % (name, n, "   <-- BLANK? expected > %d" % floor if bad else ""))
+    if bad:
+        _EMPTY.append(name)
 
 
 def record():
     """Which geometry these captures are of. See tools/fingerprint.py -- an image file that
     exists is not an image file that is current, and six stale renders sat at the top of the
-    README for weeks because nothing could tell the difference."""
+    README for weeks because nothing could tell the difference.
+
+    KEYED BY THE REAL OUTPUT PATH, as b6_stills.py is, and NOT by where the file will end up.
+    This file used to record "renders/cad/<name>.png" -- a claim about a file in the repository
+    that it had never touched. That is the loophole that let a 15% scale diagnostic run stamp six
+    full-quality images as current: a record that can be written by something other than the act
+    of writing the image is not provenance. tools/install_renders.py carries the record across
+    when it copies the file, and refuses to invent one.
+    """
     import json
     path = r"C:/Users/Josh/knee-exo/renders/manifest.json"
     man = {}
@@ -206,6 +249,10 @@ def record():
                     "by": "223_cad_shots.py", "src": doc.Name}
     json.dump(man, open(path, "w"), indent=1, sort_keys=True)
     print("recorded %d captures against geometry %s" % (len(_MADE), _SHOT_FP))
+    if _EMPTY:
+        print("REFUSING TO TRUST %d capture(s) that look blank: %s" % (len(_EMPTY), ", ".join(_EMPTY)))
+        raise AssertionError("%d blank captures -- the active view is not showing the model"
+                             % len(_EMPTY))
 
 
 # technical views: orthographic

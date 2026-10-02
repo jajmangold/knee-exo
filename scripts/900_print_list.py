@@ -164,8 +164,10 @@ if "L" not in data:
 # the post-processing list, by part, from the audit's own classifier
 sys.path.insert(0, os.path.join(REPO, "scripts"))
 HOLES = {
-    "P1_KneeYoke": "2 x M4 clearance, 6 x M5 clearance, 1 x dia 28 bearing seat (bore 28.2, bond)",
-    "P2a_KneeHub_Pulley29T": "3 x M5 clearance, 2 x dia 12.3 pin bore (clamped, not a journal)",
+    "P1_KneeYoke": ("2 x M4 clearance, 4 x M5 into the rail at X +-10, 4 x M5 clearance for "
+                    "the canopy's lip at X +-20, 1 x dia 28 bearing seat (bore 28.2, bond)"),
+    "P2a_KneeHub_Pulley29T": ("3 x M5 clearance, 2 x dia 12.3 pin bore (clamped, not a "
+                              "journal), and 29 HTD-8M grooves on the dia 72.48 belt land"),
     "P5_ThighCuff": "4 x M5 clearance with cap head counterbores",
     "P6_ShankSocket": "16 x M4 clearance, 4 x M5 heat-set insert",
     "P7_ShankCuff": "4 x M5 clearance with cap head counterbores",
@@ -179,8 +181,14 @@ HOLES = {
     "P25_MotorNacelle": "none",
     "P30_InterfaceProx": "4 x M4 clearance, 2 x 5 mm dowel H7, 6 x M5 heat-set insert",
     "P31_InterfaceDist": "6 x M4 clearance, 2 x 5 mm dowel H7, 6 x M5 heat-set insert",
-    "A7_DriveBracket_Idler": "4 x M4 clearance, 2 x dia 26 idler bearing seats (bond), screw bore",
-    "P3_GantryPlate_Printed": "NONE DRAWN -- see Open items; it cannot be bolted as it stands",
+    "A7_DriveBracket_Idler": ("4 x M4 motor clearance, 2 x dia 26 idler bearing seats (bond), "
+                              "dia 22 x 7 seat for the screw's 608 (bond), dia 9.2 screw bore, "
+                              "2 x M5 along Y into the rail's end"),
+    # was "NONE DRAWN -- it cannot be bolted as it stands", which was true until 424 and is
+    # exactly the kind of sentence that outlives the condition it describes
+    "P3_GantryPlate_Printed": ("4 x M5 V-wheel clearance, 2 x M5 radial set screws onto the "
+                               "ball nut, and the 5-tooth HTD-8M belt land -- the land prints as "
+                               "drawn and wants no reaming, but check it against the coupon"),
 }
 
 out = []

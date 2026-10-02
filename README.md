@@ -1305,13 +1305,15 @@ quietly leave one leg's STLs under names that look like a complete set.
   whether this design gets built a second time.
 - ~~**Screw lead unsettled**~~ — **settled and built.** 10 mm, and the CAD nut is now the OD 36
   SFU1610 flangeless (`A2b_BallNut_SFU1610`, 36 × 42 × 36 in the model), on the axis at X = −62.
-- **Printed mass ~1.38 kg per leg**, 2.76 kg for the pair, over 15 parts and about 86 printer-hours
+- **Printed mass ~1.65 kg per leg**, 3.3 kg for the pair, over 17 parts and about 103 printer-hours
   each — see [`docs/PRINT.md`](docs/PRINT.md), which is generated from the STLs rather than written
-  by hand. Down from the 1.59 kg this line used to claim, and for an uninteresting reason: two of the
-  parts it counted no longer exist. `P3b_CarriageB` and `P11_SprungAnchor` went with the second ball
-  screw, and `P3_Carriage` became a bought aluminium plate. The remaining candidates for a diet are
-  `P5_ThighCuff` (161 cm³), `P21_FairingThigh` (165 cm³), `P22_DriveCap` (154 cm³),
-  `P2a_KneeHub_Pulley29T` (135 cm³) and `P1_KneeYoke` (131 cm³).
+  by hand. It was 1.38 kg over 15 parts until [`802_no_metal.py`](scripts/802_no_metal.py) printed
+  the gantry plate and the drive bracket, which ADDS 270 g of filament here and removes 511 g of
+  aluminium from the machine. Before that it read 1.59 kg, because it counted two parts that no
+  longer exist: `P3b_CarriageB` and `P11_SprungAnchor` went with the second ball screw. The
+  remaining candidates for a diet are `P21_FairingThigh` (165 cm³), `P5_ThighCuff` (161 cm³),
+  `P22_DriveCap` (154 cm³), `A7_DriveBracket_Idler` (140 cm³) and
+  `P2a_KneeHub_Pulley29T` (135 cm³).
 - ~~**Carriage guides are sliding, not rolling**~~ — **changed.** Four **mini** V-wheels
   (`P10a-d_VWheel_Mini`, OD 15.23) on the extrusion's corners, 70 mm apart in Y. A solid wheel
   reaches |X| 37.6, inside the belt's backing at 36.24…38.46; a mini reaches 31.0 and clears the
