@@ -59,6 +59,12 @@ CLASS = [
     # is what 502 drills (INSERT_R 3.2, 7 mm deep). Calling 6.4 "M6 clearance" is what made this
     # audit report a conflict with the BOM that did not exist.
     (6.30, 6.55, "M5 heat-set insert", "insert OD ~7.0; 6.4 is right, melt it in"),
+    # P2a's one remaining cylinder: 6.2 mm at (0, -25, 89.8), axis Z, and only 3.5 mm deep, which
+    # is a POCKET rather than a hole -- it sits on the belt land side of the knee hub, so it is
+    # almost certainly a belt-end or clamp pocket. Inferred from position and depth: no script in
+    # the repository was found that builds it, which is its own small warning about the ~290
+    # scripts that ran before the current chain.
+    (6.15, 6.28, "pocket, 3.5 mm deep (not a fastener)", "nothing to do"),
     (6.56, 6.80, "M6 clearance", "ream 6.4"),
     (7.80, 8.20, "8 mm shaft / rod", "ream 8.0 H7 if it must rotate"),
     # 10.4 appears four times on each cuff, each one directly over a 5.2 clearance: that is a cap

@@ -176,7 +176,7 @@ and it reads the exported STLs rather than the CAD solids, because the STL is wh
 | fits a 220 × 220 bed | all 15 parts — largest footprint 178 mm, tallest 185 mm |
 | mesh watertight | all 15 |
 | mean wall | 2.1–8.9 mm, all above the 1.2 mm two-perimeter floor |
-| needs support | only `P23a/b/c`, 4.2 cm² each — one flat bracket underside |
+| needs support | only `P23a/b/c`, 4.4 cm² each — one flat bracket underside, and 4.0 of the 4.4 is in the first 4 mm above the bed, so printing on that face removes it ([`PRINT.md`](PRINT.md)) |
 
 It earns its keep: it found `P5_ThighCuff` exporting a **non-manifold mesh** that `isValid()` and
 `isClosed()` both called fine, and it caught `P25` being described in this BOM as *"prints nose-down,

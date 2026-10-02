@@ -248,6 +248,18 @@ odrv0.config.dc_max_negative_current        =  -3.0   # see section 6
 odrv0.config.brake_resistance               =  2.0
 odrv0.config.enable_brake_resistor          = True
 
+# --- HANDEDNESS: the one line that differs between the two legs ---------
+# Both legs use the SAME right-hand ball screw -- a mirrored screw would be left-hand, which
+# is a special-order part (370_no_lh_screw.py priced it and said no). The reflection is
+# absorbed here instead. For a given motor direction the nut travels the same way on both
+# legs, so the KNEE goes the opposite way:
+#     left leg    +motor -> nut distal -> knee EXTENDS
+#     right leg   +motor -> nut distal -> knee FLEXES
+# Set this per leg, from the leg letter engraved on the parts (P5L / P5R):
+JOINT_DIR = +1 if LEG == "L" else -1       # and apply it wherever knee angle meets motor
+# Get it wrong and the knee is driven the wrong way under a 28.2 N.m assist. That is not a
+# subtle failure, and it is the only difference between the two firmware images.
+
 # --- control -----------------------------------------------------------
 odrv0.axis0.controller.config.control_mode = CONTROL_MODE_TORQUE_CONTROL
 odrv0.axis0.controller.config.input_mode   = INPUT_MODE_TORQUE_RAMP

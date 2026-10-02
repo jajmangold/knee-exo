@@ -852,7 +852,15 @@ Two kinds, and the difference matters when you are reading a shape off one of th
 shading, edge lines, orthographic wherever the view is a technical one, and the tan
 reference limb shown at 75% transparency. Nothing is retouched and nothing is
 approximated. Produced by [`scripts/223_cad_shots.py`](scripts/223_cad_shots.py), then
-autocropped by [`scripts/crop_cad.py`](scripts/crop_cad.py).
+autocropped by [`scripts/crop_cad.py`](scripts/crop_cad.py). All **eleven** are scripted and were
+regenerated against the current model; four of them (`cuff_thigh`, `cuff_shank`,
+`drive_antlat_clad`, `drive_antlat_open`) had been framed by hand in a session and existed in no
+script, which is why they were the oldest images in the set — the same failure as the Cycles stills
+below, and as `vs_leg()` and `SUFFIX` in the build scripts.
+
+That script also used to end with `pose(30.0)`, leaving the document flexed. Nothing in it saves, so
+it looked harmless; the pose then waited in the session until the next build script called
+`doc.save()` and baked it in. It ends at the design pose now.
 
 Three things that script has to get right, all of which caught me out first time:
 
@@ -868,9 +876,28 @@ Three things that script has to get right, all of which caught me out first time
 
 **Cycles renders** ([`renders/flexed_40deg/`](renders/flexed_40deg),
 [`renders/extended_0deg/`](renders/extended_0deg), [`renders/anim/`](renders/anim)) are
-presentation: **512 samples**, AgX medium-high contrast, f/11, on 4× RTX 3060 via
-`blenderkit/headless-blender:blender-5.0-stable`. Materials are keyed off the `MAT__`
-filename prefix the exporter writes, so no lookup table is needed on the Blender side.
+presentation: **512 samples**, AgX medium-high contrast, f/11. Materials are keyed off the `MAT__`
+filename prefix [`221_render_export.py`](scripts/221_render_export.py) writes into each filename.
+
+> [!IMPORTANT]
+> **The eight-shot sets are stale, and seven of the eight cannot be reproduced.** They predate the
+> drive-cover rework, the conical cuffs and the engraving. Worse, no script in this repository
+> produced them: the eight camera angles were framed by hand in a Blender session, so they exist
+> nowhere — not in a file, not in a comment, not recoverable from the images. The only camera
+> direction the repository records is `(0.62, −0.76, 0.20)`, in `b3_frame.py` and again in
+> `b5_reframe.py` and `anim_common.py`.
+>
+> So [`b6_stills.py`](scripts/b6_stills.py) renders **that** direction — clad and open, hero and
+> knee, per pose — and nothing else. Guessing the other seven would have been easy and wrong: a
+> render is a claim about what the thing looks like, and eight invented viewpoints replacing eight
+> stale ones is the same problem with a newer timestamp.
+>
+> Two other things were broken in that pipeline and are now fixed. `b1_scene.py` keyed materials off
+> a hand-written table of bare part names — including `P2b_RodClevisBlock` and `P4_Rod_8mm`, both
+> deleted with the rod linkage — so feeding it the current export died on the first file with
+> `KeyError: 'ALUM__A7_DriveBox'`. It now reads the `MAT__` prefix, which is what the paragraph above
+> always claimed it did. And its source directory was hardcoded to the animation export, so the
+> still export could not be fed to it without editing the file; `KX_SRC` chooses now.
 
 Animation: also Cycles, 96 samples. 32 poses on `θ = 52 − 52·cos(2πi/32)`, so the cycle is smooth and loops
 seamlessly with no duplicated end frame. 96 samples, three cameras per frame, rig transform

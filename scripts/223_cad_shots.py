@@ -63,7 +63,10 @@ SHANK = ["A4_Shank2020_VSlot", "P2a_KneeHingePlate", "P6_ShankSocket", "P7_Shank
 # nothing here is rebuilt per pose, unlike the two-screw version.
 GANTRY = ["P3_Carriage", "A2b_BallNut_SFU1620",
           "P10a_VWheel", "P10b_VWheel", "P10c_VWheel", "P10d_VWheel"]
-FAIR = ["P20_KneeShroud", "P21_ShellAnterior", "P22_DriveCap", "P24_FairingShank"]
+# P25_MotorNacelle belongs here: 399 split the drive wall into TWO printed parts, and a "clad"
+# shot that hides P22 but leaves P25 showing has a hole in exactly the place the shot is about.
+FAIR = ["P20_KneeShroud", "P21_ShellAnterior", "P22_DriveCap", "P25_MotorNacelle",
+        "P24_FairingShank"]
 REFS = ["REF_Thigh", "REF_Knee", "REF_Shank"]
 O = lambda n: doc.getObject(n)
 ALL = [o.Name for o in doc.Objects if o.TypeId.startswith("Part::")]
@@ -112,6 +115,9 @@ CAMS = {
     "sagittal": Rot(),
     "coronal":  Rot(V(0, 1, 0), 90),
     "tq":       Rot(V(0, 1, 0), 40).multiply(Rot(V(1, 0, 0), -16)),
+    # anterior-lateral, for the drive end: the motor went anterior in 402 and the drive is at
+    # +Z, so neither of the two technical cameras shows the pod and the shell at the same time.
+    "antlat":   Rot(V(0, 1, 0), -50).multiply(Rot(V(1, 0, 0), -12)),
 }
 
 
@@ -197,10 +203,33 @@ save("tq_open", 1400, 1700)
 prep(55.0, fair=False, refs=False, cam="tq", focus=["P2a_KneeHingePlate", "P1_KneeYoke"])
 save("knee_detail", 1500, 1150)
 
-pose(30.0)
+# THE FOUR SHOTS THAT WERE NEVER IN A SCRIPT. renders/cad carried cuff_thigh, cuff_shank,
+# drive_antlat_clad and drive_antlat_open, and nothing in the repository produced them -- they
+# were framed by hand in a GUI session, which means they could not be regenerated when the parts
+# changed, and they are now the oldest images in the set. Same failure as vs_leg() and SUFFIX:
+# it worked because the session remembered, and the session is not the project.
+prep(0.0, fair=True, refs=True, cam="antlat", focus=["P22_DriveCap", "P25_MotorNacelle"])
+save("drive_antlat_clad", 1400, 1300)
+prep(0.0, fair=False, refs=False, cam="antlat",
+     focus=["A3_Motor_6374", "A7_DriveBox", "A6_Idler29T", "A2_BallScrew_SFU1620"])
+save("drive_antlat_open", 1400, 1300)
+prep(0.0, fair=True, refs=True, cam="tq", focus=["P5_ThighCuff"])
+save("cuff_thigh", 1300, 1200)
+prep(0.0, fair=True, refs=True, cam="tq", focus=["P7_ShankCuff"])
+save("cuff_shank", 1300, 1200)
+
+# LEAVE THE DOCUMENT AT THE DESIGN POSE. This used to end with pose(30.0), which looks
+# harmless -- nothing here saves -- but the pose lives in the GUI session until the next build
+# script calls doc.save() and bakes it into the file. That is invisible afterwards: valid
+# shapes, right volumes, clean save, and every boolean against a posed reference quietly using
+# geometry that is not where the part is. It cost this project a cuff fit that appeared to fail,
+# a sweep run against a flexed limb, and a session spent asking why the leg no longer lined up
+# with the machine. tools/unpose.py exists for the same reason; this is the leak it was built
+# to catch.
+pose(0.0)
 # leave the session usable: the last shot hides the fairings, and leaving them hidden
 # makes it look as though the motor has no cover
 show(ALL, True)
 show(REFS, True)
 doc.recompute()
-print("done -- all parts left visible")
+print("done -- all parts visible, document at the 0 deg design pose")
