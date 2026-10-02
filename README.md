@@ -606,6 +606,16 @@ The other three checks, all of which have caught something nothing else did:
 | [`413_mark_visibility.py`](scripts/413_mark_visibility.py) | is each engraved number actually hidden? | **14 of 14 covered**, both legs |
 | [`tools/readmark.py`](tools/readmark.py) | …and does it read forwards? | 28 of 28 marks, after 12 were found mirrored |
 | [`417_fastener_audit.py`](scripts/417_fastener_audit.py) | does the hardware fit the holes? | 102 holes, all identified, all ≥ 2 mm |
+| [`902_doc_audit.py`](scripts/902_doc_audit.py) | **do these documents still describe this model?** | 6 documents, 0 stale claims |
+
+That last one exists because this README was stale in five places at once, and every one was a fact
+a script can measure that had been typed in by hand: a sweep that no longer worked that way, parts
+that no longer existed, a nut that had already been redrawn, guides that were no longer sliding, a
+document name two versions out of date. It checks part names against the model's object list, volume
+claims against the model, every relative link, the printed-part count, the engraved-mark count and
+the leg suffixes, and it exits non-zero. Finding those by hand took a session; it takes twelve
+seconds now, and it caught one more the moment it was written (`P2a_KneeHub`, an abbreviation of a
+part whose name is `P2a_KneeHub_Pulley29T`).
 
 > [!IMPORTANT]
 > A skip list hid **six real clashes** earlier in this project, including a carriage bore
@@ -1133,7 +1143,7 @@ quietly leave one leg's STLs under names that look like a complete set.
   parts it counted no longer exist. `P3b_CarriageB` and `P11_SprungAnchor` went with the second ball
   screw, and `P3_Carriage` became a bought aluminium plate. The remaining candidates for a diet are
   `P5_ThighCuff` (161 cm³), `P21_FairingThigh` (165 cm³), `P22_DriveCap` (154 cm³),
-  `P2a_KneeHub` (143 cm³) and `P1_KneeYoke` (131 cm³).
+  `P2a_KneeHub_Pulley29T` (143 cm³) and `P1_KneeYoke` (131 cm³).
 - ~~**Carriage guides are sliding, not rolling**~~ — **changed.** Four **mini** V-wheels
   (`P10a-d_VWheel_Mini`, OD 15.23) on the extrusion's corners, 70 mm apart in Y. A solid wheel
   reaches |X| 37.6 and fouls the belt at 35.55; a mini reaches 31.0. [`396_fixes.py`](scripts/396_fixes.py)
