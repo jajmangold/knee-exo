@@ -29,6 +29,7 @@ The technical views -- coronal, sagittal, the differential pair, the knee and dr
 FreeCAD viewport captures instead (223_cad_shots.py -> renders/cad). Those are the model itself
 rather than a lit interpretation of it, which is what you want when reading a shape off an image.
 """
+import json
 import math
 import os
 import time
@@ -69,6 +70,28 @@ SHOTS = [
     ("05_drive_clad", HERO, True, (2000, 1500), 1.05, DRIVE),
     ("06_drive_open", HERO, False, (2000, 1500), 1.05, DRIVE),
 ]
+
+
+# WHAT GEOMETRY THIS IS A PICTURE OF. Recorded, because an image file that exists is not an image
+# file that is current: the README carried six renders of a boxy P22 and non-conical cuffs for
+# weeks, and nothing could have caught it. The fingerprint comes from the export (221 writes it
+# beside the STLs), so it describes the geometry actually rendered rather than whatever the model
+# happens to be now. 902_doc_audit.py compares it against the live model and fails if they differ.
+def record(images):
+    fpf = os.path.join(SRC, "fingerprint.txt")
+    fp = open(fpf).read().strip() if os.path.exists(fpf) else "unknown"
+    path = r"C:/Users/Josh/knee-exo/renders/manifest.json"
+    man = {}
+    if os.path.exists(path):
+        try:
+            man = json.load(open(path))
+        except Exception:
+            man = {}
+    for rel in images:
+        man[rel] = {"geometry": fp, "made": time.strftime("%Y-%m-%dT%H:%M:%S"),
+                    "by": os.path.basename(__file__), "src": os.path.basename(SRC)}
+    json.dump(man, open(path, "w"), indent=1, sort_keys=True)
+    print("%s: recorded %d images against geometry %s" % (os.path.basename(__file__), len(images), fp))
 
 
 def bbox(names=None):
@@ -145,3 +168,6 @@ for name, direction, clad, (rx, ry), margin, focus in SHOTS:
           % (name, rx, ry, "clad" if clad else "open", time.time() - t))
 show(SHELLS, True)
 print("STILLS: %d images in %.1f min" % (len(SHOTS), (time.time() - t0) / 60.0))
+POSE = "flexed_40deg" if "p40" in SRC else "extended_0deg"
+record(["renders/%s/%s.png" % (POSE, n) for n, _, _, _, _, _ in SHOTS
+        if not ONLY or any(n.startswith(x) for x in ONLY)])

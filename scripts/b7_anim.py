@@ -27,6 +27,7 @@ identity parent inverse, and the STL import preserves absolute coordinates, so a
 the model origin -- which is the knee axis. Rotating an object about its own Z is therefore rotating
 it about the knee axis, with no axis bookkeeping at all.
 """
+import json
 import math
 import os
 import time
@@ -62,6 +63,28 @@ THETA = [52.0 - 52.0 * math.cos(2.0 * math.pi * i / NFRAMES) for i in range(NFRA
 SHOTS = [("hero_clad", True, (560, 747), 1.22, None),
          ("hero_open", False, (560, 747), 1.22, None),
          ("knee_open", False, (560, 420), 1.00, KNEE)]
+
+
+# WHAT GEOMETRY THIS IS A PICTURE OF. Recorded, because an image file that exists is not an image
+# file that is current: the README carried six renders of a boxy P22 and non-conical cuffs for
+# weeks, and nothing could have caught it. The fingerprint comes from the export (221 writes it
+# beside the STLs), so it describes the geometry actually rendered rather than whatever the model
+# happens to be now. 902_doc_audit.py compares it against the live model and fails if they differ.
+def record(images):
+    fpf = os.path.join(SRC, "fingerprint.txt")
+    fp = open(fpf).read().strip() if os.path.exists(fpf) else "unknown"
+    path = r"C:/Users/Josh/knee-exo/renders/manifest.json"
+    man = {}
+    if os.path.exists(path):
+        try:
+            man = json.load(open(path))
+        except Exception:
+            man = {}
+    for rel in images:
+        man[rel] = {"geometry": fp, "made": time.strftime("%Y-%m-%dT%H:%M:%S"),
+                    "by": os.path.basename(__file__), "src": os.path.basename(SRC)}
+    json.dump(man, open(path, "w"), indent=1, sort_keys=True)
+    print("%s: recorded %d images against geometry %s" % (os.path.basename(__file__), len(images), fp))
 
 
 def keyframe():
@@ -164,3 +187,4 @@ for name, clad, (rx, ry), margin, focus in SHOTS:
           % (name, rx, ry, "clad" if clad else "open", NFRAMES, (time.time() - t) / 60.0))
 show(SHELLS, True)
 print("ANIM: done in %.1f min -- assemble with tools/gif.py" % ((time.time() - t0) / 60.0))
+record(["renders/anim/%s.gif" % n for n, _, _, _, _ in SHOTS])

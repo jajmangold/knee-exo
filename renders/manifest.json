@@ -1,0 +1,158 @@
+{
+ "renders/anim/hero_clad.gif": {
+  "by": "b7_anim.py, recorded afterwards: the job predated the manifest code",
+  "geometry": "636e6b85",
+  "made": "2026-10-01T21:48:44",
+  "src": "n/a"
+ },
+ "renders/anim/hero_open.gif": {
+  "by": "b7_anim.py, recorded afterwards: the job predated the manifest code",
+  "geometry": "636e6b85",
+  "made": "2026-10-01T21:48:44",
+  "src": "n/a"
+ },
+ "renders/anim/knee_open.gif": {
+  "by": "b7_anim.py, recorded afterwards: the job predated the manifest code",
+  "geometry": "636e6b85",
+  "made": "2026-10-01T21:48:44",
+  "src": "n/a"
+ },
+ "renders/cad/coronal_clad.png": {
+  "by": "223_cad_shots.py",
+  "geometry": "636e6b85",
+  "made": "2026-10-01T21:33:24",
+  "src": "KneeExo_v6"
+ },
+ "renders/cad/cuff_shank.png": {
+  "by": "223_cad_shots.py",
+  "geometry": "636e6b85",
+  "made": "2026-10-01T21:33:24",
+  "src": "KneeExo_v6"
+ },
+ "renders/cad/cuff_thigh.png": {
+  "by": "223_cad_shots.py",
+  "geometry": "636e6b85",
+  "made": "2026-10-01T21:33:24",
+  "src": "KneeExo_v6"
+ },
+ "renders/cad/diff_extended.png": {
+  "by": "223_cad_shots.py",
+  "geometry": "636e6b85",
+  "made": "2026-10-01T21:33:24",
+  "src": "KneeExo_v6"
+ },
+ "renders/cad/diff_flexed.png": {
+  "by": "223_cad_shots.py",
+  "geometry": "636e6b85",
+  "made": "2026-10-01T21:33:24",
+  "src": "KneeExo_v6"
+ },
+ "renders/cad/drive_antlat_clad.png": {
+  "by": "223_cad_shots.py",
+  "geometry": "636e6b85",
+  "made": "2026-10-01T21:33:24",
+  "src": "KneeExo_v6"
+ },
+ "renders/cad/drive_antlat_open.png": {
+  "by": "223_cad_shots.py",
+  "geometry": "636e6b85",
+  "made": "2026-10-01T21:33:24",
+  "src": "KneeExo_v6"
+ },
+ "renders/cad/knee_detail.png": {
+  "by": "223_cad_shots.py",
+  "geometry": "636e6b85",
+  "made": "2026-10-01T21:33:24",
+  "src": "KneeExo_v6"
+ },
+ "renders/cad/sagittal_open.png": {
+  "by": "223_cad_shots.py",
+  "geometry": "636e6b85",
+  "made": "2026-10-01T21:33:24",
+  "src": "KneeExo_v6"
+ },
+ "renders/cad/tq_clad.png": {
+  "by": "223_cad_shots.py",
+  "geometry": "636e6b85",
+  "made": "2026-10-01T21:33:24",
+  "src": "KneeExo_v6"
+ },
+ "renders/cad/tq_open.png": {
+  "by": "223_cad_shots.py",
+  "geometry": "636e6b85",
+  "made": "2026-10-01T21:33:24",
+  "src": "KneeExo_v6"
+ },
+ "renders/extended_0deg/01_hero_clad.png": {
+  "by": "b6_stills.py, recorded afterwards: the job predated the manifest code",
+  "geometry": "636e6b85",
+  "made": "2026-10-01T21:51:19",
+  "src": "n/a"
+ },
+ "renders/extended_0deg/02_hero_open.png": {
+  "by": "b6_stills.py, recorded afterwards: the job predated the manifest code",
+  "geometry": "636e6b85",
+  "made": "2026-10-01T21:51:19",
+  "src": "n/a"
+ },
+ "renders/extended_0deg/03_knee_clad.png": {
+  "by": "b6_stills.py, recorded afterwards: the job predated the manifest code",
+  "geometry": "636e6b85",
+  "made": "2026-10-01T21:51:19",
+  "src": "n/a"
+ },
+ "renders/extended_0deg/04_knee_open.png": {
+  "by": "b6_stills.py, recorded afterwards: the job predated the manifest code",
+  "geometry": "636e6b85",
+  "made": "2026-10-01T21:51:19",
+  "src": "n/a"
+ },
+ "renders/extended_0deg/05_drive_clad.png": {
+  "by": "b6_stills.py, recorded afterwards: the job predated the manifest code",
+  "geometry": "636e6b85",
+  "made": "2026-10-01T21:51:19",
+  "src": "n/a"
+ },
+ "renders/extended_0deg/06_drive_open.png": {
+  "by": "b6_stills.py, recorded afterwards: the job predated the manifest code",
+  "geometry": "636e6b85",
+  "made": "2026-10-01T21:51:19",
+  "src": "n/a"
+ },
+ "renders/flexed_40deg/01_hero_clad.png": {
+  "by": "b6_stills.py, recorded afterwards: the job predated the manifest code",
+  "geometry": "636e6b85",
+  "made": "2026-10-01T21:50:10",
+  "src": "n/a"
+ },
+ "renders/flexed_40deg/02_hero_open.png": {
+  "by": "b6_stills.py, recorded afterwards: the job predated the manifest code",
+  "geometry": "636e6b85",
+  "made": "2026-10-01T21:50:10",
+  "src": "n/a"
+ },
+ "renders/flexed_40deg/03_knee_clad.png": {
+  "by": "b6_stills.py, recorded afterwards: the job predated the manifest code",
+  "geometry": "636e6b85",
+  "made": "2026-10-01T21:50:10",
+  "src": "n/a"
+ },
+ "renders/flexed_40deg/04_knee_open.png": {
+  "by": "b6_stills.py, recorded afterwards: the job predated the manifest code",
+  "geometry": "636e6b85",
+  "made": "2026-10-01T21:50:10",
+  "src": "n/a"
+ },
+ "renders/flexed_40deg/05_drive_clad.png": {
+  "by": "b6_stills.py, recorded afterwards: the job predated the manifest code",
+  "geometry": "636e6b85",
+  "made": "2026-10-01T21:50:10",
+  "src": "n/a"
+ },
+ "renders/flexed_40deg/06_drive_open.png": {
+  "by": "b6_stills.py, recorded afterwards: the job predated the manifest code",
+  "geometry": "636e6b85",
+  "made": "2026-10-01T21:50:10",
+  "src": "n/a"
+ }
+}

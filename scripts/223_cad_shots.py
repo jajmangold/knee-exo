@@ -24,6 +24,11 @@ import os, math, json, FreeCAD, Part, FreeCADGui as Gui
 from FreeCAD import Vector as V, Rotation as Rot
 
 OUT = r"C:/Users/Josh/KneeExo_render/cad"
+import sys as _sys
+# Absolute: inside the GUI's RPC server __file__ is the server module, not this script, so a
+# path derived from it points into the FreeCAD Mod directory and the import fails.
+_sys.path.insert(0, r"C:/Users/Josh/knee-exo/tools")
+from fingerprint import fingerprint as _fp          # noqa: E402
 def _kx_doc():
     """The model, in the GUI instance or headless under freecadcmd.
 
@@ -170,12 +175,37 @@ def prep(theta, fair=True, refs=True, cam="tq", focus=None, ortho=False):
     Gui.updateGui()
 
 
+_SHOT_FP = _fp(doc)
+_MADE = []
+
+
 def save(name, w, h):
     if not os.path.isdir(OUT):
         os.makedirs(OUT)
     p = os.path.join(OUT, name + ".png")
     Gui.ActiveDocument.ActiveView.saveImage(p, w, h, 'Current')
+    _MADE.append("renders/cad/%s.png" % name)
     print("%-16s %7d bytes" % (name, os.path.getsize(p)))
+
+
+def record():
+    """Which geometry these captures are of. See tools/fingerprint.py -- an image file that
+    exists is not an image file that is current, and six stale renders sat at the top of the
+    README for weeks because nothing could tell the difference."""
+    import json
+    path = r"C:/Users/Josh/knee-exo/renders/manifest.json"
+    man = {}
+    if os.path.exists(path):
+        try:
+            man = json.load(open(path))
+        except Exception:
+            man = {}
+    import time as _t
+    for rel in _MADE:
+        man[rel] = {"geometry": _SHOT_FP, "made": _t.strftime("%Y-%m-%dT%H:%M:%S"),
+                    "by": "223_cad_shots.py", "src": doc.Name}
+    json.dump(man, open(path, "w"), indent=1, sort_keys=True)
+    print("recorded %d captures against geometry %s" % (len(_MADE), _SHOT_FP))
 
 
 # technical views: orthographic
@@ -232,4 +262,5 @@ pose(0.0)
 show(ALL, True)
 show(REFS, True)
 doc.recompute()
+record()
 print("done -- all parts visible, document at the 0 deg design pose")

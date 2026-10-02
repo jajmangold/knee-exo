@@ -15,6 +15,10 @@ What it checks:
   4. the printed-part count the docs claim matches the printed set
   5. the engraved-mark count matches the registry beside the document
   6. every STL in stl/ and stl_R/ corresponds to a part in the model, and vice versa
+  7. every <img src> resolves, AND shows the CURRENT geometry -- see tools/fingerprint.py. This
+     is the check that was missing when six renders of a boxy P22 and non-conical cuffs sat at
+     the top of the README for weeks: the link checker reads markdown links, these are HTML img
+     tags, and a file that exists is not a file that is current.
 
     freecadcmd.exe scripts/902_doc_audit.py          # exit 1 if anything is stale
 """
@@ -134,6 +138,49 @@ print("  6. STLs with no part of that name in the model: %d" % len(orphans))
 for s in sorted(orphans):
     print("       %s" % s)
 fail += ["stl/%s.stl has no part in the model" % s for s in orphans]
+
+# 7 ------------------------------------------------------------------------------ images
+sys.path.insert(0, os.path.join(REPO, "tools"))
+from fingerprint import fingerprint                                  # noqa: E402
+
+now_fp = fingerprint(doc)
+man_path = os.path.join(REPO, "renders", "manifest.json")
+man = json.load(open(man_path)) if os.path.exists(man_path) else {}
+missing_img, stale_img, unrecorded = [], [], []
+for d in DOCS:
+    path = os.path.join(REPO, d)
+    if not os.path.exists(path):
+        continue
+    base = os.path.dirname(path)
+    txt = open(path, encoding="utf-8").read()
+    for m in re.finditer(r'<img\s+src="([^"]+)"', txt):
+        rel = m.group(1).strip()
+        line = txt[:m.start()].count(chr(10)) + 1
+        full = os.path.normpath(os.path.join(base, rel))
+        if not os.path.exists(full):
+            missing_img.append((d, line, rel))
+            continue
+        key = rel if rel.startswith("renders/") else "renders/" + rel.split("renders/")[-1]
+        rec = man.get(key)
+        if rec is None:
+            unrecorded.append((d, line, rel))
+        elif rec.get("geometry") != now_fp:
+            stale_img.append((d, line, rel, rec.get("geometry"), rec.get("made", "?")))
+print("  7. images: %d broken, %d of unknown provenance, %d showing older geometry than the model"
+      % (len(missing_img), len(unrecorded), len(stale_img)))
+print("     model geometry fingerprint is %s" % now_fp)
+for d, l, t in missing_img:
+    print("       MISSING   %-14s line %-5d %s" % (d, l, t))
+for d, l, t in unrecorded:
+    print("       NO RECORD  %-14s line %-5d %s" % (d, l, t))
+for d, l, t, g, w in stale_img:
+    print("       STALE     %-14s line %-5d %s -- rendered from geometry %s on %s"
+          % (d, l, t, g, w))
+fail += ["%s line %d: image %s does not exist" % (d, l, t) for d, l, t in missing_img]
+fail += ["%s line %d: image %s shows geometry %s, model is %s" % (d, l, t, g, now_fp)
+         for d, l, t, g, _ in stale_img]
+fail += ["%s line %d: image %s has no provenance in renders/manifest.json" % (d, l, t)
+         for d, l, t in unrecorded]
 
 # 5 ------------------------------------------------------------------------------- marks
 for leg, f in (("left", DOCFILE[:-6] + ".marks.json"),

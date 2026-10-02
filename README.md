@@ -2,7 +2,7 @@
 
 # Powered Knee Orthosis
 
-<img src="renders/flexed_40deg/06_threequarter_open.png" width="440">
+<img src="renders/flexed_40deg/02_hero_open.png" width="440">
 
 <sub>Cycles render · 512 samples · the CAD itself is below</sub>
 
@@ -293,8 +293,8 @@ chosen for its *mount*, not its capacity — see [`docs/BOM.md`](docs/BOM.md) §
 ## Packaging
 
 <div align="center">
-<img src="renders/cad/coronal_clad.png" width="150"> <img src="renders/cad/sagittal_open.png" width="136"> <img src="renders/flexed_40deg/05_profile_clad.png" width="235">
-<br><sub>FreeCAD orthographic coronal and sagittal · then the same coronal profile as a Cycles render</sub>
+<img src="renders/cad/coronal_clad.png" width="170"> <img src="renders/cad/sagittal_open.png" width="155"> <img src="renders/flexed_40deg/03_knee_clad.png" width="300">
+<br><sub>FreeCAD orthographic coronal and sagittal — the model itself · then the knee clad, at 40° of flexion, in Cycles</sub>
 </div>
 
 The device sits **86 mm proud of the knee** clad, 80 mm bare — unchanged by the one-screw
@@ -776,7 +776,7 @@ Numbers: [`scripts/310_guides.py`](scripts/310_guides.py).
 ## Sensing
 
 <div align="center">
-<img src="renders/flexed_40deg/07_drive_open.png" width="560">
+<img src="renders/flexed_40deg/06_drive_open.png" width="560">
 <br><sub>Cycles render · the drive head — idler, gantry and the anterior motor</sub>
 </div>
 
@@ -857,6 +857,21 @@ adds the pose check.
 ### Images
 
 Two kinds, and the difference matters when you are reading a shape off one of them:
+
+> [!NOTE]
+> **Every image here records which geometry it shows**, in
+> [`renders/manifest.json`](renders/manifest.json), and
+> [`902_doc_audit.py`](scripts/902_doc_audit.py) fails if any of them disagrees with the model.
+>
+> This exists because six renders of a boxy `P22` and non-conical cuffs sat at the top of this
+> README for weeks after both were redesigned, and **nothing could have caught it**: the link
+> checker reads markdown links and these are HTML `<img>` tags, and in any case a file that exists
+> is not a file that is current. Timestamps cannot answer it either — git does not preserve mtimes,
+> so every file in a fresh clone is the same age — and hashing the `.FCStd` cannot, because saving
+> it changes the bytes whether or not anything moved. So the fingerprint
+> ([`tools/fingerprint.py`](tools/fingerprint.py)) hashes the thing a picture actually depends on:
+> every part's name and volume, to a thousandth of a cm³. Move a part and it changes; re-save, or
+> rebuild from the same scripts, and it does not.
 
 **FreeCAD viewport captures** ([`renders/cad/`](renders/cad)) are the model itself — flat
 shading, edge lines, orthographic wherever the view is a technical one, and the tan

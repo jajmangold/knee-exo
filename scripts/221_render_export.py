@@ -2,7 +2,9 @@
 """Export the whole assembly, posed, with a material tag in each filename so the Blender
 script can assign shaders without a lookup table. Placements are baked in (Shape already
 carries them), which is what we want for a still."""
-import os, math, json, FreeCAD, Part, Mesh, MeshPart
+import os, sys, math, json, FreeCAD, Part, Mesh, MeshPart
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "tools"))
+from fingerprint import write as _write_fp
 from FreeCAD import Vector as V
 g=globals()
 def _kx_doc():
@@ -84,6 +86,9 @@ for th,tag in ((40.,"p40"),(0.,"p00")):
                                  AngularDeflection=0.20,Relative=False)
         Mesh.Mesh(m.Topology).write(os.path.join(OUT,"%s__%s.stl"%(MAT.get(n,"MISC"),n)))
         cnt+=1; tri+=m.CountFacets
-    print("%s (theta=%.0f): %d parts, %d facets -> %s"%(tag,th,cnt,tri,OUT))
+    # Which geometry this export is of, for the renderer to record. Without it an image can only
+    # say when it was made, and "when" says nothing after a git clone.
+    _fp = _write_fp(doc, os.path.join(OUT, "fingerprint.txt"))
+    print("%s (theta=%.0f): %d parts, %d facets, geometry %s -> %s"%(tag,th,cnt,tri,_fp,OUT))
 pose(0.)
 print("done")
