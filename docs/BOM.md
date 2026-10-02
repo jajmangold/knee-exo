@@ -109,7 +109,8 @@ drifting, and there is no adjustment for it. Each screw only needs **162 mm of t
 | S2c | Idler axle + 2 bearings | 1 | Supported top and bottom by the drive bracket. Reaction is 2·T_b, **up to 1828 N — the largest single load in the machine** | 10 |
 | ~~S2d~~ | ~~Aluminium gantry plate~~ → **printed, see §5** | 0 | 80.8 cm³, replacing 383 g of printed twin carriages. It **straddles** the belt rather than crossing over it: the drive run passes through a closed tunnel in the plate — floor at Z 89…95.5, roof at Z 126.5…130, outboard wall face at X −38.70 — and the tunnel's inboard wall is cut with **five HTD-8M grooves at 8 mm pitch over Y 144…186**, which is how the belt is gripped. 764 N over five teeth is 153 N a tooth, 1.5 MPa across a 30 × 3.45 mm groove wall. There is 5.5 mm between the nut's OD at X −44.0 and the belt's back at X −38.46. Owned | 15 |
 | ~~S2e~~ | ~~Aluminium drive bracket~~ → **printed, see §5** | 0 | Holds the idler, the screw's top bearing and the motor. **140.9 cm³ as printed** (121 cm³ when it was aluminium, and 134.9 before [`422_missing_features.py`](../scripts/422_missing_features.py) added the ⌀32 × 12 screw boss the BOM had always claimed it had). 4 mm plates and 5 mm cheeks, sized by [`400_bracket_stress.py`](../scripts/400_bracket_stress.py) at 18 MPa against 240 MPa yield; it was 465 g when it was sized by eye | 25 |
-| S3 | M5 T-nuts + button head cap screws | ~40 | Everything mounts to the slots | 12 |
+| S3 | M5 T-nuts + button head cap screws | ~40 | Everything mounts to the slots — **at X ±10 on the 20×40's wide faces**, which is where its two cells put their channels. The knee yoke's pattern was at X −20/0/+20, the spacing of the 20×60 this design abandoned, so none of its six bolts could reach a slot ([`427_rail_bolts.py`](../scripts/427_rail_bolts.py)) | 12 |
+| S3a | M5 × 16 into the extrusion's **end** | 2 | The drive bracket's only fixing to the rail, through its 10 mm end plate into the two cell cores at X ±10. Self-tapping, or tap the extrusion M6 and step up | 2 |
 | S4 | M3 / M4 cap screws, assorted | ~40 | Fairings, cuffs, electronics | 10 |
 | S4a | **Rubber grommets, M5**, + shoulder screws | 3 | The fairing's only mounts. Isolating rather than rigid — `ELECTRONICS.md` §9 names the rigid spine as the likely structure-borne noise path | 6 |
 | S5 | **Neoprene sleeve, thigh and calf**, 3 mm | 2 | The skin interface, and the only thing that touches the patient. Replaces the EVA pad entirely. Raises the friction that sets strap tension from μ≈0.4 to ≈0.6 worst case, so the strap needs **21 N instead of 31 N**; bridges the shell rim instead of letting it dig; and moves the sliding interface off the skin. Washable, and a consumable. Over a **closed, dry** incision only — ask whoever runs his rehab, and note neoprene contact dermatitis is common enough to plan a nylon-faced fallback | 30 |
@@ -156,7 +157,7 @@ down 241 g in total device mass because they left the fabricated one. Both figur
 
 **Hardware does not fit a printed hole as drawn.** A hole comes off the bed 0.1–0.3 mm undersize,
 and almost every hole here runs along the knee axis while most parts build along their length, so
-most print slightly oval too. 102 holes, what fits each and what to do about it:
+most print slightly oval too. 132 holes, what fits each and what to do about it:
 [`417_fastener_audit.py`](../scripts/417_fastener_audit.py), summarised as a drill list at the top
 of [`ASSEMBLY.md`](ASSEMBLY.md).
 

@@ -38,8 +38,8 @@ load case, not from a global profile:
 
 | Part | Orientation | Footprint | Height | Support | Volume | Est. filament | Est. time |
 |---|---|---|---|---|---|---|---|
-| `A7_DriveBracket_Idler` | +X up, 0° | 92 x 102 mm | 182 mm | 10.2% | 141 cm³ | 179 g | 11.2 h |
-| `P1_KneeYoke` | -Y up, 0° | 90 x 12 mm | 167 mm | 5.5% | 125 cm³ | 127 g | 8.0 h |
+| `A7_DriveBracket_Idler` | +X up, 0° | 92 x 102 mm | 182 mm | 10.3% | 140 cm³ | 178 g | 11.1 h |
+| `P1_KneeYoke` | -Y up, 0° | 90 x 12 mm | 167 mm | 5.8% | 125 cm³ | 127 g | 7.9 h |
 | `P20_KneeCap` | +Y up, 0° | 116 x 36 mm | 74 mm | 8.8% | 31 cm³ | 39 g | 2.4 h |
 | `P21_FairingThigh` | +Y up, 0° | 154 x 56 mm | 178 mm | 2.0% | 165 cm³ | 176 g | 11.0 h |
 | `P22_DriveCap` | -Y up, 0° | 156 x 61 mm | 154 mm | 7.3% | 154 cm³ | 161 g | 10.1 h |
@@ -56,11 +56,11 @@ load case, not from a global profile:
 | `P6_ShankSocket` | -Y up, 0° | 60 x 55 mm | 110 mm | 7.2% | 161 cm³ | 122 g | 7.6 h |
 | `P7_ShankCuff` | -Y up, 0° | 86 x 126 mm | 160 mm | 2.2% | 136 cm³ | 159 g | 9.9 h |
 | `TEST_ToothCoupon_3xHTD8M` | +Z up, 0° | 12 x 30 mm | 12 mm | 13.6% | 2 cm³ | 3 g | 0.2 h |
-| | | | | **454 cm² total** | | **1655 g** | **103 h** |
+| | | | | **456 cm² total** | | **1654 g** | **103 h** |
 
 The right leg is the mirror image and measures the same to within meshing noise: 
-1483 cm³ against 1484 cm³, a 0.01% difference, all of it in facet placement.
-So budget **3310 g of filament and 207 printer-hours for the pair**, plus supports.
+1482 cm³ against 1483 cm³, a 0.01% difference, all of it in facet placement.
+So budget **3308 g of filament and 207 printer-hours for the pair**, plus supports.
 
 ## Before you assemble anything: holes
 
@@ -107,7 +107,7 @@ to finish to, from [`scripts/417_fastener_audit.py`](../scripts/417_fastener_aud
 Support fraction is of TOTAL surface area, so 10% is a few bosses rather than a disaster. What
 matters is a part that cannot be oriented below the threshold at all. Measured, per part over 8%:
 
-* **`A7_DriveBracket_Idler`** — 10% of its surface, 60.6 cm², overhangs past 45° in its best orientation
+* **`A7_DriveBracket_Idler`** — 10% of its surface, 61.3 cm², overhangs past 45° in its best orientation
   (+X up, 0°).
 * **`P20_KneeCap`** — 9% of its surface, 25.7 cm², overhangs past 45° in its best orientation
   (+Y up, 0°).
@@ -123,7 +123,7 @@ matters is a part that cannot be oriented below the threshold at all. Measured, 
   (+Y up, 0°).
 * **`P31_InterfaceDist`** — 10% of its surface, 7.5 cm², overhangs past 45° in its best orientation
   (+Y up, 0°).
-* **`P3_GantryPlate_Printed`** — 13% of its surface, 46.7 cm², overhangs past 45° in its best orientation
+* **`P3_GantryPlate_Printed`** — 13% of its surface, 46.8 cm², overhangs past 45° in its best orientation
   (+Y up, 0°).
 * **`TEST_ToothCoupon_3xHTD8M`** — 14% of its surface, 2.1 cm², overhangs past 45° in its best orientation
   (+Z up, 0°).

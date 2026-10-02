@@ -605,9 +605,9 @@ The other three checks, all of which have caught something nothing else did:
 | [`406_coverage.py`](scripts/406_coverage.py) | from the skin, looking out, is any moving part reachable? | **0 of 187 rays** at 0°, 30° and 104° |
 | [`411_printability.py`](scripts/411_printability.py) | bed, overhangs, mean wall, closed mesh | **18 of 18 watertight** (17 parts + the tooth coupon), all inside 220 × 220 |
 | [`413_mark_visibility.py`](scripts/413_mark_visibility.py) | is each engraved number actually hidden? | **16 of 16 covered**, both legs |
-| [`tools/readmark.py`](tools/readmark.py) | …and does it read forwards? | 28 of 28 marks, after 12 were found mirrored |
+| [`tools/readmark.py`](tools/readmark.py) | …and does it read forwards? | **32 of 32 marks**, after 12 were found mirrored |
 | [`417_fastener_audit.py`](scripts/417_fastener_audit.py) | does the hardware fit the holes? | **128 holes**, all identified; no printed part is left unbolted |
-| [`420_mockup_audit.py`](scripts/420_mockup_audit.py) | **is each part the part, or only its shape?** | 20 features, all present — 8 were missing |
+| [`420_mockup_audit.py`](scripts/420_mockup_audit.py) | **is each part the part, or only its shape?** | 22 features, all present — 8 were missing |
 | [`902_doc_audit.py`](scripts/902_doc_audit.py) | **do these documents still describe this model?** | 6 documents, 0 stale claims |
 
 That last one exists because this README was stale in five places at once, and every one was a fact
@@ -657,6 +657,33 @@ Fixing it moved three things that had been wrong for months and agreed with each
   [`424_belt_tunnel.py`](scripts/424_belt_tunnel.py) rebuilds it to the real section and cuts
   **five HTD-8M grooves at 8 mm pitch** into its inboard wall, so the belt is gripped by its own
   teeth — 153 N each, 1.5 MPa across a groove wall — and needs no clamp part and no bolts at all.
+
+Then the same question, asked of the parts the table did **not** yet cover, found two more:
+
+* **The knee yoke's bolts were at the wrong rail's slot spacing.** `P1_KneeYoke` had six M5
+  through its 12 mm plate at X −20, 0 and +20 — which is where a **20×60** V-slot's three cells
+  put their slots, and the object is still called `A1_Extrusion_20x60_VSlot`. The rail is a 20×40:
+  two cells, channels at X ±10. BOM S1 says so outright — "Its 40 mm face has slots at X = ±10,
+  not X = 0" — and notes the fairing spine has to move because of it; nobody checked the yoke, so
+  all six bolts on the part that carries the whole knee reaction landed on solid aluminium or off
+  the edge. [`427_rail_bolts.py`](scripts/427_rail_bolts.py) fills them and drills four that line
+  up. The fill is exact rather than approximate, because each hole is a plain cylinder through a
+  plate whose faces are planar and perpendicular to its axis.
+* **The drive bracket had no fixing at all.** `A7_DriveBracket_Idler` carries the idler at up to
+  1828 N, the largest single load in the machine, and ASSEMBLY step 5 says to bolt it to the top
+  of the extrusion. Its entire hole inventory was 4 × M4 for the motor, the screw clearance, the
+  608 seat, two idler bearing seats and the boss — **no M5 anywhere**, and 0.000 cm³ of contact
+  with the rail. It does have a 10 mm plate butted against the rail's end face, square across both
+  cells, so the fixing had been designed and never drilled.
+
+Both were invisible to a hole count, which is what `417_fastener_audit.py` and the first version of
+this table both did: the yoke had six M5 and passed "a bolt pattern into the thigh rail ≥ 2" every
+time it ran. The check now samples the rail at the height of its channel and asks whether a bolt at
+that X could enter — **laterally**, never along the bolt's own axis, because the bought rail's
+mockup carries a 2 mm web across the slot centreline that a real V-slot does not have, so a ray
+fired along a correctly placed bolt reports "hits material" and one along a wrong bolt can report
+clear. That web is the next thing in this file's own list: a bought part's simplification that no
+printed part's geometry can be checked against.
 
 The tooth profile is the one number in the build that arithmetic cannot settle: HTD-8M is a
 curvilinear form defined by arcs this repository does not have, so the groove is a half-ellipse

@@ -28,7 +28,7 @@ as well. Budget an hour per leg for this and do all of it before you pick up a b
 | Do this | To these |
 |---|---|
 | Drill 4.3 | every ⌀4.2 — `P1`, `P6` (16 of them), `P30`, `P31` |
-| Drill 5.3 | every ⌀5.2 — `P1`, `P2a`, `P5`, `P7`, `P21` (19), `P23a/b/c`, `P24` |
+| Drill 5.3 | every ⌀5.2 — `P1` (4, at X ±10), `P2a`, `P3` (4 wheel + 2 set screws), `P5`, `P7`, `P21` (19), `P23a/b/c`, `P24`, `A7` (2 into the rail's end) |
 | **Ream** 5.0 H7 | the ⌀5.0 dowel holes in `P30` and `P31` — these set the interface alignment, so ream, do not drill |
 | Ream 12.3, on a drill press | the ⌀12.3 knee-pin holes in **`P2a`** (the hub). This is the joint axis; a hole drilled crooked by hand becomes a knee that binds at one end of its travel |
 | **Bore 28.2, on a drill press** | the ⌀28 bearing seat in **`P1_KneeYoke`**. 28.2 rather than 28.0 deliberately: the 6001 is **bonded**, not pressed, and 0.1 mm is the bond line |
@@ -39,7 +39,7 @@ Then dry-fit the knee: `P1L` and `P2aL` on the pin — **bearing not yet bonded*
 it. It must move freely through **−2° to +104°** with no tight spot. Fix that here, not later: once
 the 6001 is bonded in, getting back out of the seat means destroying the bearing.
 
-Full table: [`scripts/417_fastener_audit.py`](../scripts/417_fastener_audit.py), 102 holes.
+Full table: [`scripts/417_fastener_audit.py`](../scripts/417_fastener_audit.py), 128 holes.
 
 ---
 
@@ -58,7 +58,7 @@ Full table: [`scripts/417_fastener_audit.py`](../scripts/417_fastener_audit.py),
    a mini reaches 31.0 and clears the belt's tooth tips at 32.86 by 1.86 mm.
 3. Slide the plate onto the extrusion and set the eccentrics until it rolls with no rock and no
    drag. Check again after the belt is tensioned — tension changes it.
-4. Mount the **ball screw** (D1, SFU1610 RH, 330 mm) on its axis at **X = −62**: the **KP08** (D8)
+4. Mount the **ball screw** (D1, SFU1610 RH, **260 mm**) on its axis at **X = −62**: the **KP08** (D8)
    at the lower end, and at the upper end a **608-2RS bonded into the bracket's ⌀32 × 12 screw
    boss** at Y 286…298 (D8a). The nut (D3) is **flangeless and trapped axially** between two plates
    on the gantry, not clamped radially: a 36.4 mm bore through a 40 mm housing would sever it, and
@@ -74,10 +74,15 @@ Full table: [`scripts/417_fastener_audit.py`](../scripts/417_fastener_audit.py),
 ## 2. Drive bracket, motor, link belt
 
 5. Bolt the **drive bracket** (`A7_DriveBracket_Idler` — printed, 6 mm plates) to the top of the
-   extrusion. **Bond the two idler bearings into their ⌀26 seats first**: a bare 10 mm axle through
-   6 mm of PETG is 15.2 MPa and will bed in, where the bearing's race spreads the same 914 N to
-   5.9. That substitution is what lets this part be printed at all. It carries three things:
-   the 29T idler, the screw's upper bearing, and the motor.
+   extrusion: **two M5 × 16 along the limb** (S3a) through its 10 mm end plate at X ±10, Z 98,
+   into the two cell cores in the rail's end face. Self-tapping into the core, or tap it. These
+   holes did not exist until [`427_rail_bolts.py`](../scripts/427_rail_bolts.py) — the bracket that
+   carries 1828 N had no M5 anywhere in it.
+
+   **Bond the two idler bearings into their ⌀26 seats first**: a bare 10 mm axle through 6 mm of
+   PETG is 15.2 MPa and will bed in, where the bearing's race spreads the same 914 N to 5.9. That
+   substitution is what lets this part be printed at all. It carries three things: the 29T idler,
+   the screw's upper bearing, and the motor.
 6. Fit the **29T HTD-8M idler** (S2b) on the centreline at **X 0, Y 255**, supported top and bottom.
    Its axle reaction is up to **1828 N — the largest single load in the machine**, so both bearings,
    both ends, no exceptions.
@@ -91,8 +96,13 @@ Full table: [`scripts/417_fastener_audit.py`](../scripts/417_fastener_audit.py),
 
 ## 3. Knee joint
 
-9. `P1L_KneeYoke` to the lower end of the thigh spine. `P2aL_KneeHub_Pulley29T` is the shank-side
-   capstan and the 29T the main belt wraps — handle its tooth flanks carefully, they are printed.
+9. `P1L_KneeYoke` to the lower end of the thigh spine, on **four M5 T-nuts at X ±10**, Y 70 and
+   112. **Not six at X −20/0/+20** — that was the 20×60 rail's slot spacing and this is a 20×40;
+   those six holes are filled. If you are working from an older print, check before drilling.
+
+   `P2aL_KneeHub_Pulley29T` is the shank-side capstan and the 29T the main belt wraps — handle its
+   tooth flanks carefully, they are printed, and they are an approximation of the HTD-8M form until
+   the coupon says otherwise.
 10. **Bond the 6001 into `P1L`'s seat** (K3) — structural methacrylate or epoxy, bearing square to
     the face, wiped clean, left to cure before anything loads it. Do **not** press it in: PETG
     creeps under hoop stress and the interference is gone within months.
