@@ -49,17 +49,24 @@ Full table: [`scripts/417_fastener_audit.py`](../scripts/417_fastener_audit.py),
    slots or the T-nuts will not slide.
 2. Fit the four **mini V-wheels** (S2) to the **gantry plate** (`P3_GantryPlate_Printed` — printed,
    not aluminium: [`802_no_metal.py`](../scripts/802_no_metal.py) puts it at 1.5–7.6 MPa in PETG),
-   two on eccentric spacers. **Note:** its bolt pattern is not drawn yet — see the README's open
-   items. You will be setting those holes out yourself for now. Wheels sit on the |X| 20 corners, **70 mm
-   apart in Y**, not 50: the Hertz contact at 50 mm is 107 MPa against a ~101 MPa yield onset
+   two on eccentric spacers. The four M5 bolt holes **are** drawn now, at |X| 23.36, Y 126 and 196
+   ([`424_belt_tunnel.py`](../scripts/424_belt_tunnel.py) takes them from where the wheels actually
+   sit rather than from a remembered number). Wheels sit on the |X| 20 corners, **70 mm apart in
+   Y**, not 50: the Hertz contact at 50 mm is 107 MPa against a ~101 MPa yield onset
    ([`401_vwheel_load.py`](../scripts/401_vwheel_load.py)).
-   **Mini wheels only.** A solid V-wheel reaches |X| 37.6 and fouls the belt at 35.55.
+   **Mini wheels only.** A solid V-wheel reaches |X| 37.6, inside the belt's backing at 36.24…38.46;
+   a mini reaches 31.0 and clears the belt's tooth tips at 32.86 by 1.86 mm.
 3. Slide the plate onto the extrusion and set the eccentrics until it rolls with no rock and no
    drag. Check again after the belt is tensioned — tension changes it.
-4. Mount the **ball screw** (D1, SFU1610 RH, 330 mm) on its axis at **X = −62** with the two bearing
-   blocks (D8). The nut (D3) is **flangeless and trapped axially** between two plates on the gantry,
-   not clamped radially: a 36.4 mm bore through a 40 mm housing would sever it, and the load is
-   along Y anyway.
+4. Mount the **ball screw** (D1, SFU1610 RH, 330 mm) on its axis at **X = −62**: the **KP08** (D8)
+   at the lower end, and at the upper end a **608-2RS bonded into the bracket's ⌀32 × 12 screw
+   boss** at Y 286…298 (D8a). The nut (D3) is **flangeless and trapped axially** between two plates
+   on the gantry, not clamped radially: a 36.4 mm bore through a 40 mm housing would sever it, and
+   the load is along Y anyway.
+   **File a flat on the nut** and lock it against rotation with the two radial **M5 set screws**
+   through the gantry's outboard wall at Y 149 and 173: trapping the nut axially carries the
+   thrust, but a flangeless nut in a round pocket has nothing stopping it turning with the screw,
+   and if it turns, the carriage does not move.
 
 > The screw is **right-hand on both legs**. Do not look for a left-hand one for the right leg — the
 > reflection is absorbed by one sign in firmware (section 9).
@@ -98,11 +105,18 @@ Full table: [`scripts/417_fastener_audit.py`](../scripts/417_fastener_audit.py),
 
 ## 4. The main belt
 
-13. Route the **HTD-8M closed loop** (D4) over the knee capstan and the idler, and clamp both ends
-    to the gantry plate. The loop is what makes **one** screw do both directions.
-14. Tension it. The capstan loop carries up to **764 N** differential at peak torque; the belt land
-    is 30 mm wide. Tension to the belt's spec, not by feel — this is the one place a slack belt
-    looks fine and loses position under load.
+13. **Thread** the **HTD-8M closed loop** (K1, 742 mm / 93T) through the gantry plate's belt tunnel
+    first, then take it over the knee capstan and the idler. There is nothing to clamp and no belt
+    end to terminate: the tunnel's inboard wall carries **five HTD-8M grooves at 8 mm pitch** over
+    Y 144…186, and the belt's own teeth sit in them — the outboard wall at X −38.70 stops it
+    backing out of mesh, the floor and roof stop it climbing. Slide the belt along until the teeth
+    seat in all five grooves. The tooth phase sets the carriage's home position to within half a
+    pitch, which is absorbed by homing. The loop is what makes **one** screw do both directions.
+14. Tension it **by sliding the idler on its slotted mount** (K4's spring takes up bedding-in).
+    The capstan loop carries up to **764 N** differential at peak torque over a 30 mm land; at the
+    tunnel that is 153 N on each of the five teeth, 1.5 MPa across a 30 × 3.45 mm groove wall.
+    Tension to the belt's spec, not by feel — this is the one place a slack belt looks fine and
+    loses position under load.
 15. Re-check the eccentrics (step 3) and run the gantry end to end by hand. **68.3 mm of stroke**,
     no binding, no belt climb.
 

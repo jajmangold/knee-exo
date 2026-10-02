@@ -29,8 +29,18 @@ import os
 import FreeCAD
 from FreeCAD import Vector as V
 
-SRC = r"C:/Users/Josh/KneeExo_v6.FCStd"
-DST = r"C:/Users/Josh/KneeExo_v6_R.FCStd"
+# The mirror source must be UNMARKED, because mirroring an engraved part reflects its glyphs
+# along with it and 702 then cuts fresh text into a face that already has backwards text in it.
+# Blanking the real left leg to achieve that is the dangerous way round -- a self-intersecting
+# fill has destroyed a good document here before -- so KX_SRC lets the mirror be taken from a
+# throwaway copy that 416_unmark.py has blanked, leaving the left leg untouched:
+#
+#   copy KneeExo_v6.FCStd + .marks.json to KneeExo_v6.blank.FCStd + .blank.marks.json
+#   KX_DOC=...blank.FCStd freecadcmd scripts/416_unmark.py
+#   KX_SRC=...blank.FCStd freecadcmd scripts/701_mirror_build.py
+#   freecadcmd scripts/702_mirror_marks.py
+SRC = os.environ.get("KX_SRC", r"C:/Users/Josh/KneeExo_v6.FCStd").replace("\\", "/")
+DST = os.environ.get("KX_DST", r"C:/Users/Josh/KneeExo_v6_R.FCStd").replace("\\", "/")
 
 src = FreeCAD.openDocument(SRC)
 # Build to a TEMPORARY file and move it into place only once every part has passed. Deleting

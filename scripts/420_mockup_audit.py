@@ -48,6 +48,23 @@ def cyls(sh, lo, hi, axis=None):
     return n
 
 
+def land_spread(sh, z, y0, y1, x_out=-36.74, x_in=-28.0, step=0.5):
+    """how much a flat land's surface steps in and out along Y -- grooves, or a plain wall
+
+    The ray runs from outside the tip plane inboard, so the land surface is the first boundary it
+    meets. A plain wall gives a spread of zero whatever holes are drilled through it.
+    """
+    xs = []
+    y = y0 + 1.0
+    while y <= y1 - 1.0:
+        ln = Part.makeLine(V(x_out, y, z), V(x_in, y, z))
+        k = sh.common(ln)
+        if not k.isNull() and k.Vertexes:
+            xs.append(-min(v.Point.x for v in k.Vertexes))
+        y += step
+    return (max(xs) - min(xs)) if xs else None
+
+
 def profile_spread(sh, z, cx=0.0, cy=0.0, r0=20.0, r1=60.0, n=240):
     """how much the outer radius varies around a part at one height -- teeth, or not"""
     rs = []
@@ -71,17 +88,34 @@ CHECKS = [
      lambda sh: cyls(sh, 4.5, 5.6) >= 3, "the capstan has to take its torque into the shank"),
     ("P3_Carriage", "V-wheel mounting holes",
      lambda sh: cyls(sh, 4.5, 5.6) >= 4, "four wheels carry the gantry on the rail"),
-    ("P3_Carriage", "a belt clamp",
-     lambda sh: cyls(sh, 3.0, 7.0) >= 2,
-     "the closed belt loop is clamped here; this is how the drive force leaves the screw"),
-    ("P3_Carriage", "a ball-nut mounting pattern",
-     lambda sh: cyls(sh, 5.5, 7.0) >= 4, "the nut is trapped between plates and bolted"),
+    # EXPECTATION CORRECTED, AND THE CHECK WITH IT. "A belt clamp" tested for two cylindrical
+    # faces of 3..7 mm -- two bolt holes -- and 422 satisfied it while cutting its five grooves in
+    # the wrong plane entirely (elliptical tunnels bored sideways through the carriage at Z 96).
+    # Counting holes cannot tell a clamp from a colander. 424 grips the belt with a toothed land
+    # in the tunnel instead of a bolt-on clamp, so measure the land: scan along Y at the belt
+    # plane and demand the surface step in and out by the groove depth.
+    ("P3_Carriage", "a toothed belt land, 8 mm pitch",
+     lambda sh: (land_spread(sh, 111.0, 144.0, 186.0) or 0) > 2.5,
+     "the closed belt loop is gripped here; this is how the drive force leaves the screw"),
+    # EXPECTATION CORRECTED, not relaxed. The nut is NOT bolted: BOM D3 traps the flangeless
+    # SFU1610 nut axially between two end plates, which is right for thrust. What it lacks is
+    # anything to stop it TURNING with the screw -- a flangeless nut in a round pocket has no
+    # anti-rotation feature at all. 422 adds two radial M5 set screws, so that is what to check.
+    ("P3_Carriage", "nut anti-rotation (it is trapped, not bolted)",
+     lambda sh: cyls(sh, 4.5, 5.6, "x") >= 2,
+     "a flangeless nut in a round pocket spins with the screw"),
     ("A7_DriveBox", "idler bearing seats",
      lambda sh: cyls(sh, 25.8, 26.3) >= 2, "printed, so the axle load must land on a race"),
     ("A7_DriveBox", "a motor bolt pattern",
      lambda sh: cyls(sh, 3.0, 5.6) >= 4, "the C6374 bolts to this face"),
-    ("A7_DriveBox", "a KP08 bolt pattern for the screw's top bearing",
-     lambda sh: cyls(sh, 4.5, 7.0) >= 2, "the screw's upper block mounts here"),
+    # EXPECTATION CORRECTED. Probing the screw axis showed the bracket is AIR at every Y from 210
+    # to 296 -- there was no screw boss for a KP08 to bolt to, and no support of any kind for the
+    # screw's upper end. 422 builds the boss and seats a 608 (8 x 22 x 7) in it, which is one
+    # bought part instead of a pillow block and two bolts, and the same answer that made the idler
+    # and the knee printable. Check for the seat, not for bolts that should not exist.
+    ("A7_DriveBox", "support for the screw's upper end",
+     lambda sh: cyls(sh, 21.8, 22.3) >= 1,
+     "without it the ball screw is a cantilever off its bottom block"),
     ("P1_KneeYoke", "a bolt pattern into the thigh rail",
      lambda sh: cyls(sh, 4.5, 5.6) >= 2, "the yoke is how the thigh side reaches the knee"),
     ("P6_ShankSocket", "a clamp pattern onto the shank rail",

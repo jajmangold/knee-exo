@@ -46,6 +46,10 @@ GHOSTS_OK = {"P3b_CarriageB", "P11_SprungAnchor", "P2b_RodClevisBlock", "P4_Rod_
              "P8_RodEndHousing_PETG", "P3b_Carriage", "P2b_Clevis",
              "P2a_KneeHub"}
 PRINTED = 17      # 15 + the drive bracket and gantry plate, printed since 802
+# TEST_* are not parts of the device. The tooth coupon is exported so it can be sliced and
+# printed before the capstan, but counting it would make the printed set 18 and every per-leg
+# total in the documentation wrong by one part.
+NOT_A_PART = ("TEST_",)
 ALLOW_VOL = 0.05
 
 _BASE = DOCFILE.rsplit("/", 1)[-1]
@@ -123,8 +127,11 @@ for d, l, t in broken:
 fail += ["%s line %d: link %s does not resolve" % (d, l, t) for d, l, t in broken]
 
 # 4 + 6 --------------------------------------------------------------------- the printed set
-stl_l = {os.path.basename(p)[:-4] for p in glob.glob(os.path.join(REPO, "stl", "*.stl"))}
-stl_r = {os.path.basename(p)[:-4] for p in glob.glob(os.path.join(REPO, "stl_R", "*.stl"))}
+stl_l = {os.path.basename(p)[:-4] for p in glob.glob(os.path.join(REPO, "stl", "*.stl"))
+         if not os.path.basename(p).startswith(NOT_A_PART)}
+stl_r = {os.path.basename(p)[:-4] for p in glob.glob(os.path.join(REPO, "stl_R", "*.stl"))
+         if not os.path.basename(p).startswith(NOT_A_PART)}
+coupon = glob.glob(os.path.join(REPO, "stl", "TEST_ToothCoupon*.stl"))
 print("  4. printed parts: stl/ has %d, stl_R/ has %d, the docs claim %d"
       % (len(stl_l), len(stl_r), PRINTED))
 if len(stl_l) != PRINTED or len(stl_r) != PRINTED:
@@ -133,6 +140,10 @@ if stl_l != stl_r:
     d = (stl_l ^ stl_r)
     print("       the two legs do not hold the same parts: %s" % ", ".join(sorted(d)))
     fail.append("stl/ and stl_R/ differ: %s" % ", ".join(sorted(d)))
+print("       plus the tooth coupon, which is a test print and not a part: %s"
+      % ("present" if coupon else "NOT EXPORTED"))
+if not coupon:
+    fail.append("stl/ has no TEST_ToothCoupon: the tooth profile is unproven and unprintable")
 orphans = [s for s in stl_l if s not in live]
 print("  6. STLs with no part of that name in the model: %d" % len(orphans))
 for s in sorted(orphans):

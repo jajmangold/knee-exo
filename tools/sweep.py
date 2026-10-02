@@ -22,7 +22,8 @@ n = int(sys.argv[1]) if len(sys.argv) > 1 else max(1, (os.cpu_count() or 4) - 2)
 tmp = tempfile.mkdtemp(prefix="kxsweep_")
 outs = [os.path.join(tmp, "s%d.json" % i) for i in range(n)]
 
-print("launching %d headless shards..." % n)
+print("launching %d headless shards against %s..."
+      % (n, os.path.basename(os.environ.get("KX_DOC", "KneeExo_v6.FCStd"))))
 t0 = time.time()
 procs = [subprocess.Popen([FREECADCMD, SCRIPT, str(i), str(n), outs[i]],
                           stdout=subprocess.PIPE, stderr=subprocess.STDOUT)

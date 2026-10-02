@@ -49,8 +49,14 @@ FAIR=["P20_KneeShroud","P21_ShellAnterior","P22_DriveCap","P25_MotorNacelle","P2
       "P23a_FairingMount","P23b_FairingMount","P23c_FairingMount",
 ]
 MACH=[]   # gibs -> MGN7H blocks (250_mgn7.py) -> mini V-wheels (396_fixes.py)
+# Not a part of the device: a three-tooth arc of the capstan, to push a real HTD-8M belt into
+# before committing ten hours to the 135 cm3 pulley. The tooth profile here is an approximation
+# of the HTD curvilinear form (421_pulley_teeth.py explains how much of it is known), so it is
+# the one thing in the build that has to be proven against hardware rather than arithmetic.
+# Exported so it can be sliced; excluded from the part counts and the mass totals.
+TEST=["TEST_ToothCoupon"]
 ts=tf=0.
-for n in STRUCT+FAIR+MACH:
+for n in STRUCT+FAIR+MACH+TEST:
     o=doc.getObject(n)
     if not o: print("  %-22s MISSING"%n); continue
     assert len(o.Shape.Solids)==1, n
@@ -74,7 +80,7 @@ for n in STRUCT+FAIR+MACH:
     if n in STRUCT: ts+=v
     if n in FAIR: tf+=v
     print("  %-24s %6.1f cm3  %s"%(o.Label,v,"PETG struct" if n in STRUCT else
-          ("PETG fairing" if n in FAIR else "Delrin")))
+          ("PETG fairing" if n in FAIR else ("test coupon" if n in TEST else "Delrin"))))
 print("\nstructural %.0f cm3 (~%.0f g) + fairings %.0f cm3 (~%.0f g at 2-wall/low infill)"%(
     ts,ts*1.27,tf,tf*0.55))
 # No fabricated aluminium left. P3 and A7 were the only two parts needing a workshop and both

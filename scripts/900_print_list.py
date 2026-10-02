@@ -57,6 +57,8 @@ SETTING = {
     # printed since 802_no_metal.py -- these were the only two fabricated aluminium parts
     "A7_DriveBracket_Idler": (6, 0.60, "holds the idler at 1828 N; the heaviest load path"),
     "P3_GantryPlate_Printed": (6, 0.50, "drags the whole gantry; in-plane loads only"),
+    # not a part of the device: the go/no-go print for the tooth profile
+    "TEST_ToothCoupon_3xHTD8M": (6, 0.60, "print FIRST and push a real HTD-8M belt into it"),
 }
 
 

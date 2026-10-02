@@ -40,7 +40,10 @@ SHARD = int(argv[0]) if argv else 0
 NSHARD = int(argv[1]) if len(argv) > 1 else 1
 OUT = argv[2] if len(argv) > 2 else "sweep_%d.json" % SHARD
 
-DOC = r"C:/Users/Josh/KneeExo_v6.FCStd"
+# KX_DOC so the same sweep can be run against the right leg. Mirroring is an isometry, so the
+# right leg's interference set is the left's by construction -- but "by construction" is the kind
+# of claim this repository has been wrong about before, and the run costs six minutes.
+DOC = os.environ.get("KX_DOC", r"C:/Users/Josh/KneeExo_v6.FCStd").replace("\\", "/")
 TEETH, PITCH = 29, 8.0
 R_CAP = TEETH * PITCH / (2 * math.pi)
 A0 = 161.0
@@ -54,9 +57,15 @@ MOVERS = set(SHANK) | set(GANTRY)
 
 t_start = time.time()
 doc = FreeCAD.openDocument(DOC)
+# TEST_* are not parts of the device. The tooth coupon is a three-tooth arc printed on its own to
+# try a real belt against, and it is modelled at the origin, inside the reference limb -- leaving it
+# in the sweep reports 2.5 cm3 of overlap with REF_Knee at every pose and teaches nothing. This is
+# not a skip list: no pair of real parts is excluded, and a skip list hid six real clashes here
+# once already.
 parts = [o for o in doc.Objects
          if o.TypeId == "Part::Feature" and getattr(o, "Shape", None) is not None
-         and not o.Shape.isNull() and o.Shape.Solids]
+         and not o.Shape.isNull() and o.Shape.Solids
+         and not o.Name.startswith("TEST_")]
 names = [o.Name for o in parts]
 obj = dict(zip(names, parts))
 

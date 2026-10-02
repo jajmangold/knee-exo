@@ -127,8 +127,16 @@ JOBS = [
     ("P1_KneeYoke",       "P1",  "Y", (55.0, 60.0, 90.0)),
     # P2a_KneeHingePlate is deliberately absent. 414 searched 16 stations x 36 bearings
     # and found nowhere covered -- it is the knee hub at an open joint, reachable from
-    # every direction. It is the 143 cm3 29T pulley; an unmarked part is the better trade.
+    # every direction. It is the 135 cm3 29T pulley; an unmarked part is the better trade.
     ("P6_ShankSocket",    "P6",  "Y", (-260.0, -240.0, -280.0)),
+    # THESE TWO WERE MISSING, and the hole was opened by 802_no_metal.py rather than by this
+    # file: the gantry plate and the drive bracket were fabricated ALUMINIUM when the table was
+    # written, so they were never engraved. Printing them made them printed parts like any other,
+    # and nobody added them here -- so two of the seventeen carried no part number while the BOM
+    # said "each engraved with its leg letter". 902's mark count expects PRINTED - 1 and was
+    # reporting 14 against 16 without anyone reading it as this.
+    ("P3_Carriage",       "P3",  "Y", (160.0, 130.0, 190.0)),
+    ("A7_DriveBox",       "A7",  "Y", (240.0, 200.0, 280.0)),
     # The three mounts are the SAME PART printed three times -- 398 builds one shape at
     # three stations, 6.4 cm3 each, identical bounding box. They are interchangeable, so
     # they get the same mark, and "P23a" never fitted anyway: the bracket is 16 mm along

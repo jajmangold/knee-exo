@@ -1,4 +1,20 @@
 {
+ "A7_DriveBox": {
+  "axis": "r",
+  "height": 8.0,
+  "mode": "r",
+  "normal": [
+   0.0,
+   0.0,
+   1.0
+  ],
+  "point": [
+   0.0,
+   280.0,
+   88.0
+  ],
+  "text": "A7L"
+ },
  "P1_KneeYoke": {
   "axis": "r",
   "height": 8.0,
@@ -174,6 +190,22 @@
    123.0
   ],
   "text": "P31L"
+ },
+ "P3_Carriage": {
+  "axis": "r",
+  "height": 8.0,
+  "mode": "r",
+  "normal": [
+   0.0,
+   0.0,
+   1.0
+  ],
+  "point": [
+   0.0,
+   160.0,
+   117.0
+  ],
+  "text": "P3L"
  },
  "P5_ThighCuff": {
   "axis": "r",

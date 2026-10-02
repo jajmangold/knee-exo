@@ -9,9 +9,11 @@ because changing one assumption moves several lines at once.
 
 **Ordering for both legs?** Only the symmetric lines double in quantity — extrusion, belts,
 pulleys, motors, drive, V-wheels, bearings, fasteners, neoprene sleeves, webbing. The printed
-and machined parts double in *count* but are **new part numbers, not more of the same**: 15 L +
-15 R printed (2.5 kg of filament) and 2 L + 2 R aluminium (956 g), each engraved with its leg
-letter. The **ball screw stays right-hand on both legs** — a mirrored screw would be left-hand,
+printed parts double in *count* but are **new part numbers, not more of the same**: 17 L + 17 R
+(1655 g of filament per leg, 103 h of printing), and **no machined parts at all** since
+[`802_no_metal.py`](../scripts/802_no_metal.py). Sixteen of the seventeen are engraved with their
+leg letter; the 29T capstan is the exception, because 414 searched 16 stations × 36 bearings and
+found nowhere on it that is hidden at an open joint. The **ball screw stays right-hand on both legs** — a mirrored screw would be left-hand,
 which is a special-order premium part, and the reflection is absorbed by one sign in firmware
 instead. See [`700_handedness.py`](../scripts/700_handedness.py) and the README's
 "Building the pair".
@@ -49,7 +51,7 @@ You cannot fix this by moving the reduction around: only the *total* ratio matte
 This repository previously said the 1610 nut fouled the belt by 1.1 mm and the screws
 would have to move out to X = ±62, widening the pack by 8 mm. **That was wrong.** It came
 from projecting the nut and the belt onto the X axis and comparing edges — 58 − 18 = 40
-against the belt's outer face at 41.1 — while ignoring Y. The nut sits at `carrA + 36` and
+against the belt's outer face, then at 41.1 and now 38.46 (423) — while ignoring Y. The nut sits at `carrA + 36` and
 its belt run ends at `carrA − 24`, so they are a constant **60 mm apart along the limb at
 every pose, by construction**. Swept over all 107 poses, the nut/belt overlap is
 **0.000 cm³ for OD 28, OD 36 and OD 40 alike**.
@@ -76,21 +78,22 @@ drifting, and there is no adjustment for it. Each screw only needs **162 mm of t
 
 | # | Part | Qty | Notes | ~USD |
 |---|---|---|---|---|
-| D1 | Ball screw SFU1610, **RH**, 330 mm, machined ends | 1 | The only screw. 68.3 mm stroke; the nut sweeps Y 73…183 so 110 mm of thread is used, the rest is bearing seats. Axis at **X = −62**, moved 4 mm outboard of the old −58 so the nut clears the return strand | 45 |
+| D1 | Ball screw SFU1610, **RH**, **260 mm**, machined ends | 1 | The only screw. 68.3 mm stroke; the nut sweeps Y 73…183 so 110 mm of thread is used, the rest is bearing seats. Axis at **X = −62**, moved 4 mm outboard of the old −58 so the nut clears the return strand. **260, not the 330 this line used to say**: the screw has to span Y 57…314 — a ⌀8 journal at Y 57…71 for the KP08, thread from Y 71, and a ⌀8 journal at Y 284…314 for the 608 and the 20T pulley — which is 257 mm, and a 330 mm screw overhangs the top of the drive bracket by 73 mm. [`426_screw_ends.py`](../scripts/426_screw_ends.py) | 45 |
 | ~~D2~~ | ~~Ball screw SFU1610, **LH**~~ | **0** | **Deleted.** The closed-loop belt over two 29T pulleys makes one carriage do both jobs, so there is no left-hand thread and no special order anywhere in the build. [`390_onescrew_section.py`](../scripts/390_onescrew_section.py) | −70 |
-| D3 | SFU1610 **flangeless** ball nut | 1 | Supplied with the screw. Trapped axially between two end plates in the gantry rather than clamped radially — a 36.4 mm bore through a 40 mm housing severs it, and the load is along Y anyway | inc. |
+| D3 | SFU1610 **flangeless** ball nut | 1 | Supplied with the screw. Trapped axially between two end plates in the gantry rather than clamped radially — a 36.4 mm bore through a 40 mm housing severs it, and the load is along Y anyway. **Axial trapping is not enough on its own**: a flangeless nut in a round pocket has nothing stopping it turning with the screw, so two radial **M5 set screws** at Y 149 and 173 bear on the nut body through the gantry's outboard wall. File a flat on the nut for them. [`424_belt_tunnel.py`](../scripts/424_belt_tunnel.py) | inc. |
 | D4 | BLDC outrunner C6374, **170 Kv**, 8 mm shaft | 1 | **Owned — 4 of them, $32–40 each.** 24.8 A peak at SFU1610. ~800 g, the heaviest single item | 38 |
 | D5 | Diametric magnet 6 x 2.5 mm | 1 | Glued to the motor shaft end for the drive's onboard AS5047P | 3 |
 | D6 | HTD-5M belt, **15 mm** wide, closed loop | 1 | Motor to screw, at Y 302…314. Centre distance 61 mm. 15 mm, not 9: it now carries the overdrive, ~153 N tight side | 10 |
 | D7 | HTD-5M **32T** pulley (motor) + **20T** pulley (screw), 8 mm bore | 1 each | **A 1:1.6 OVERDRIVE, not 1:1.** This is what puts the total ratio at 14.5:1 with the SFU1610 — see [`404_link_ratio.py`](../scripts/404_link_ratio.py). Gearing here is nearly free because this belt sits on the motor side of the screw's advantage and carries 85 N, not the 764 N the capstan loop carries | 14 |
-| D8 | KP08 / KFL08 bearing blocks | 2 | One screw, top and bottom. The upper one lives in the drive bracket's screw boss | 10 |
+| D8 | KP08 / KFL08 bearing block | 1 | The screw's **lower** end only | 5 |
+| D8a | **608-2RS bearing** (8 × 22 × 7) | 1 | The screw's **upper** end. This line used to be a second KP08 bolted to "the drive bracket's screw boss" — [`420_mockup_audit.py`](../scripts/420_mockup_audit.py) went looking for the boss and found the bracket was **air at every Y from 210 to 296** along the screw axis: there was no boss, no bolt pattern, and nothing supporting the screw's top at all, so the screw was a cantilever off its bottom block. [`422_missing_features.py`](../scripts/422_missing_features.py) builds a ⌀32 × 12 boss at Y 286…298 and seats this bearing in it — one bought part instead of a pillow block and two bolts, and the same answer that made the idler and the knee printable. **Bond it, do not press it** | 3 |
 | D9 | Rigid shaft coupler 8 to 10 mm | 1 | Only if you mount the motor coaxial with screw A instead of belting it | 8 |
 
 ## 3. Knee transmission
 
 | # | Part | Qty | Notes | ~USD |
 |---|---|---|---|---|
-| K1 | HTD-8M **closed-loop** belt, 30 mm wide, **742 mm** | 1 | 2πR + 2·Y_idler. A closed loop, not an open strip: no end terminations, and it is tensioned by sliding the idler instead. 764 N differential over 30 mm = 25.5 N/mm | 25 |
+| K1 | HTD-8M **closed-loop** belt, 30 mm wide, **742 mm** (93T) | 1 | 2π·36.923 + 2·255 = 742.0. A closed loop, not an open strip: no end terminations, and it is tensioned by sliding the idler instead. 764 N differential over 30 mm = 25.5 N/mm. **This length is only right because [`421_pulley_teeth.py`](../scripts/421_pulley_teeth.py) corrected the capstan**: the rim was built at 35.552 — the pitch line differential deducted twice — which puts the path at 737.7 mm, so a 742 mm belt would arrive 4.3 mm long against an idler with 3 mm of travel. The belt is gripped by a 5-tooth land in the gantry's tunnel, not clamped: see §5 and [`424_belt_tunnel.py`](../scripts/424_belt_tunnel.py) | 25 |
 | K2 | **ISO 7379 12 × 70** shoulder screw, or ISO 8734 ⌀12 × 70 hardened dowel | 1 | The knee pin, in the flush counterbore (modelled ⌀20 × 13). SF 5.9. **Not "M12 × 70"** — a shoulder screw is designated by its *shoulder*, so 12 × 70 carries an **M10** thread and an ⌀18 head, while an "M12 shoulder bolt" has a ⌀16 shoulder that will not enter the ⌀12.3 bore. The dowel is cheaper and needs axial retention; a part-threaded M12 hex bolt is the wrong answer, its shank is unground | 10 |
 | K3 | **6001-2RS sealed ball bearing** (28 × 12 × 8) | 1 | **Replaces the two M12 bushings this line used to ask for.** They had nowhere to sit — the knee axis carried only ⌀12.3 pin clearance — and a plain bearing was the wrong part anyway: at 764 N it puts a **0.69 N·m friction deadband** at the hinge, against **0.007 N·m** for this. That is a stiff hinge on a limb meant to swing freely when the device is off, which is the property the whole 14.5:1 drivetrain was sized around. Seated in `P1_KneeYoke` (⌀28 × 8, against a ⌀26 abutment), where the hub straddles it so the load is symmetric and it sees no cocking moment. SF 3.1 on C₀. **Bond it, do not press it** — PETG creeps and a press fit is gone in months; bore to 28.2 for a 0.1 mm bond line. [`418_knee_bearing.py`](../scripts/418_knee_bearing.py), [`801_knee_bearing.py`](../scripts/801_knee_bearing.py) | 4 |
 | K4 | Compression spring, ~500 N/mm, 3 mm working travel | 1 | Now acts on the **idler carrier's slotted mount**, not a belt end. Same job — takes up belt bedding-in — one fewer printed part | 5 |
@@ -100,12 +103,12 @@ drifting, and there is no adjustment for it. Each screw only needs **162 mm of t
 | # | Part | Qty | Notes | ~USD |
 |---|---|---|---|---|
 | S1 | V-slot extrusion **20x40**, **black anodised**, 160 mm | 1 | Cut to Y 51…207. **~159 g, against 352 g for the 20×60 × 227 mm.** It ends short of the idler because a 71 mm pulley on the centreline would otherwise contain the extrusion. **Its 40 mm face has slots at X = ±10, not X = 0** — the fairing spine has to move | 12 |
-| S2 | **Mini V-wheel**, Delrin, OD 15.23 | 4 | On the |X| 20 corners of the 20×40, wheels 50 mm apart in Y. **Mini, not solid**: a V groove seats the corner apex at the bottom of the groove, so the centre stands off along the 45° bisector — a solid wheel reaches |X| 37.6 and fouls the belt at 35.55, a mini reaches 31.0. Spaced **70 mm apart**, not 50: OpenBuilds publishes no load rating, and a Hertz calculation ([`401_vwheel_load.py`](../scripts/401_vwheel_load.py)) puts the flank contact at 107 MPa against a ~101 MPa yield onset at 50 mm, versus 91 MPa at 70. Bench-test for play at reversal; MGN7 on the same side faces is the fallback | 12 |
+| S2 | **Mini V-wheel**, Delrin, OD 15.23 | 4 | On the |X| 20 corners of the 20×40, wheels 50 mm apart in Y. **Mini, not solid**: a V groove seats the corner apex at the bottom of the groove, so the centre stands off along the 45° bisector — a solid wheel reaches |X| 37.6, which is inside the belt's backing at 36.24…38.46, and a mini reaches 31.0 — clear of the belt's tooth tips at 32.86 by 1.86 mm. Spaced **70 mm apart**, not 50: OpenBuilds publishes no load rating, and a Hertz calculation ([`401_vwheel_load.py`](../scripts/401_vwheel_load.py)) puts the flank contact at 107 MPa against a ~101 MPa yield onset at 50 mm, versus 91 MPa at 70. Bench-test for play at reversal; MGN7 on the same side faces is the fallback | 12 |
 | S2a | Eccentric spacers + wheel bolts | 4 | Two eccentric, two fixed, the usual V-slot gantry arrangement | 10 |
-| S2b | **29T HTD-8M idler pulley**, 30 mm wide | 1 | **The same part as the knee capstan.** On the centreline at X = 0, Y 255, which is what makes the two strands land at exactly ±36.92 | 25 |
+| S2b | **29T HTD-8M idler pulley**, 30 mm wide, ⌀72.48 over the tips | 1 | **The same part as the knee capstan** — which is the constraint that fixed the capstan's radius. A bought 29T pulley measures 72.48, and the belt cannot wrap 72.48 at one end and the 71.10 the capstan was drawn at the other without the strands sitting at different distances from the centreline. On the centreline at X = 0, Y 255, which is what makes the two strands land at exactly ±36.92 — true as of [`421_pulley_teeth.py`](../scripts/421_pulley_teeth.py), not before it | 25 |
 | S2c | Idler axle + 2 bearings | 1 | Supported top and bottom by the drive bracket. Reaction is 2·T_b, **up to 1828 N — the largest single load in the machine** | 10 |
-| ~~S2d~~ | ~~Aluminium gantry plate~~ → **printed, see §5** | 0 | 71 cm³, 192 g, replacing 383 g of printed twin carriages. Crosses **over** the belt at Z 126.3, not under it — the 2.9 mm corridor between the nut and the belt is not a place for structure. Owned | 15 |
-| ~~S2e~~ | ~~Aluminium drive bracket~~ → **printed, see §5** | 0 | Holds the idler, the screw's top bearing and the motor. 121 cm³, **326 g — still the heaviest fabricated part.** 4 mm plates and 5 mm cheeks, sized by [`400_bracket_stress.py`](../scripts/400_bracket_stress.py) at 18 MPa against 240 MPa yield; it was 465 g when it was sized by eye | 25 |
+| ~~S2d~~ | ~~Aluminium gantry plate~~ → **printed, see §5** | 0 | 80.8 cm³, replacing 383 g of printed twin carriages. It **straddles** the belt rather than crossing over it: the drive run passes through a closed tunnel in the plate — floor at Z 89…95.5, roof at Z 126.5…130, outboard wall face at X −38.70 — and the tunnel's inboard wall is cut with **five HTD-8M grooves at 8 mm pitch over Y 144…186**, which is how the belt is gripped. 764 N over five teeth is 153 N a tooth, 1.5 MPa across a 30 × 3.45 mm groove wall. There is 5.5 mm between the nut's OD at X −44.0 and the belt's back at X −38.46. Owned | 15 |
+| ~~S2e~~ | ~~Aluminium drive bracket~~ → **printed, see §5** | 0 | Holds the idler, the screw's top bearing and the motor. **140.9 cm³ as printed** (121 cm³ when it was aluminium, and 134.9 before [`422_missing_features.py`](../scripts/422_missing_features.py) added the ⌀32 × 12 screw boss the BOM had always claimed it had). 4 mm plates and 5 mm cheeks, sized by [`400_bracket_stress.py`](../scripts/400_bracket_stress.py) at 18 MPa against 240 MPa yield; it was 465 g when it was sized by eye | 25 |
 | S3 | M5 T-nuts + button head cap screws | ~40 | Everything mounts to the slots | 12 |
 | S4 | M3 / M4 cap screws, assorted | ~40 | Fairings, cuffs, electronics | 10 |
 | S4a | **Rubber grommets, M5**, + shoulder screws | 3 | The fairing's only mounts. Isolating rather than rigid — `ELECTRONICS.md` §9 names the rigid spine as the likely structure-borne noise path | 6 |
@@ -161,7 +164,7 @@ of [`ASSEMBLY.md`](ASSEMBLY.md).
 ([`412_engrave.py`](../scripts/412_engrave.py)) — 0.8 mm recessed, Arial Bold at 8 mm where it fits
 and 5 or 4 mm where the suffix made it not, on a face that is **verified hidden** and **verified to
 read forwards**. `P2a_KneeHub_Pulley29T` carries no mark: 16 stations × 36 bearings found nowhere
-covered, because it is the knee hub at an open joint. It is the 143 cm³ 29T pulley and nothing else
+covered, because it is the knee hub at an open joint. It is the 135 cm³ 29T pulley and nothing else
 resembles it.
 
 *Verified* matters here. The first placement rule was "the first surface a ray from the limb

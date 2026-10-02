@@ -233,8 +233,9 @@ total ratio (which costs motor current) or a lower-inertia rotor.
 
 This used to carry a caveat that the 1610 nut fouled the belt by 1.1 mm and the screws had
 to move out to ±62. That was wrong, and wrong in an instructive way: it compared the nut
-and the belt *projected onto the X axis* — 58 − 18 = 40 against the belt's outer face at
-41.1 — and never checked whether they share any length. They do not. The nut sits at
+and the belt *projected onto the X axis* — 58 − 18 = 40 against the belt's outer face, taken
+then as 41.1 and since [`423_belt_envelope.py`](scripts/423_belt_envelope.py) as **38.46** — and
+never checked whether they share any length. They do not. The nut sits at
 `carrA + 36` and its belt run ends at `carrA − 24`, a constant **60 mm apart at every
 pose, by construction**. Swept over all 107 poses the overlap is **0.000 cm³ for OD 28,
 OD 36 and OD 40 alike**.
@@ -388,7 +389,7 @@ Z 128      .     #     .     .     .     .     .     .     .     .     #     #  
 Z 132      .     #     #     #     #     #     #     #     #     #     #     #     #
 ```
 
-Two walls at X ±50 and a roof at Z 132, with the belt runs at X ±35.6…41.1, Z 96…126
+Two walls at X ±50 and a roof at Z 132, with the belt runs at X ±36.24…38.46, Z 96…126
 sitting inside that channel. It is the only guard on either nip — `P21` starts at Y=28 and
 the nips are at Y≈0 — and the channel is open only medially, through an 8 mm slot between
 the yoke at Z 88 and the shroud at Z 96.5, which no finger fits through.
@@ -602,10 +603,11 @@ The other three checks, all of which have caught something nothing else did:
 | Check | What it asks | Current result |
 |---|---|---|
 | [`406_coverage.py`](scripts/406_coverage.py) | from the skin, looking out, is any moving part reachable? | **0 of 187 rays** at 0°, 30° and 104° |
-| [`411_printability.py`](scripts/411_printability.py) | bed, overhangs, mean wall, closed mesh | 15 of 15 watertight, all inside 220 × 220 |
-| [`413_mark_visibility.py`](scripts/413_mark_visibility.py) | is each engraved number actually hidden? | **14 of 14 covered**, both legs |
+| [`411_printability.py`](scripts/411_printability.py) | bed, overhangs, mean wall, closed mesh | **18 of 18 watertight** (17 parts + the tooth coupon), all inside 220 × 220 |
+| [`413_mark_visibility.py`](scripts/413_mark_visibility.py) | is each engraved number actually hidden? | **16 of 16 covered**, both legs |
 | [`tools/readmark.py`](tools/readmark.py) | …and does it read forwards? | 28 of 28 marks, after 12 were found mirrored |
-| [`417_fastener_audit.py`](scripts/417_fastener_audit.py) | does the hardware fit the holes? | 102 holes, all identified, all ≥ 2 mm |
+| [`417_fastener_audit.py`](scripts/417_fastener_audit.py) | does the hardware fit the holes? | **128 holes**, all identified; no printed part is left unbolted |
+| [`420_mockup_audit.py`](scripts/420_mockup_audit.py) | **is each part the part, or only its shape?** | 20 features, all present — 8 were missing |
 | [`902_doc_audit.py`](scripts/902_doc_audit.py) | **do these documents still describe this model?** | 6 documents, 0 stale claims |
 
 That last one exists because this README was stale in five places at once, and every one was a fact
@@ -616,6 +618,60 @@ claims against the model, every relative link, the printed-part count, the engra
 the leg suffixes, and it exits non-zero. Finding those by hand took a session; it takes twelve
 seconds now, and it caught one more the moment it was written (`P2a_KneeHub`, an abbreviation of a
 part whose name is `P2a_KneeHub_Pulley29T`).
+
+### The pulley had no teeth
+
+Every check above asks about the **shape a part occupies**. None of them asks whether that shape
+does the job, and the difference is not academic: sampled at the belt plane over 360 bearings, the
+29T capstan's outer radius was 35.55 mm with a spread of **0.000**. It was a plain drum. The belt
+had nothing to grip, and the sweep, the coverage rays, the printability pass, the mesh integrity
+test, the engraving and its visibility fan all passed it, because a drum of the right diameter
+sweeps the right volume.
+
+[`420_mockup_audit.py`](scripts/420_mockup_audit.py) asks the other question, from a hand-written
+table of required features, because only a person knows what a part is *for*. It found **eight
+missing features across five of the seventeen printed parts** — no teeth on the capstan, no V-wheel
+holes and no belt grip on the gantry plate, no support for the ball screw's upper end, and no way
+of attaching three cladding panels. A part that fails that table cannot work; a part that passes it
+is not thereby verified, because the table only contains what someone has thought to write down.
+
+Fixing it moved three things that had been wrong for months and agreed with each other:
+
+* **The capstan's radius was not a free choice.** The rim was built at 35.552 — the pitch line
+  differential deducted twice — and the first attempt at teeth simply cut from the rim as drawn, on
+  the grounds that 0.69 mm is 1.8% of torque. But BOM S2b's idler is a **bought** 29T pulley, which
+  measures ⌀72.48, and BOM K1's belt is a **bought** 742 mm loop, which is 2π·36.923 + 2·255 to
+  0.03 mm. A belt cannot wrap 72.48 at one end and 71.10 at the other, and on the small rim the path
+  is 737.7 mm, so a 742 mm belt arrives 4.3 mm long against an idler with 3 mm of travel. The
+  bought parts set the radius: [`421_pulley_teeth.py`](scripts/421_pulley_teeth.py) grows the land
+  to the standard 36.237 and cuts 29 grooves into it.
+* **The belt was drawn 2.7 mm outside where a belt sits.** All four belt solids were a 5.57 mm band
+  resting *on* the tip circle, which is self-consistent only while the pulleys are smooth drums.
+  A real belt meshes: its teeth go into the grooves and its back stands 2.22 mm outside the tip
+  circle, not 5.57. [`423_belt_envelope.py`](scripts/423_belt_envelope.py) redraws the backing and
+  then checks the space the teeth sweep, where nothing but the two pulleys and the gantry's land may
+  be — which caught two ribs of the drive bracket standing in it and the gantry's deck edge running
+  through it for its whole length.
+* **So the gantry's belt tunnel was 4.1 mm too wide.** The carriage already straddled the belt in a
+  closed tunnel; against a real belt the slot was oversize and the belt would ride out of any mesh.
+  [`424_belt_tunnel.py`](scripts/424_belt_tunnel.py) rebuilds it to the real section and cuts
+  **five HTD-8M grooves at 8 mm pitch** into its inboard wall, so the belt is gripped by its own
+  teeth — 153 N each, 1.5 MPa across a groove wall — and needs no clamp part and no bolts at all.
+
+The tooth profile is the one number in the build that arithmetic cannot settle: HTD-8M is a
+curvilinear form defined by arcs this repository does not have, so the groove is a half-ellipse
+approximation and `TEST_ToothCoupon_3xHTD8M` — three teeth, 2.5 cm³ — is exported to be printed and
+pushed onto a real belt **before** the 10-hour capstan.
+
+> [!WARNING]
+> **The first fix was itself a mockup.** The belt clamp added for the gantry extruded its groove
+> along Z and then rotated it 90° about Y "to lay the groove along X", which instead turned the
+> depth axis into Z: the cut was five elliptical tunnels bored sideways through the carriage, not
+> five grooves across a face. Every one removed material, so the "did this cut land in air?"
+> assertion passed, and the audit's own `a belt clamp` test — two cylindrical faces of 3–7 mm —
+> was satisfied by the bolt holes. **Counting holes cannot tell a clamp from a colander.** Both
+> checks now measure the feature: the land is scanned along Y and must step in and out by the
+> groove depth, at the belt's pitch.
 
 > [!IMPORTANT]
 > A skip list hid **six real clashes** earlier in this project, including a carriage bore
@@ -708,7 +764,9 @@ Y 0…`carrA−24` and carriage A's first block starts later, so there is a cons
 every pose — the same construction that keeps the ball nut clear. Swept over all 107
 poses, block-to-belt overlap is 0.00 cm³ at every rail height tried. But it is right for
 the **rail**, which is continuous and therefore does share length with the belt. There is
-5.6 mm between the side face at |X| 30 and the belt's inner face at 35.6:
+2.9 mm between the side face at |X| 30 and the belt's tooth tips at 32.86 — it was read as
+5.6 mm against a belt drawn 2.7 mm too far out, so the MGN7 fallback is tighter than this
+section claimed:
 
 | | Proud of the face | Reaches | vs. the belt |
 |---|---|---|---|
@@ -1177,7 +1235,8 @@ quietly leave one leg's STLs under names that look like a complete set.
   it does not rub — but it is three parts and a clamp stack where one bearing would do).
   [`419_knee_coaxial.py`](scripts/419_knee_coaxial.py) models the alternative in its own document:
   a **6808-2RS (40 × 52 × 7) nested inside the toothed ring**, in the plane of the belt. The tooth
-  root circle is ⌀64.3, so a bearing under about ⌀62 fits inside it with 6.2 mm of rim — and the belt
+  root circle is ⌀65.6 (⌀64.3 before 421 corrected the tip radius), so a bearing under about
+  ⌀63 fits inside it with 6.3 mm of rim — and the belt
   pull then passes straight through the bearing plane instead of 20 mm to one side of it, which on a
   single 6815 beside the teeth would have been 764 N × 0.020 = **15.3 N·m of moment on one raceway**.
   It passes the 107-pose sweep, keeps the full belt land, is **47 g lighter**, and opens a **⌀20 hole
@@ -1185,19 +1244,25 @@ quietly leave one leg's STLs under names that look like a complete set.
   device.
 
   Not built because it still needs coverage, printability, re-engraving and the mirror, and because
-  `v6` is print-ready today. Two things it taught that the sketch did not: cutting the stub clearance
+  `v6` is the one with teeth in it: [`421_pulley_teeth.py`](scripts/421_pulley_teeth.py) would have
+  to be run against that document too, and `v7`'s tooth root circle is exactly what its nested
+  bearing has to fit inside. Two things it taught that the sketch did not: cutting the stub clearance
   **split the pulley in two**, since the 165 mm shank plate's only path to the rim ran up the middle
   where the stub now goes (so the shank has to wrap the stub — which is what "the bearing is the only
   thing crossing the joint" looks like drawn); and a fuse needs real interference, because two
   attempts left 0.1 and 0.05 mm gaps and the solids merely touched.
-- **Four printed parts have no fastener holes drawn.** `P3_GantryPlate_Printed` carries the ball nut
-  and rides on four V-wheels, and contains exactly two cylinders — both ball-screw clearance. The
-  wheels and the nut are modelled as separate solids that happen to sit in the right place, and
-  nothing bolts to anything. `P20_KneeShroud`, `P22_DriveCap` and `P25_MotorNacelle` are the same,
-  though they are cladding rather than structure. No diameter table could notice this, because a
-  table only reports what is there; [`417_fastener_audit.py`](scripts/417_fastener_audit.py) now
-  asks the absence question too. **The gantry plate is the one that blocks assembly** — the other
-  three need a decision about whether they clip, bond or bolt.
+- ~~**Four printed parts have no fastener holes drawn**~~ — **fixed.** `P3_GantryPlate_Printed`
+  carried the ball nut and rode on four V-wheels while containing exactly two cylinders, both
+  ball-screw clearance: the wheels and the nut were separate solids that happened to sit in the
+  right place, and nothing bolted to anything. `P20_KneeShroud`, `P22_DriveCap` and
+  `P25_MotorNacelle` were the same, though they are cladding rather than structure. No diameter
+  table could notice this, because a table only reports what is there;
+  [`417_fastener_audit.py`](scripts/417_fastener_audit.py) asks the absence question too, and
+  [`420_mockup_audit.py`](scripts/420_mockup_audit.py) asks it per feature. The gantry now has its
+  four M5 wheel bolts at |X| 23.36, two M5 set screws locking the flangeless nut against rotation,
+  and a five-tooth belt land; the three cladding panels have two M4 each into the structure they
+  cover. **The cladding fixings are a decision, not a calculation** — bolts were chosen because
+  they are serviceable, and clips or bonding would both work.
 - ~~**The two fabricated aluminium parts**~~ — **gone; both print.** `S2d` and `S2e` were the only
   parts in this build needing a workshop, and neither was ever sized by load:
   [`400_bracket_stress.py`](scripts/400_bracket_stress.py) had the bracket 50× overbuilt at 4.3 MPa
@@ -1219,10 +1284,11 @@ quietly leave one leg's STLs under names that look like a complete set.
   parts it counted no longer exist. `P3b_CarriageB` and `P11_SprungAnchor` went with the second ball
   screw, and `P3_Carriage` became a bought aluminium plate. The remaining candidates for a diet are
   `P5_ThighCuff` (161 cm³), `P21_FairingThigh` (165 cm³), `P22_DriveCap` (154 cm³),
-  `P2a_KneeHub_Pulley29T` (143 cm³) and `P1_KneeYoke` (131 cm³).
+  `P2a_KneeHub_Pulley29T` (135 cm³) and `P1_KneeYoke` (131 cm³).
 - ~~**Carriage guides are sliding, not rolling**~~ — **changed.** Four **mini** V-wheels
   (`P10a-d_VWheel_Mini`, OD 15.23) on the extrusion's corners, 70 mm apart in Y. A solid wheel
-  reaches |X| 37.6 and fouls the belt at 35.55; a mini reaches 31.0. [`396_fixes.py`](scripts/396_fixes.py)
+  reaches |X| 37.6, inside the belt's backing at 36.24…38.46; a mini reaches 31.0 and clears the
+  belt's tooth tips at 32.86 by 1.86 mm. [`396_fixes.py`](scripts/396_fixes.py)
 - **The motor sits at the hip**, where the reference limb model ends (Y = 300). Its 100 mm
   clearance is measured against nothing and needs a fitting check on the patient.
 - **Belt tooth-shear figures come from continuous-duty power ratings**, which carry fatigue
@@ -1320,7 +1386,7 @@ quietly leave one leg's STLs under names that look like a complete set.
 
   The **spine had to move, and not to where I first said.** A 20×40's 40 mm face has slots
   at X = ±10 rather than X = 0 — but that is the smaller problem. The gantry deck sweeps
-  X −32.5…32 over Y 59…197 and the idler spans X ±35.55 over Y 213…291, so between them
+  X −32.5…32 over Y 59…197 and the idler spans X ±36.24 over Y 218.8…291.2, so between them
   they own the rail's whole **outboard** face. I concluded from that there was no mid-span
   mount left at all and fell back to two end flanges, which was wrong twice over: it
   generalised from one face of four, and a rib spanning the section is an obstruction

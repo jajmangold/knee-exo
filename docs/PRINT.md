@@ -32,12 +32,13 @@ load case, not from a global profile:
 | `P5_ThighCuff` | 4 | 30% | pressure vessel, not a beam |
 | `P6_ShankSocket` | 4 | 30% | structural but bulky |
 | `P7_ShankCuff` | 4 | 30% | pressure vessel, not a beam |
+| `TEST_ToothCoupon_3xHTD8M` | 6 | 60% | print FIRST and push a real HTD-8M belt into it |
 
 ## Per part, left leg
 
 | Part | Orientation | Footprint | Height | Support | Volume | Est. filament | Est. time |
 |---|---|---|---|---|---|---|---|
-| `A7_DriveBracket_Idler` | +X up, 0° | 92 x 102 mm | 182 mm | 10.0% | 135 cm³ | 171 g | 10.7 h |
+| `A7_DriveBracket_Idler` | +X up, 0° | 92 x 102 mm | 182 mm | 10.2% | 141 cm³ | 179 g | 11.2 h |
 | `P1_KneeYoke` | -Y up, 0° | 90 x 12 mm | 167 mm | 5.5% | 125 cm³ | 127 g | 8.0 h |
 | `P20_KneeCap` | +Y up, 0° | 116 x 36 mm | 74 mm | 8.8% | 31 cm³ | 39 g | 2.4 h |
 | `P21_FairingThigh` | +Y up, 0° | 154 x 56 mm | 178 mm | 2.0% | 165 cm³ | 176 g | 11.0 h |
@@ -47,18 +48,19 @@ load case, not from a global profile:
 | `P23c_FairingMount` | +Z up, 0° | 27 x 16 mm | 39 mm | 12.7% | 6 cm³ | 8 g | 0.5 h |
 | `P24_FairingShank` | -Y up, 0° | 48 x 29 mm | 142 mm | 4.0% | 42 cm³ | 47 g | 2.9 h |
 | `P25_MotorNacelle` | +Y up, 0° | 97 x 91 mm | 119 mm | 10.2% | 85 cm³ | 95 g | 6.0 h |
-| `P2a_KneeHub_Pulley29T` | +Y up, 0° | 71 x 56 mm | 185 mm | 10.5% | 143 cm³ | 169 g | 10.6 h |
+| `P2a_KneeHub_Pulley29T` | +Y up, 0° | 72 x 56 mm | 185 mm | 11.6% | 135 cm³ | 168 g | 10.5 h |
 | `P30_InterfaceProx` | -Y up, 0° | 80 x 10 mm | 56 mm | 6.7% | 27 cm³ | 34 g | 2.1 h |
 | `P31_InterfaceDist` | +Y up, 0° | 40 x 10 mm | 56 mm | 9.9% | 20 cm³ | 25 g | 1.6 h |
-| `P3_GantryPlate_Printed` | +Y up, 0° | 116 x 41 mm | 84 mm | 11.7% | 71 cm³ | 91 g | 5.7 h |
+| `P3_GantryPlate_Printed` | +Y up, 0° | 116 x 41 mm | 84 mm | 12.8% | 80 cm³ | 102 g | 6.3 h |
 | `P5_ThighCuff` | -Y up, 0° | 120 x 180 mm | 140 mm | 0.8% | 161 cm³ | 195 g | 12.2 h |
 | `P6_ShankSocket` | -Y up, 0° | 60 x 55 mm | 110 mm | 7.2% | 161 cm³ | 122 g | 7.6 h |
 | `P7_ShankCuff` | -Y up, 0° | 86 x 126 mm | 160 mm | 2.2% | 136 cm³ | 159 g | 9.9 h |
-| | | | | **429 cm² total** | | **1635 g** | **102 h** |
+| `TEST_ToothCoupon_3xHTD8M` | +Z up, 0° | 12 x 30 mm | 12 mm | 13.6% | 2 cm³ | 3 g | 0.2 h |
+| | | | | **454 cm² total** | | **1655 g** | **103 h** |
 
 The right leg is the mirror image and measures the same to within meshing noise: 
-1475 cm³ against 1475 cm³, a 0.01% difference, all of it in facet placement.
-So budget **3269 g of filament and 204 printer-hours for the pair**, plus supports.
+1483 cm³ against 1484 cm³, a 0.01% difference, all of it in facet placement.
+So budget **3310 g of filament and 207 printer-hours for the pair**, plus supports.
 
 ## Before you assemble anything: holes
 
@@ -98,15 +100,16 @@ to finish to, from [`scripts/417_fastener_audit.py`](../scripts/417_fastener_aud
 | `P5_ThighCuff` | 4 x M5 clearance with cap head counterbores |
 | `P6_ShankSocket` | 16 x M4 clearance, 4 x M5 heat-set insert |
 | `P7_ShankCuff` | 4 x M5 clearance with cap head counterbores |
+| `TEST_ToothCoupon_3xHTD8M` | see 417 |
 
 ## Where the supports are
 
 Support fraction is of TOTAL surface area, so 10% is a few bosses rather than a disaster. What
 matters is a part that cannot be oriented below the threshold at all. Measured, per part over 8%:
 
-* **`A7_DriveBracket_Idler`** — 10% of its surface, 57.1 cm², overhangs past 45° in its best orientation
+* **`A7_DriveBracket_Idler`** — 10% of its surface, 60.6 cm², overhangs past 45° in its best orientation
   (+X up, 0°).
-* **`P20_KneeCap`** — 9% of its surface, 25.6 cm², overhangs past 45° in its best orientation
+* **`P20_KneeCap`** — 9% of its surface, 25.7 cm², overhangs past 45° in its best orientation
   (+Y up, 0°).
 * **`P23a_FairingMount`** — 13% of its surface, 4.4 cm², overhangs past 45° in its best orientation
   (+Z up, 0°).
@@ -114,14 +117,16 @@ matters is a part that cannot be oriented below the threshold at all. Measured, 
   (+Z up, 0°).
 * **`P23c_FairingMount`** — 13% of its surface, 4.4 cm², overhangs past 45° in its best orientation
   (+Z up, 0°).
-* **`P25_MotorNacelle`** — 10% of its surface, 59.1 cm², overhangs past 45° in its best orientation
+* **`P25_MotorNacelle`** — 10% of its surface, 59.4 cm², overhangs past 45° in its best orientation
   (+Y up, 0°).
-* **`P2a_KneeHub_Pulley29T`** — 10% of its surface, 49.6 cm², overhangs past 45° in its best orientation
+* **`P2a_KneeHub_Pulley29T`** — 12% of its surface, 58.5 cm², overhangs past 45° in its best orientation
   (+Y up, 0°).
 * **`P31_InterfaceDist`** — 10% of its surface, 7.5 cm², overhangs past 45° in its best orientation
   (+Y up, 0°).
-* **`P3_GantryPlate_Printed`** — 12% of its surface, 37.2 cm², overhangs past 45° in its best orientation
+* **`P3_GantryPlate_Printed`** — 13% of its surface, 46.7 cm², overhangs past 45° in its best orientation
   (+Y up, 0°).
+* **`TEST_ToothCoupon_3xHTD8M`** — 14% of its surface, 2.1 cm², overhangs past 45° in its best orientation
+  (+Z up, 0°).
 
 The three fairing mounts are one part printed three times, and 4.0 of their 4.4 cm² is in the
 first 4 mm above the bed: that is the bracket's foot, a flat underside. Printed on that face
