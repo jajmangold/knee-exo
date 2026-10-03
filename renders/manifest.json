@@ -1,20 +1,20 @@
 {
  "C:/Users/Josh/KneeExo_render/anim/hero_clad": {
   "by": "b7_anim.py",
-  "geometry": "9197e8cf",
-  "made": "2026-10-02T12:02:52",
+  "geometry": "5d089e70",
+  "made": "2026-10-02T19:35:35",
   "src": "p00"
  },
  "C:/Users/Josh/KneeExo_render/anim/hero_open": {
   "by": "b7_anim.py",
-  "geometry": "9197e8cf",
-  "made": "2026-10-02T12:02:52",
+  "geometry": "5d089e70",
+  "made": "2026-10-02T19:35:35",
   "src": "p00"
  },
  "C:/Users/Josh/KneeExo_render/anim/knee_open": {
   "by": "b7_anim.py",
-  "geometry": "9197e8cf",
-  "made": "2026-10-02T12:02:52",
+  "geometry": "5d089e70",
+  "made": "2026-10-02T19:35:35",
   "src": "p00"
  },
  "C:/Users/Josh/KneeExo_render/cad/coronal_clad.png": {
@@ -85,92 +85,95 @@
  },
  "C:/Users/Josh/KneeExo_render/out_p00/01_hero_clad.png": {
   "by": "b6_stills.py",
-  "geometry": "c70875af",
-  "made": "2026-10-02T17:00:03",
+  "geometry": "5d089e70",
+  "made": "2026-10-02T18:27:26",
   "src": "p00"
  },
  "C:/Users/Josh/KneeExo_render/out_p00/02_hero_open.png": {
   "by": "b6_stills.py",
-  "geometry": "c70875af",
-  "made": "2026-10-02T17:00:03",
+  "geometry": "5d089e70",
+  "made": "2026-10-02T18:27:26",
   "src": "p00"
  },
  "C:/Users/Josh/KneeExo_render/out_p00/03_knee_clad.png": {
   "by": "b6_stills.py",
-  "geometry": "c70875af",
-  "made": "2026-10-02T17:00:03",
+  "geometry": "5d089e70",
+  "made": "2026-10-02T18:27:26",
   "src": "p00"
  },
  "C:/Users/Josh/KneeExo_render/out_p00/04_knee_open.png": {
   "by": "b6_stills.py",
-  "geometry": "c70875af",
-  "made": "2026-10-02T17:00:03",
+  "geometry": "5d089e70",
+  "made": "2026-10-02T18:27:26",
   "src": "p00"
  },
  "C:/Users/Josh/KneeExo_render/out_p00/05_drive_clad.png": {
   "by": "b6_stills.py",
-  "geometry": "c70875af",
-  "made": "2026-10-02T17:00:03",
+  "geometry": "5d089e70",
+  "made": "2026-10-02T18:27:26",
   "src": "p00"
  },
  "C:/Users/Josh/KneeExo_render/out_p00/06_drive_open.png": {
   "by": "b6_stills.py",
-  "geometry": "c70875af",
-  "made": "2026-10-02T17:00:03",
+  "geometry": "5d089e70",
+  "made": "2026-10-02T18:27:26",
   "src": "p00"
  },
  "C:/Users/Josh/KneeExo_render/out_p40/01_hero_clad.png": {
   "by": "b6_stills.py",
-  "geometry": "9197e8cf",
-  "made": "2026-10-02T11:35:48",
+  "geometry": "5d089e70",
+  "made": "2026-10-02T19:10:37",
   "src": "p40"
  },
  "C:/Users/Josh/KneeExo_render/out_p40/02_hero_open.png": {
   "by": "b6_stills.py",
-  "geometry": "9197e8cf",
-  "made": "2026-10-02T11:35:48",
+  "geometry": "5d089e70",
+  "made": "2026-10-02T19:10:37",
   "src": "p40"
  },
  "C:/Users/Josh/KneeExo_render/out_p40/03_knee_clad.png": {
   "by": "b6_stills.py",
-  "geometry": "9197e8cf",
-  "made": "2026-10-02T11:35:48",
+  "geometry": "5d089e70",
+  "made": "2026-10-02T19:10:37",
   "src": "p40"
  },
  "C:/Users/Josh/KneeExo_render/out_p40/04_knee_open.png": {
   "by": "b6_stills.py",
-  "geometry": "9197e8cf",
-  "made": "2026-10-02T11:35:48",
+  "geometry": "5d089e70",
+  "made": "2026-10-02T19:10:37",
   "src": "p40"
  },
  "C:/Users/Josh/KneeExo_render/out_p40/05_drive_clad.png": {
   "by": "b6_stills.py",
-  "geometry": "9197e8cf",
-  "made": "2026-10-02T11:35:48",
+  "geometry": "5d089e70",
+  "made": "2026-10-02T19:10:37",
   "src": "p40"
  },
  "C:/Users/Josh/KneeExo_render/out_p40/06_drive_open.png": {
   "by": "b6_stills.py",
-  "geometry": "9197e8cf",
-  "made": "2026-10-02T11:35:48",
+  "geometry": "5d089e70",
+  "made": "2026-10-02T19:10:37",
   "src": "p40"
  },
  "renders/anim/hero_clad.gif": {
+  "assembled": true,
   "by": "b7_anim.py",
-  "geometry": "6d4eb38f",
-  "made": "2026-10-02T00:03:14",
+  "geometry": "5d089e70",
+  "made": "2026-10-02T19:35:35",
   "src": "p00"
  },
  "renders/anim/hero_open.gif": {
+  "assembled": true,
   "by": "b7_anim.py",
-  "geometry": "6d4eb38f",
-  "made": "2026-10-02T00:03:14",
+  "geometry": "5d089e70",
+  "made": "2026-10-02T19:35:35",
   "src": "p00"
  },
  "renders/anim/knee_open.gif": {
+  "assembled": true,
   "by": "b7_anim.py",
-  "geometry": "6d4eb38f",
-  "made": "2026-10-02T00:03:14",
+  "geometry": "5d089e70",
+  "made": "2026-10-02T19:35:35",
   "src": "p00"
  },
  "renders/cad/coronal_clad.png": {
@@ -252,74 +255,86 @@
  },
  "renders/extended_0deg/01_hero_clad.png": {
   "by": "b6_stills.py",
-  "geometry": "6d4eb38f",
-  "made": "2026-10-02T00:34:56",
+  "geometry": "5d089e70",
+  "installed": true,
+  "made": "2026-10-02T18:27:26",
   "src": "p00"
  },
  "renders/extended_0deg/02_hero_open.png": {
   "by": "b6_stills.py",
-  "geometry": "6d4eb38f",
-  "made": "2026-10-02T00:34:56",
+  "geometry": "5d089e70",
+  "installed": true,
+  "made": "2026-10-02T18:27:26",
   "src": "p00"
  },
  "renders/extended_0deg/03_knee_clad.png": {
   "by": "b6_stills.py",
-  "geometry": "6d4eb38f",
-  "made": "2026-10-02T00:34:56",
+  "geometry": "5d089e70",
+  "installed": true,
+  "made": "2026-10-02T18:27:26",
   "src": "p00"
  },
  "renders/extended_0deg/04_knee_open.png": {
   "by": "b6_stills.py",
-  "geometry": "6d4eb38f",
-  "made": "2026-10-02T00:34:56",
+  "geometry": "5d089e70",
+  "installed": true,
+  "made": "2026-10-02T18:27:26",
   "src": "p00"
  },
  "renders/extended_0deg/05_drive_clad.png": {
   "by": "b6_stills.py",
-  "geometry": "6d4eb38f",
-  "made": "2026-10-02T00:34:56",
+  "geometry": "5d089e70",
+  "installed": true,
+  "made": "2026-10-02T18:27:26",
   "src": "p00"
  },
  "renders/extended_0deg/06_drive_open.png": {
   "by": "b6_stills.py",
-  "geometry": "6d4eb38f",
-  "made": "2026-10-02T00:34:56",
+  "geometry": "5d089e70",
+  "installed": true,
+  "made": "2026-10-02T18:27:26",
   "src": "p00"
  },
  "renders/flexed_40deg/01_hero_clad.png": {
   "by": "b6_stills.py",
-  "geometry": "6d4eb38f",
-  "made": "2026-10-01T23:39:15",
+  "geometry": "5d089e70",
+  "installed": true,
+  "made": "2026-10-02T19:10:37",
   "src": "p40"
  },
  "renders/flexed_40deg/02_hero_open.png": {
   "by": "b6_stills.py",
-  "geometry": "6d4eb38f",
-  "made": "2026-10-01T23:39:15",
+  "geometry": "5d089e70",
+  "installed": true,
+  "made": "2026-10-02T19:10:37",
   "src": "p40"
  },
  "renders/flexed_40deg/03_knee_clad.png": {
   "by": "b6_stills.py",
-  "geometry": "6d4eb38f",
-  "made": "2026-10-01T23:39:15",
+  "geometry": "5d089e70",
+  "installed": true,
+  "made": "2026-10-02T19:10:37",
   "src": "p40"
  },
  "renders/flexed_40deg/04_knee_open.png": {
   "by": "b6_stills.py",
-  "geometry": "6d4eb38f",
-  "made": "2026-10-01T23:39:15",
+  "geometry": "5d089e70",
+  "installed": true,
+  "made": "2026-10-02T19:10:37",
   "src": "p40"
  },
  "renders/flexed_40deg/05_drive_clad.png": {
   "by": "b6_stills.py",
-  "geometry": "6d4eb38f",
-  "made": "2026-10-01T23:39:15",
+  "geometry": "5d089e70",
+  "installed": true,
+  "made": "2026-10-02T19:10:37",
   "src": "p40"
  },
  "renders/flexed_40deg/06_drive_open.png": {
   "by": "b6_stills.py",
-  "geometry": "6d4eb38f",
-  "made": "2026-10-01T23:39:15",
+  "geometry": "5d089e70",
+  "installed": true,
+  "made": "2026-10-02T19:10:37",
   "src": "p40"
  }
 }

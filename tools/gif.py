@@ -19,6 +19,8 @@ dithering off. Two reasons, and the second is the one that matters for file size
     the encoder store only what moved.
 """
 import glob
+import io
+import json
 import os
 import sys
 
@@ -29,9 +31,19 @@ DST = sys.argv[2] if len(sys.argv) > 2 else "renders/anim"
 MS = int(sys.argv[3]) if len(sys.argv) > 3 else 50          # 20 fps
 COLORS = int(os.environ.get("KX_COLORS", "128"))            # 128 is plenty for six materials
 
+# PROVENANCE TRAVELS WITH THE ARTEFACT. b7_anim.py records the frames it rendered, keyed by the
+# frame directory's real path; this assembles those frames into a GIF somewhere else, and until it
+# carried the record across, the GIF in renders/ kept whatever fingerprint it had last time --
+# three animations sat in the README stamped with geometry from two days earlier while their own
+# frames were current. Same rule as tools/install_renders.py: carry the record, never invent one.
+REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+MAN = os.path.join(REPO, "renders", "manifest.json")
+man = json.load(io.open(MAN, encoding="utf-8")) if os.path.exists(MAN) else {}
+
 if not os.path.isdir(DST):
     os.makedirs(DST)
 made = 0
+carried = 0
 for sub in sorted(os.listdir(SRC)):
     d = os.path.join(SRC, sub)
     if not os.path.isdir(d):
@@ -47,10 +59,20 @@ for sub in sorted(os.listdir(SRC)):
                                      dither=Image.NONE)
     frames = [im.quantize(palette=pal, dither=Image.NONE) for im in rgb]
     out = os.path.join(DST, sub + ".gif")
+    rec = man.get(d.replace(chr(92), "/"))
     frames[0].save(out, save_all=True, append_images=frames[1:], loop=0, duration=MS,
                    optimize=True, disposal=1)
-    print("  %-14s %d frames %dx%d -> %s, %.1f MB"
+    note = ""
+    if rec is None:
+        note = "   NO RECORD at source -- the audit will flag it"
+    else:
+        man["%s/%s.gif" % (DST, sub)] = dict(rec, assembled=True)
+        carried += 1
+        note = "   geometry %s" % rec.get("geometry", "?")
+    print("  %-14s %d frames %dx%d -> %s, %.1f MB%s"
           % (sub, len(frames), frames[0].size[0], frames[0].size[1], out,
-             os.path.getsize(out) / 1048576.0))
+             os.path.getsize(out) / 1048576.0, note))
     made += 1
-print("  %d gif(s)" % made)
+if carried:
+    json.dump(man, io.open(MAN, "w", encoding="utf-8"), indent=1, sort_keys=True)
+print("  %d gif(s), %d with provenance carried from their frames" % (made, carried))
