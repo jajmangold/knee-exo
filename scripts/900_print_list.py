@@ -50,8 +50,10 @@ SETTING = {
     "P23a_FairingMount": (4, 0.40, "carries the canopy"),
     "P23b_FairingMount": (4, 0.40, "carries the canopy"),
     "P23c_FairingMount": (4, 0.40, "carries the canopy"),
-    "P24_FairingShank": (3, 0.15, "cosmetic"),
+    # P24_FairingShank was here. The shank rail went in-line under the knee joint
+    # (430_shank_inline_build.py) and there was nothing left for it to fair.
     "P25_MotorNacelle": (3, 0.15, "cosmetic; prints nose-down on its domed end"),
+    "P27_ControllerMount": (4, 0.40, "carries the controller 2 mm off the shaft magnet"),
     "P30_InterfaceProx": (6, 0.60, "KX-1 interface, 1.2 MPa of bearing standalone"),
     "P31_InterfaceDist": (6, 0.60, "KX-1 interface, 1.2 MPa of bearing standalone"),
     # printed since 802_no_metal.py -- these were the only two fabricated aluminium parts
@@ -177,7 +179,7 @@ HOLES = {
     "P23a_FairingMount": "1 x M5 clearance (on the build axis)",
     "P23b_FairingMount": "1 x M5 clearance (on the build axis)",
     "P23c_FairingMount": "1 x M5 clearance (on the build axis)",
-    "P24_FairingShank": "3 x M5 clearance",
+    "P27_ControllerMount": "4 x M5 into the motor's rear, 4 x M3 into the board's bosses",
     "P25_MotorNacelle": "none",
     "P30_InterfaceProx": "4 x M4 clearance, 2 x 5 mm dowel H7, 6 x M5 heat-set insert",
     "P31_InterfaceDist": "6 x M4 clearance, 2 x 5 mm dowel H7, 6 x M5 heat-set insert",

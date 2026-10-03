@@ -340,9 +340,10 @@ X = ±30 side. So the mounts are never swept.
 |---|---|
 | `P20_KneeCap` | an inverted-U channel — walls at X ±50, roof at Z 132 — enclosing both belt runs and both in-running nips |
 | `P21_FairingThigh` | one canopy, Y 28…180 with side skirts to 206, over the screw, the nut, the carriage and both belt runs |
-| `P22_DriveCap` | Y 180…334 over the bracket, the idler and the link belt. Its Y 180 station **is** P21's end section, so the two are flush with no step |
-| `P25_MotorNacelle` | Y 178…326 over the motor. A tube, because it has to be — see below |
-| `P24_FairingShank` | the shank member, Y −208…**−66** — the proximal tip tapers in width and height to duck under the knee shroud through the swing |
+| `P22_DriveCap` | Y 178…334 over the bracket, the idler and the link belt. Its Y 180 station **is** P21's end section, so the two are flush with no step |
+| `P25_MotorNacelle` | Y 206…334 over the motor, the link belt and the controller. A tube over the motor, because it has to be — see below — opening into a superelliptical nose over the board and ending in P22's own proximal plane |
+
+**There is no shank cover.** There used to be one, `P24`, over the shank member at Y −208…−66. The shank rail then moved in-line under the knee joint ([`430_shank_inline_build.py`](scripts/430_shank_inline_build.py)) and there was nothing left for it to fair, so it is deleted rather than redrawn. [`406_coverage.py`](scripts/406_coverage.py) is what decides whether that is acceptable, and it reports **0 of 187 rays** reaching a moving part at 0°, 30° and 104°.
 
 `P22` and `P25` are **two printed parts of one surface**, not two shells that happen to
 meet. They are built as (cap outer ∪ pod outer) − (cap inner ∪ pod inner) and then split
@@ -1211,10 +1212,20 @@ Three things came out of it, and they are the shape of the fix rather than the f
 
 Removing the bad marks was its own problem. [`416_unmark.py`](scripts/416_unmark.py) rebuilds each
 cutting tool from the registry and fuses it back, verified by probing the skin before and after
-(59% solid → 100%). It worked on 13 of 14. `P24_FairingShank` refused every variant — at tool
+(59% solid → 100%). It worked on 13 of 14. The shank fairing refused every variant — at tool
 inflation 1.0 the volume came back exactly right and the solid was still broken — so it was
 rebuilt blank from its own generator instead, which meant making `217_fairing.py` and
 `232_covers.py` run headless. A part that resists booleans is better regenerated than repaired.
+(That part is gone now; the lesson is not.)
+
+Two more of the same kind, found while mirroring the right leg. `P31_InterfaceDist`'s mark
+station was **15 mm above the part** — the socket's top came down to Z 98 and the station still
+said 123 — so 412 cut nothing, 413 found nothing visible, `readmark` rendered the site as solid,
+and the part went out unnumbered on **both** legs. And [`702_mirror_marks.py`](scripts/702_mirror_marks.py)
+refused two of sixteen because its "is this already engraved" gate was an absolute skin
+threshold: P22's reflected site reads 79% against a threshold of 80%, so it tried to fill glyphs
+that had already been filled, added 0.000 cm³, and skipped the part instead of cutting it. Both
+checks passed for years by having nothing to find.
 
 ### What is in the repository, and what the repository is missing
 
@@ -1326,8 +1337,8 @@ quietly leave one leg's STLs under names that look like a complete set.
   aluminium from the machine. Before that it read 1.59 kg, because it counted two parts that no
   longer exist: `P3b_CarriageB` and `P11_SprungAnchor` went with the second ball screw. The
   remaining candidates for a diet are `P21_FairingThigh` (165 cm³), `P5_ThighCuff` (161 cm³),
-  `P22_DriveCap` (154 cm³), `A7_DriveBracket_Idler` (140 cm³) and
-  `P2a_KneeHub_Pulley29T` (135 cm³).
+  `P22_DriveCap` (152 cm³), `P2a_KneeHub_Pulley29T` (148 cm³) and
+  `A7_DriveBracket_Idler` (137 cm³).
 - ~~**Carriage guides are sliding, not rolling**~~ — **changed.** Four **mini** V-wheels
   (`P10a-d_VWheel_Mini`, OD 15.23) on the extrusion's corners, 70 mm apart in Y. A solid wheel
   reaches |X| 37.6, inside the belt's backing at 36.24…38.46; a mini reaches 31.0 and clears the

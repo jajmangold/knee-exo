@@ -239,6 +239,12 @@ CHECKS = [
      lambda sh: cyls(sh, 6.3, 6.6) >= 6 and cyls(sh, 4.9, 5.2) >= 2, "the KX-1 pattern"),
     ("P31_InterfaceDist", "6 x M5 inserts and 2 dowels",
      lambda sh: cyls(sh, 6.3, 6.6) >= 6 and cyls(sh, 4.9, 5.2) >= 2, "the KX-1 pattern"),
+    # The controller's mount. It carries a board whose only fixing is four M3 into bosses, and
+    # bolts to the motor on four M5 -- and it has to let the shaft and its magnet through, which
+    # is the feature that is easiest to leave out of a plate that otherwise looks finished.
+    ("P27_ControllerMount", "4 x M5 to the motor, 4 x M3 bosses, a bore for the magnet",
+     lambda sh: cyls(sh, 5.1, 5.4) >= 4 and cyls(sh, 3.1, 3.4) >= 4
+     and cyls(sh, 13.8, 14.2) >= 1, "it mounts a PCB 2 mm off a magnet"),
     ("P20_KneeShroud", "some way of attaching",
      lambda sh: cyls(sh, 3.0, 7.0) >= 1, "cladding still has to stay on"),
     ("P22_DriveCap", "some way of attaching", lambda sh: cyls(sh, 3.0, 7.0) >= 1, "as above"),
