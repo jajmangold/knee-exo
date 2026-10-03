@@ -34,6 +34,7 @@ the datasheet fixes: it refuses to finish if the air gap it has built falls outs
 
     freecadcmd.exe scripts/434_odrive_mount.py
 """
+import math
 import os
 import sys
 
@@ -150,55 +151,150 @@ b.Label = "HW_ODrive_XDriveMini"
 print("  board %.0f x %.0f x %.1f at Y %.1f, components to Y %.1f  -- DIMENSIONS UNVERIFIED"
       % (BOARD[0], BOARD[1], BOARD[2], board_y[0], board_y[1] + COMPONENTS))
 
-# ---------------------------------------------------------------- the shell has to grow over it
-# The board is 63 x 58 and the motor it sits on is 63 across, so the board's CORNERS stand at
-# radius 42.8 where the motor's skin is at 31.5 -- they project straight through the nacelle.
-# This is not a clash to relieve, it is a cover that is too small: the shell gets a blister over
-# the controller. Sized to the board's unverified dimensions, so it changes when they do.
-BLISTER = 3.0
-bx = (MOT_X - BOARD[0] / 2.0 - BLISTER, BOARD[0] + 2 * BLISTER)
-bz = (zc - BOARD[1] / 2.0 - BLISTER, BOARD[1] + 2 * BLISTER)
-# the blister starts at the motor's rear face, not at the board: the mount's web and bosses
-# stand proud of the motor's circle from Y 302 upwards, and a blister that begins at the board
-# leaves them sticking through the shell
-by_ = (REAR_Y - 1.0, (board_y[1] + COMPONENTS + BLISTER) - (REAR_Y - 1.0))
+# ---------------------------------------------------------------- the shell closes over it
+# The board is 63 x 58 and the pod that covers the motor is a dia 70 tube, so the board's CORNERS
+# stand at radius 42.8 where the pod's inner wall is at 32 -- they project straight through it.
+#
+# THE FIRST VERSION OF THIS PUT A BOX THERE, and 399_drivecap.py's own history says why that is
+# wrong: "v1 was a rectangular box. It looked like a shoebox bolted to the end of the canopy."
+# It also cost 0.206 cm3 of overlap into P22_DriveCap that nothing in this file was checking for,
+# because the box was fused into the nacelle and then never compared against the other half of
+# the same wall.
+#
+# So the rear end of the pod is re-lofted in the SAME superelliptical family as the cap, n = 5.5,
+# and the exponent is what makes it cheap: a round tube has to grow to r 42.8 + wall to swallow a
+# 63 x 58 rectangle, where an n = 5.5 section swallows it at 36.5 x 34.0 because it is already
+# nearly a rounded rectangle. The visible bulge over the controller is 4 mm, not 16.
+#
+#   Y 296..312   the circle opens out into the superellipse
+#   Y 312..324   full section, which is what clears the board and its 10 mm of components
+#   Y 324..334   a 45 deg blunt nose, ending in the same plane as P22's proximal end
+#
+# 45 deg because 411_printability.py has already caught this exact mistake on this exact part at
+# the other end: a short wide taper DIVERGES upward and every layer overhangs.
+N_PTS = 32                      # 32, not 48: at n=5.5 the parameterisation crowds points into
+                                # the corners, and 48 of them produced six BOPAlgo TooSmallEdge
+                                # errors that Shape.check(True) caught and isValid() would not
+WALL = 2.5
+NOSE_Y = 334.0                  # P22_DriveCap's proximal end, measured below and asserted
+
+# THE EXPONENT IS THE WHOLE TRICK. A superellipse reaches 2**(1/2 - 1/n) of its semi-axis on the
+# diagonal -- 1.247x at n = 5.5 -- and the board's corners are at radius 42.8, at 42.6 deg. So a
+# section with a = 36.5 swallows a 63 x 58 board with 2.6 mm to spare, where a CIRCLE would have
+# to be r 45 to do it. The cover over the controller is 5 mm wider than the tube it grows out of,
+# not 20.
+#
+# n RAMPS FROM 2, so the tube does not step into a rounded square: it is a true circle at the
+# root and squares off gradually over 15 mm. The first version of this started the loft at n=5.5
+# all the way down and put a visible square sleeve around the motor.
+#
+#   Y 286..301   circle r 34 opens out into the n=5.5 section
+#   Y 301..322   full section: the mount's web and bosses, the board, its 10 mm of components
+#   Y 322..334   45 deg to a blunt end in P22's own proximal plane
+#
+# 45 deg because 411_printability.py has already caught this mistake on this exact part at the
+# other end: a short wide taper DIVERGES upward and every layer overhangs.
+#
+# (y, semi-axis, exponent), DERIVED rather than typed: the stack above this moved 3 mm when
+# 433_drive_flip.py corrected the link belt from 12 mm wide to the 15 mm BOM D6 specifies, and a
+# typed station list simply became wrong -- the full section ended 2.6 mm before the board's
+# components did. These follow the board.
+A_FULL = 39.0                           # the section over the controller
+FULL_END = board_y[1] + COMPONENTS + 1.5
+SWELL_END = REAR_Y - 0.5                # full section before the mount's web, which is as wide
+SWELL_START = SWELL_END - 15.5          # 15.5 mm of blend: 5 mm of radius, and 43 deg on the
+                                        # diagonals, which is what has to print
+A_END = A_FULL - (NOSE_Y - FULL_END)    # a 45 deg nose, by construction
+assert A_END >= 24.0,     "the components reach Y %.1f and P22 ends at %.0f, which leaves no room for a 45 deg nose"     % (board_y[1] + COMPONENTS, NOSE_Y)
+assert FULL_END > SWELL_END, "the swell has not finished before the board's section ends"
+
+OUT = [(SWELL_START, 34.0, 2.0), (SWELL_START + 8.0, 35.5, 3.0), (SWELL_END, A_FULL, 5.5),
+       (FULL_END, A_FULL, 5.5), (NOSE_Y, A_END, 5.5)]
+IN_ = [(SWELL_START + 6.0, 33.0, 2.5), (SWELL_START + 8.0, 33.0, 3.0),
+       (SWELL_END - 0.5, A_FULL - WALL, 5.5), (FULL_END, A_FULL - WALL, 5.5),
+       (NOSE_Y - WALL, A_END, 5.5)]
+
+
+def sell(y, a, n):
+    """one superelliptical wire about the motor's axis, in 399's own parameterisation"""
+    pts = []
+    for i in range(N_PTS):
+        t = 2.0 * math.pi * i / N_PTS
+        ct, st = math.cos(t), math.sin(t)
+        pts.append(V(MOT_X + a * math.copysign(abs(ct) ** (2.0 / n), ct), y,
+                     MOT_Z + a * math.copysign(abs(st) ** (2.0 / n), st)))
+    pts.append(pts[0])
+    return Part.makePolygon(pts)
+
+
+def contains(a, n, hx, hz):
+    return (hx / a) ** n + (hz / a) ** n
+
+
 nac = doc.getObject("P25_MotorNacelle")
+cap22 = doc.getObject("P22_DriveCap")
+outer = Part.makeLoft([sell(*st) for st in OUT], True, True)
+inner = Part.makeLoft([sell(*st) for st in IN_], True, True)
 if nac is not None:
     v = nac.Shape.Volume
-    outer = Part.makeBox(bx[1], by_[1], bz[1], V(bx[0], by_[0], bz[0]))
-    top = by_[0] + by_[1] - 2.0          # the blister's own 2 mm rear wall
-    # No floor at the blister's root: it is a bump on a hollow cover, so its cavity is the
-    # nacelle's own.  A 2 mm diaphragm there would sit straight on the mount's web corners --
-    # which is exactly what it did, 0.554 cm3 of it in four pieces at Y 302..303.  The cavity
-    # therefore starts at by_[0], 1 mm under the motor's rear face, where the tube wall's inner
-    # surface is at r 31.8 (measured): the box reaches r 32.5 on the X axes, so it thins ~0.7 mm
-    # off a 4 mm wall over a 1 mm band and opens nothing.
-    inner = Part.makeBox(bx[1] - 2 * 2.0, top - by_[0], bz[1] - 2 * 2.0,
-                         V(bx[0] + 2.0, by_[0], bz[0] + 2.0))
-    # The nacelle used to close off at the motor's rear face -- a disc across the whole bore at
-    # Y 302..304, measured, not assumed.  The controller now lives in that space and the mount
-    # bolts straight through it, so that closure has to move outboard: cut it away over the
-    # motor's full circle and let the blister's rear wall be the cover instead.  The drive and
-    # controller compartments then share one volume, which is what the motor's own leads want
-    # anyway.  The blister's footprint (69 x 64) contains the bore (dia 63), so nothing is
-    # left open to the outside.
-    inner = inner.fuse(Part.makeCylinder(MOT_R + 0.5, top - by_[0],
-                                         V(MOT_X, by_[0], MOT_Z), V(0, 1, 0)))
-    assert bx[0] <= MOT_X - MOT_R and bx[0] + bx[1] >= MOT_X + MOT_R,         "the blister is narrower than the bore it now has to close"
-    assert bz[0] <= MOT_Z - MOT_R and bz[0] + bz[1] >= MOT_Z + MOT_R,         "the blister is shallower than the bore it now has to close"
-    grown = nac.Shape.fuse(outer).cut(inner)
+    assert cap22 is not None, "no P22 to end flush with"
+    p22y = cap22.Shape.BoundBox.YMax
+    assert abs(p22y - NOSE_Y) < 0.6,         "P22 ends at Y %.1f, so the nose should too, not at %.1f" % (p22y, NOSE_Y)
+    # the cavity must swallow the board at every station it covers, corners included
+    for y, a, n in IN_[2:4]:
+        c = contains(a, n, BOARD[0] / 2.0, BOARD[1] / 2.0)
+        assert c <= 0.85,             "the cavity at Y %.0f is %.2f of the way to the board's corner -- too close" % (y, c)
+    assert board_y[1] + COMPONENTS <= IN_[3][0] - 1.0,         "the board's components reach Y %.1f and the full section ends at %.1f"         % (board_y[1] + COMPONENTS, IN_[3][0])
+    # TRIM, DO NOT CUT. Above the Y where the new cavity is wider than the tube's own OUTER skin,
+    # keeping the tube would leave a void ring between the two walls belonging to neither -- the
+    # exact defect 399_drivecap.py records from its v2. So the tube is removed there and the bell
+    # is the only wall; below it the two overlap solidly and fuse. That also takes the nacelle's
+    # old rear closure -- a disc across the whole bore at Y 302..304, measured -- which is where
+    # the controller now lives and where the mount bolts straight through.
+    # Above the Y where the cavity is wider than the tube's own OUTER skin, keeping the tube
+    # would leave a void ring between the two walls belonging to neither part.
+    pod_outer = 35.0
+    y0, a0_, _ = IN_[1]
+    y1, a1_, _ = IN_[2]
+    TRIM_Y = y0 + (pod_outer - a0_) / (a1_ - a0_) * (y1 - y0) - 0.5
+    assert y0 < TRIM_Y < y1, "the trim at Y %.1f is not inside the blend" % TRIM_Y
+    cb = nac.Shape.BoundBox
+    trimmed = nac.Shape.cut(Part.makeBox(cb.XLength + 8.0, (cb.YMax + 8.0) - TRIM_Y,
+                                         cb.ZLength + 8.0,
+                                         V(cb.XMin - 4.0, TRIM_Y, cb.ZMin - 4.0)))
+    bell = outer.cut(inner)
+    assert len(bell.Solids) == 1, "the nose came out as %d solids" % len(bell.Solids)
+    grown = trimmed.fuse(bell)
     if len(grown.Solids) == 1:
         grown.check(True)
         nac.Shape = grown
-        print("  clad  nacelle blistered over the board, %.0f x %.0f x %.0f: %.1f -> %.1f cm3"
-              % (bx[1], bz[1], by_[1], v / 1000.0, grown.Volume / 1000.0))
+        print("  clad  nacelle re-nosed: circle r %.0f swells to an n=5.5 %.0f across over the"
+              % (OUT[0][1], 2 * OUT[2][1]))
+        print("        controller, then 45 deg to a blunt end in P22's plane at Y %.0f"
+              % NOSE_Y)
+        print("        %.1f -> %.1f cm3, and the board's corners clear the wall by %.1f mm"
+              % (v / 1000.0, grown.Volume / 1000.0,
+                 math.hypot(BOARD[0] / 2.0, BOARD[1] / 2.0)
+                 * (contains(IN_[2][1], IN_[2][2], BOARD[0] / 2.0, BOARD[1] / 2.0)
+                    ** (-1.0 / IN_[2][2]) - 1.0)))
     else:
-        print("  clad  REFUSED to blister the nacelle: %d solids" % len(grown.Solids))
-cap22 = doc.getObject("P22_DriveCap")
+        print("  clad  REFUSED to re-nose the nacelle: %d solids" % len(grown.Solids))
+
+# P22 AND P25 ARE ONE WALL SPLIT IN TWO, so the nose displacing the seam is P22's business too:
+# whatever the new section occupies, P22 gives up. Without this the pair overlaps and the sweep
+# is the only thing that says so -- which is exactly how the box's 0.206 cm3 got in.
 if cap22 is not None:
-    g = cap22.Shape.cut(o.Shape).cut(b.Shape)
+    v22 = cap22.Shape.Volume
+    # the mount, the board, and the nose's own outer surface -- all three, in one cut, because
+    # chaining three booleans on a 150 cm3 shell is how "Unorientable shape" gets made here
+    g = cap22.Shape.cut(o.Shape.fuse(b.Shape).fuse(outer))
     if len(g.Solids) == 1:
+        g.check(True)
         cap22.Shape = g
+        print("  clad  P22 gives up the seam the nose now owns: %.1f -> %.1f cm3"
+              % (v22 / 1000.0, g.Volume / 1000.0))
+    else:
+        print("  clad  REFUSED to relieve P22: %d solids" % len(g.Solids))
 
 doc.recompute()
 doc.save()
@@ -213,6 +309,19 @@ print("     air gap %.2f mm, datasheet allows %.1f..%.1f  %s"
       % (gap, GAP_LIMITS[0], GAP_LIMITS[1], "" if ok else "<-- OUT OF RANGE"))
 if not ok:
     fail.append("air gap %.2f mm is outside the AS5047P's %.1f..%.1f" % (gap,) + GAP_LIMITS)
+# THE CHECK THE BOX GOT PAST. This file grows the nacelle, so the nacelle is one of the things
+# it has to re-examine -- not just the two parts it adds. P22 and P25 are one wall split in two
+# and are claimed in ASSEMBLY.md to tile with zero overlap and no void between them, so the pair
+# is checked both ways: no common volume, and no gap along the seam the nose just moved.
+for n1, n2 in (("P22_DriveCap", "P25_MotorNacelle"),):
+    t1, t2 = doc.getObject(n1), doc.getObject(n2)
+    if t1 is not None and t2 is not None:
+        c = t1.Shape.common(t2.Shape)
+        vv = 0.0 if c.isNull() else c.Volume / 1000.0
+        print("     %-6s vs %-22s %7.3f cm3 %s"
+              % ("P22", n2, vv, "" if vv <= 0.02 else "<-- CLASH"))
+        if vv > 0.02:
+            fail.append("%s overlaps %s by %.3f cm3" % (n1, n2, vv))
 for nm in ("A3_Motor_6374", "A7_DriveBox", "P25_MotorNacelle", "P22_DriveCap", "A7b_LinkBelt",
            "A2_BallScrew_SFU1620"):
     t = doc.getObject(nm)

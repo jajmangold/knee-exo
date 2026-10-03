@@ -122,7 +122,8 @@ JOBS = [
     ("P25_MotorNacelle",  "P25", "M", (250.0, 235.0, 265.0)),
     # Stations vetted by 413: the knee end of these parts is OPEN, and marks placed there
     # are visible from outside however "inner" the surface is.
-    ("P24_FairingShank",  "P24", "Y", (-175.0, -180.0, -170.0)),
+    # P24_FairingShank is gone, not merely unmarked: 430 moved the shank rail in-line under
+    # the knee joint and there was nothing left for it to fair.
     ("P20_KneeShroud",    "P20", "Y", (0.0, 15.0, -15.0)),
     ("P1_KneeYoke",       "P1",  "Y", (55.0, 60.0, 90.0)),
     # P2a_KneeHingePlate is deliberately absent. 414 searched 16 stations x 36 bearings
@@ -159,6 +160,13 @@ JOBS = [
     # rays escaping; the underside at Z 123 beds on P6_ShankSocket. A 0.8 mm recess in a
     # bolted joint face is harmless, a readable part number on the outside is not.
     ("P31_InterfaceDist", "P31", "P3", (0.0, -275.0, 123.0)),
+    # The controller mount, on the face that beds against the motor's rear -- the same argument
+    # as P31's underside: a 0.8 mm recess in a bolted joint face is harmless, a readable part
+    # number on an outside face is not. Y 302 is that face; Z 86 is 24 mm above the motor's
+    # axis, which clears the four M5 at Z 49.5/74.5 and still has 40 mm of disc across it.
+    # NEEDS A FOURTH PLANAR MODE: this is the only mark in the device on a face normal to the
+    # limb axis, so neither X mode nor the bed face frames it. markframe grew "P4" for it.
+    ("P27_ControllerMount", "P27", "P4", (MOT.x, 302.0, 86.0)),
 ]
 
 
@@ -378,11 +386,11 @@ for name, mark, axis, stations in JOBS[I0:I1]:
         continue
     sh = o.Shape
 
-    if axis in ("P", "P2", "P3"):
+    if axis in ("P", "P2", "P3", "P4"):
         # explicit face: point on it, outward normal -X, text along +Z, up +Y
         px, py, pz = stations
         faces = None
-        for h in ((H, 6.0, 5.0) if axis == "P" else (5.0, 4.0)):
+        for h in ((H, 6.0, 5.0) if axis in ("P", "P4") else (5.0, 4.0)):
             faces = text_faces(mark + SUFFIX, h)
             tb = faces[0]
             for f in faces[1:]:
@@ -396,7 +404,8 @@ for name, mark, axis, stations in JOBS[I0:I1]:
         # written out inline here -- four of them, one per style -- three were LEFT-handed and
         # cut 12 of 14 part numbers as mirror images. Nothing caught it: the volume was right,
         # the solid was clean and the mark was hidden. See tools/readmark.py.
-        nrm = V(1.0, 0.0, 0.0) if axis in ("P", "P2") else V(0.0, 0.0, -1.0)
+        nrm = (V(1.0, 0.0, 0.0) if axis in ("P", "P2")
+               else V(0.0, -1.0, 0.0) if axis == "P4" else V(0.0, 0.0, -1.0))
         m, into = mark_matrix(axis, V(px, py, pz), nrm, standoff=0.3, legacy=FILL and LEGACY)
         d = V(into.x, into.y, into.z).multiply(DEPTH + 0.3)
         flat = tb.transformGeometry(m)

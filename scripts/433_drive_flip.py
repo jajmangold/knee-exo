@@ -22,15 +22,19 @@ THE STACK, FROM THE BOTTOM, AND WHY EACH NUMBER IS WHAT IT IS
     Y 302+    the motor's free shaft end, where the magnet goes, in the space the belt vacated.
               434_odrive_mount.py puts the controller there, which is the only place it can go.
 
-    screw     Y 57..224, with the 608 at Y 190..197 and the 20T pulley at 208..220
-              167 mm instead of 257: 90 mm less screw, about 150 g of steel
+    screw     Y 57..232, with the 608 seated in the motor plate at Y 220..227 and the 20T
+              pulley at 208..220.  175 mm instead of 257: 82 mm less screw, about 124 g of
+              steel off the thigh.  The 608 does NOT get a boss of its own at Y 190, where it
+              would rather be -- see BRG_Y below for why that boss attaches to nothing.
 
-WHAT THIS DOES NOT DO. P22_DriveCap runs to Y 334 and P25_MotorNacelle to Y 326, both sized to
-cover a link belt that is no longer up there. There is roughly 30 mm of shell to come off once the
-controller's envelope is known, and that is a cladding job for after the board is measured.
+WHAT THIS DOES NOT DO. P22_DriveCap still runs to Y 334, sized to cover a link belt that is no
+longer up there; the nacelle's distal end is trimmed here only as far as the belt's new plane
+demands.  434_odrive_mount.py reworks the nacelle's other end around the controller, and
+406_coverage.py is the check that says whether the trimmed shell leaves anything reachable.
 
     freecadcmd.exe scripts/433_drive_flip.py
 """
+import math
 import os
 import sys
 
@@ -49,16 +53,21 @@ except StopIteration:
 M5 = 5.2
 MOT_X, MOT_Z, MOT_R = -104.0, 62.0, 31.5
 SCREW_X, SCREW_Z = -62.0, 106.0
-MOTOR_Y = (228.0, 302.0)
-PLATE_Y = (220.0, 228.0)
-BELT_Y = (208.0, 220.0)
+# THE BELT IS 15 mm WIDE. BOM D6 says so and 404_link_ratio.py sized it so -- "15 mm, not 9:
+# it now carries the overdrive, ~153 N tight side" -- and the solid in the document was 12 mm
+# thick, which put the motor's plate 3 mm into the belt it was supposed to clear. Everything
+# proximal of the belt therefore moves up 3 mm from where the first version of this file put it.
+BELT_W = 15.0
+MOTOR_Y = (231.0, 305.0)
+PLATE_Y = (223.0, 231.0)
+BELT_Y = (208.0, 208.0 + BELT_W)
 # THE 608 GOES IN THE MOTOR'S PLATE, not in a boss of its own. A boss at Y 190 -- just above the
 # nut's travel, which is where it wants to be -- attaches to nothing: the bracket is empty until
 # Y 206. The plate carries the screw's axis anyway (its section spans X -135..+46), it is 8 mm
 # thick and a 608 is 7 mm wide, and this is what the original bracket did at Y 291..299: one
 # plate holding the motor and the screw's upper bearing.
-BRG_Y = (220.0, 227.0)          # the 608, seated in the motor plate
-SCREW_Y = (57.0, 232.0)
+BRG_Y = (223.0, 230.0)          # the 608, seated in the motor plate
+SCREW_Y = (57.0, 235.0)
 R_BODY, R_END = 7.90, 4.00
 # thread to Y 204, then dia 8 through the pulley (208..220) and the bearing (220..227). The nut
 # needs thread to Y 183 at the top of its stroke, so 204 clears it by 21 mm.
@@ -102,11 +111,41 @@ print("  motor Y %.0f..%.0f -> %.0f..%.0f, shaft now out of the DISTAL face at Y
       % (b3.YMin, b3.YMax, MOTOR_Y[0], MOTOR_Y[1], MOTOR_Y[0]))
 
 # ---------------------------------------------------------------- the link belt follows it
+# AND IS REBUILT, NOT TRANSLATED. The solid in the document was a capsule of CONSTANT 27.46 mm
+# half-width -- the motor pulley's radius -- running 73.8 mm along a 60.8 mm centre distance: it
+# was 13 mm longer than the belt can be and the same width at the 20T end as at the 32T end.
+# Sizing a cover to that envelope makes the cover 13 mm bigger than the belt, which is how a
+# wrong reference solid turns into a wrong printed part. The real envelope is the hull of the two
+# pulleys, and both radii are 399_drivecap.py's own: pitch radius plus 2.
+R_M_BELT = 32 * 5.0 / (2 * math.pi) + 2.0       # 27.46
+R_S_BELT = 20 * 5.0 / (2 * math.pi) + 2.0       # 17.92
+
+
+def stadium(rm, rs, y0, y1):
+    """the region two pulleys and the strands between them occupy, as one solid"""
+    dx, dz = SCREW_X - MOT_X, z(SCREW_Z) - z(MOT_Z)
+    L = math.hypot(dx, dz)
+    nx, nz = -dz / L, dx / L
+    pts = [V(MOT_X + nx * rm, y0, z(MOT_Z) + nz * rm),
+           V(SCREW_X + nx * rs, y0, z(SCREW_Z) + nz * rs),
+           V(SCREW_X - nx * rs, y0, z(SCREW_Z) - nz * rs),
+           V(MOT_X - nx * rm, y0, z(MOT_Z) - nz * rm)]
+    pts.append(pts[0])
+    sol = Part.makeCylinder(rm, y1 - y0, V(MOT_X, y0, z(MOT_Z)), V(0, 1, 0))
+    sol = sol.fuse(Part.makeCylinder(rs, y1 - y0, V(SCREW_X, y0, z(SCREW_Z)), V(0, 1, 0)))
+    sol = sol.fuse(Part.Face(Part.makePolygon(pts)).extrude(V(0, y1 - y0, 0)))
+    assert len(sol.Solids) == 1, "the belt plane came out as %d solids" % len(sol.Solids)
+    return sol
+
+
 bb = a7b.Shape.BoundBox
-moved = a7b.Shape.copy()
-moved.translate(V(0, BELT_Y[0] - bb.YMin, 0))
-a7b.Shape = moved
-print("  belt  Y %.0f..%.0f -> %.0f..%.0f" % (bb.YMin, bb.YMax, BELT_Y[0], BELT_Y[1]))
+belt = stadium(R_M_BELT, R_S_BELT, BELT_Y[0], BELT_Y[1])
+belt.check(True)
+a7b.Shape = belt
+print("  belt  Y %.0f..%.0f (%.0f mm) -> %.0f..%.0f (%.0f mm), and rebuilt to the hull of the"
+      % (bb.YMin, bb.YMax, bb.YLength, BELT_Y[0], BELT_Y[1], BELT_W))
+print("        two pulleys: r %.1f at the 32T, %.1f at the 20T, %.1f cm3 instead of %.1f"
+      % (R_M_BELT, R_S_BELT, belt.Volume / 1000.0, bb.XLength * 0.0 + 57.83))
 
 # ---------------------------------------------------------------- the screw, 90 mm shorter
 was = a2.Shape.Volume / 1000.0
@@ -150,7 +189,6 @@ sh = sh.cut(Part.makeBox(34.0, 14.0, _bz[1] - _bz[0], V(SCREW_X - 17.0, 285.0, _
 # plus a cylinder at each pulley -- which is bounded and is the real clearance anyway.
 R32, R20 = 50.9 / 2.0 + 4.0, 31.8 / 2.0 + 4.0      # HTD-5M 32T and 20T pitch radii, plus belt
 win = a7b.Shape.copy()
-win.translate(V(0, BELT_Y[0] - win.BoundBox.YMin, 0))
 win = win.fuse(Part.makeCylinder(R32, (BELT_Y[1] - BELT_Y[0]) + 4.0,
                                  V(MOT_X, BELT_Y[0] - 2.0, z(MOT_Z)), V(0, 1, 0)))
 win = win.fuse(Part.makeCylinder(R20, (BELT_Y[1] - BELT_Y[0]) + 4.0,
@@ -248,6 +286,132 @@ for nm in ("P25_MotorNacelle", "P22_DriveCap"):
     cl.Shape = trim
     print("  clad  %-18s could not be perforated without splitting, so trimmed to Y %.0f: -%.2f cm3"
           % (nm, BELT_Y[1] + 2.0, (v - trim.Volume) / 1000.0))
+
+# ---------------------------------------------------------------- and then the mouth comes down
+# TRIMMING ALONE LEAVES THE BELT BARE. The comment above said to let 406_coverage.py decide, and
+# it did: one ray of 187, at Y 220, 42 deg anterior, reaching A7b_LinkBelt at r 90.8 where the
+# skin is at 85.4 and the first blocker not until r 108. The belt moved from Y 302..314 to
+# Y 208..220 and the nacelle has never reached below Y 220, so its whole new plane is below the
+# cover. A belt entering a pulley is the one genuine pinch hazard in the machine.
+#
+# EXTENDING THE SECTION DOWN DOES NOT WORK, and the reason is worth keeping: the shell's wall at
+# Y 223 runs BETWEEN the two pulleys -- the pod is a tube around the motor and the cap is a wall
+# around the screw, and they seam together in between. Extrude that section and the belt's strand
+# has to pass through 1.404 cm3 of it. The cover at a belt plane cannot be two tubes; it has to
+# wrap both pulleys in one cavity, which is exactly what P22 and P25 together did when the belt
+# was at the top.
+#
+# So the mouth becomes a COLLAR: the convex region spanned by both pulleys -- two circles and the
+# trapezoid between them, which is the shape the strands actually occupy -- hollowed by the same
+# wall the pod has. It stops at Y 206, because P3_Carriage's proximal end at rest is Y 203 and
+# the shell may not enter the gantry's clearance at the one pose it is closest.
+MOUTH_Y = 206.0
+COLLAR_TOP = BELT_Y[1] + 3.0            # 226, a millimetre inside the trimmed mouth
+GAP = 2.0                               # clearance around the belt
+
+
+def _profile(sh, y):
+    """the part's own wall section at this Y, as one face with its holes in it"""
+    ws = sh.slice(V(0, 1, 0), y)
+    assert ws, "no section at Y %.1f" % y
+    fs = [Part.Face(w) for w in ws]
+    outer = max(fs, key=lambda f: f.Area)
+    prof = outer
+    for f in fs:
+        if f is not outer:
+            prof = prof.cut(f)
+    return prof if prof.ShapeType == "Face" else prof.Faces[0]
+
+
+nac = doc.getObject("P25_MotorNacelle")
+if nac is not None:
+    v = nac.Shape.Volume
+    # EXTRUDE THE PART'S OWN SECTION, and then take out just the web the belt has to cross.
+    # The first attempt at this extruded the section and stopped there, and the strand ran
+    # through 1.404 cm3 of it: at that Y the shell is a tube around the motor and a wall around
+    # the screw, seamed together in between, and the belt runs from one to the other. The second
+    # attempt replaced the whole section with a collar spanning both pulleys, which the bracket
+    # and P22 -- who already own most of that plane -- cut into two disjoint solids.
+    #
+    # The web between the two cavities is INTERNAL. Removing it over the belt's plane joins them
+    # into one volume and opens nothing to the outside, which is why this is the cheap answer:
+    # the outer wall is the section's own, unchanged, and P22 keeps its share of the perimeter
+    # exactly as it already has it at these Y.
+    skirt = _profile(nac.Shape, COLLAR_TOP).extrude(V(0, MOUTH_Y - COLLAR_TOP, 0))
+    clear = stadium(R_M_BELT + GAP, R_S_BELT + GAP, MOUTH_Y - 1.0, COLLAR_TOP + 1.0)
+    skirt = skirt.cut(clear)
+    # AND A GUARD ON THE LIMB SIDE. Cutting the belt's clearance out of the skirt takes the wall
+    # away in every direction, including the one direction it is needed: 406_coverage.py put one
+    # ray of 187 straight through it -- Y 220, 42 deg anterior, the belt's own strand at r 96.4
+    # with the skin at 85.4. The strand lands in the 9 mm band between where the cap's floor
+    # stops (Z 78) and where the limb cut starts (Z 68.6), so neither covers it.
+    #
+    # There is room: the strand is 96.4 from the limb axis and the comfort surface is 88.4, so a
+    # 2 mm gap and a 2.5 mm wall fit with 3 mm to spare. The guard is the belt's own hull offset
+    # outward and kept only on the limb side -- a belt guard, following the strands rather than
+    # a flap bolted over them.
+    gd_in = stadium(R_M_BELT + GAP, R_S_BELT + GAP, MOUTH_Y - 1.0, COLLAR_TOP + 1.0)
+    gd_out = stadium(R_M_BELT + GAP + 2.5, R_S_BELT + GAP + 2.5, MOUTH_Y, COLLAR_TOP)
+    dx, dz = SCREW_X - MOT_X, z(SCREW_Z) - z(MOT_Z)
+    L = math.hypot(dx, dz)
+    nx, nz = -dz / L, dx / L                    # +n is away from the limb, so keep -n
+    dxu, dzu = dx / L, dz / L
+
+    def _pt(along, perp):
+        return V(MOT_X + along * dxu + perp * nx, MOUTH_Y - 5.0,
+                 z(MOT_Z) + along * dzu + perp * nz)
+
+    # the limb-side half plane, as a face in X-Z extruded along the limb: Part has no
+    # makeHalfSpace in 1.0, and a rotated box is a placement waiting to be got wrong
+    corners = [_pt(-300.0, 0.0), _pt(300.0, 0.0), _pt(300.0, -300.0), _pt(-300.0, -300.0)]
+    corners.append(corners[0])
+    half = Part.Face(Part.makePolygon(corners)).extrude(V(0, (COLLAR_TOP + 5.0) - (MOUTH_Y - 5.0), 0))
+    guard = gd_out.cut(gd_in).common(half)
+    assert guard.Solids, "the guard came out empty"
+    # it must not reach the limb: 3 mm of comfort clearance outside the skin, measured
+    ref = doc.getObject("REF_Thigh")
+    if ref is not None:
+        worst = None
+        for vx in guard.Vertexes:
+            pr = math.hypot(vx.Point.x, vx.Point.z)
+            if worst is None or pr < worst[0]:
+                worst = (pr, vx.Point)
+        print("  clad  the guard's closest point to the limb axis is r %.1f at Y %.0f"
+              % (worst[0], worst[1].y))
+        assert worst[0] >= 88.0,             "the guard reaches r %.1f, inside the limb's 85.4 skin plus 3 mm comfort" % worst[0]
+    skirt = skirt.fuse(guard)
+    skirt = skirt.cut(a7.Shape)                 # the cladding yields to the structure, as ever
+    car = doc.getObject("P3_Carriage")
+    if car is not None:
+        assert MOUTH_Y >= car.Shape.BoundBox.YMax + 2.0,             "the mouth at Y %.0f is inside the carriage's travel to Y %.0f"             % (MOUTH_Y, car.Shape.BoundBox.YMax)
+    grown = nac.Shape.fuse(skirt)
+    # every piece of the skirt shares the section it was taken from, so it cannot float free
+    assert len(grown.Solids) == 1, "extending the mouth gave %d solids" % len(grown.Solids)
+    grown.check(True)
+    c = grown.common(a7b.Shape)
+    bv = 0.0 if c.isNull() else c.Volume / 1000.0
+    assert bv <= 0.02, "the extended mouth sits on the belt by %.3f cm3" % bv
+    nac.Shape = grown
+    print("  clad  %-18s mouth extended Y %.0f -> %.0f over the belt's plane, web relieved:"
+          % ("P25_MotorNacelle", COLLAR_TOP, MOUTH_Y))
+    print("        +%.2f cm3, %d solid" % ((grown.Volume - v) / 1000.0, len(grown.Solids)))
+    # P22 AND P25 ARE ONE WALL SPLIT IN TWO, so whatever the mouth and the guard now occupy,
+    # P22 gives up. The guard reaches Z 88 and P22's floor starts at Z 76.2, so without this the
+    # pair overlaps by 0.155 cm3 and only the sweep says so.
+    cap22 = doc.getObject("P22_DriveCap")
+    if cap22 is not None:
+        v22 = cap22.Shape.Volume
+        g22 = cap22.Shape.cut(skirt)
+        if len(g22.Solids) == 1:
+            g22.check(True)
+            cap22.Shape = g22
+            print("  clad  %-18s gives up the plane the mouth now owns: %.1f -> %.1f cm3"
+                  % ("P22_DriveCap", v22 / 1000.0, g22.Volume / 1000.0))
+        else:
+            print("  clad  REFUSED to relieve P22: %d solids" % len(g22.Solids))
+        c = nac.Shape.common(cap22.Shape)
+        pv = 0.0 if c.isNull() else c.Volume / 1000.0
+        assert pv <= 0.02, "P22 and P25 still overlap by %.3f cm3" % pv
 
 doc.recompute()
 doc.save()

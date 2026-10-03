@@ -25,7 +25,7 @@ renders a mark uses it. The surface geometry decides `into`:
 
     radial ("r")   the ray from the limb axis meets the surface from the inside, so the material
                    is OUTBOARD: into = +normal. The reader is inside the bore or the shell.
-    a face ("P", "P2", "P3")
+    a face ("P", "P2", "P3", "P4")
                    the normal points out of the face and the material is behind it:
                    into = -normal.
 """
@@ -51,7 +51,10 @@ def frame(mode, normal, hoop=False, legacy=False):
                axis against 39 of Z, so the string cannot run along the limb),
           "P2" a flat X face with the string running along the limb (the interface bosses: 56 mm
                along the limb against 7 of height),
-          "P3" a bed face whose normal is +/-Z (the distal interface's underside).
+          "P3" a bed face whose normal is +/-Z (the distal interface's underside),
+          "P4" a face whose normal is +/-Y, string along X and up +Z (the controller mount's
+               motor-facing side: a disc normal to the limb axis, so neither of the two X modes
+               nor the bed face applies).
     hoop: lay a radial string around the part instead of along the limb.
     """
     n = _unit(normal)
@@ -67,6 +70,9 @@ def frame(mode, normal, hoop=False, legacy=False):
     elif mode == "P3":
         into = V(-n.x, -n.y, -n.z)
         up = V(1.0, 0.0, 0.0)
+    elif mode == "P4":
+        into = V(-n.x, -n.y, -n.z)
+        up = V(0.0, 0.0, 1.0)
     else:
         raise AssertionError("unknown mark mode %r" % mode)
     read = into.cross(up)

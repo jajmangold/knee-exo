@@ -192,15 +192,30 @@ assert len(s6.Solids) == 1, "the 2040 pocket split the socket into %d" % len(s6.
 # fill the old clamp holes where material remains, below the pocket and above it
 fill = None
 for (hx, hy) in old_holes:
-    # EXACTLY the socket's own envelope. Overshooting by 1 mm at each end put 0.056 cm3 of
-    # P6 inside P31 and 0.028 inside the cuff -- both found by the sweep, both invisible here.
-    for lo, hi in ((by.ZMin, npz[0]), (npz[1], by.ZMax)):
+    # Overshooting by 1 mm at each end put 0.056 cm3 of P6 inside P31 and 0.028 inside the
+    # cuff -- both found by the sweep, both invisible here. The answer to that was to make the
+    # plugs EXACTLY flush with the socket's envelope, and that was wrong in a way nothing could
+    # see for several sessions: flush is a TANGENT FUSE, and OCC closed each plug against the
+    # bottom face about a nanometre adrift, leaving 33 degenerate faces in a band 1.2e-6 mm
+    # thick. The solid stayed valid, closed and BOP-clean, and simply would not mesh -- see
+    # 436_socket_mesh.py, which is the repair for documents already built this way.
+    #
+    # So: overshoot, then trim the whole part back with ONE planar cut per end. A half-space
+    # cut is a clean operation where twelve tangencies are not, and the sweep still gets a part
+    # that stops at its own envelope.
+    for lo, hi in ((by.ZMin - 1.0, npz[0]), (npz[1], by.ZMax + 1.0)):
         if hi - lo <= 0.1:
             continue
         c = Part.makeCylinder(M4 / 2.0, hi - lo, V(hx, hy, lo), V(0, 0, 1))
         fill = c if fill is None else fill.fuse(c)
 if fill is not None:
     s6 = s6.fuse(fill)
+    pad = 8.0
+    s6 = s6.cut(Part.makeBox(by.XLength + pad, by.YLength + pad, 10.0,
+                             V(by.XMin - pad / 2.0, by.YMin - pad / 2.0, by.ZMin - 10.0)))
+    s6 = s6.cut(Part.makeBox(by.XLength + pad, by.YLength + pad, 10.0,
+                             V(by.XMin - pad / 2.0, by.YMin - pad / 2.0, by.ZMax)))
+    assert len(s6.Solids) == 1, "trimming the plugs gave %d solids" % len(s6.Solids)
 
 drill = None
 for (hx, hy) in old_holes:

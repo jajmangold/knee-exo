@@ -64,9 +64,30 @@ So the board sits a few millimetres off the end of the C6374's free shaft, conce
 half a millimetre. It cannot live in the backpack with the battery, and it cannot be tucked
 wherever there is room inside the nacelle.
 
-**It is not in the CAD.** Forty-two solids in the model and not one of them is electronic: no
-board, no standoffs, no cover, no space reserved. That is a gap of the same kind as the motor
-having no bolts -- the BOM orders it, the topology routes it, and nothing holds it.
+**It is in the CAD now, and the flip is what made room for it.** This used to read "it is not in
+the CAD: forty-two solids and not one of them is electronic -- no board, no standoffs, no cover, no
+space reserved", which was a gap of the same kind as the motor having no bolts. The motor was then
+turned over ([`433_drive_flip.py`](../scripts/433_drive_flip.py)) to shorten the ball screw, which
+moved the link belt from above the drive to below it and left the motor's free shaft end -- the one
+end the magnet can go on -- pointing up the limb into empty space.
+[`434_odrive_mount.py`](../scripts/434_odrive_mount.py) puts the board there:
+
+| surface | Y |
+|---|---|
+| motor's rear face, where `P27_ControllerMount` bolts on | 302.0 |
+| shaft end | 304.0 |
+| magnet's outer face | 306.5 |
+| **board's sensor face** | **308.5** |
+| board's far side, components to | 320.1 |
+
+That is a **2.0 mm air gap**, stated as a chain of surfaces rather than a stack-up, and the script
+refuses to finish if it lands outside the 0.5..3.0 above. The nacelle used to close off with a disc
+across the bore at Y 302 -- exactly where the mount bolts -- so that closure moves outboard and the
+shell grows a blister over the board instead.
+
+**The board's own dimensions are still guesses**, all of them flagged in the script: a 63 x 58
+outline, a 55 x 50 M3 pattern, 10 mm of component height. The mount is a 20-minute reprint once
+they are measured; the magnet bonded to the shaft is not.
 
 **And no mechanical drawing is published.** Makerbase's repository
 ([makerbase-motor/MKS-ODrive](https://github.com/makerbase-motor/MKS-ODrive)) carries

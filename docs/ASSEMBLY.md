@@ -28,7 +28,7 @@ as well. Budget an hour per leg for this and do all of it before you pick up a b
 | Do this | To these |
 |---|---|
 | Drill 4.3 | every ⌀4.2 — `P1`, `P6` (16 of them), `P30`, `P31` |
-| Drill 5.3 | every ⌀5.2 — `P1` (4, at X ±10), `P2a`, `P3` (4 wheel + 2 set screws), `P5`, `P7`, `P21` (19), `P23a/b/c`, `P24`, `A7` (2 into the rail's end) |
+| Drill 5.3 | every ⌀5.2 — `P1` (4, at X ±10), `P2a`, `P3` (4 wheel + 2 set screws), `P5`, `P7`, `P21` (19), `P23a/b/c`, `P6` (12 clamp bolts at |X| 24 + the cap's 2 axial), `P27` (4 into the motor's rear), `A7` (2 into the rail's end) |
 | **Ream** 5.0 H7 | the ⌀5.0 dowel holes in `P30` and `P31` — these set the interface alignment, so ream, do not drill |
 | Ream 12.3, on a drill press | the ⌀12.3 knee-pin holes in **`P2a`** (the hub). This is the joint axis; a hole drilled crooked by hand becomes a knee that binds at one end of its travel |
 | **Bore 28.2, on a drill press** | the ⌀28 bearing seat in **`P1_KneeYoke`**. 28.2 rather than 28.0 deliberately: the 6001 is **bonded**, not pressed, and 0.1 mm is the bond line |
@@ -58,9 +58,10 @@ Full table: [`scripts/417_fastener_audit.py`](../scripts/417_fastener_audit.py),
    a mini reaches 31.0 and clears the belt's tooth tips at 32.86 by 1.86 mm.
 3. Slide the plate onto the extrusion and set the eccentrics until it rolls with no rock and no
    drag. Check again after the belt is tensioned — tension changes it.
-4. Mount the **ball screw** (D1, SFU1610 RH, **260 mm**) on its axis at **X = −62**: the **KP08** (D8)
-   at the lower end, and at the upper end a **608-2RS bonded into the bracket's ⌀32 × 12 screw
-   boss** at Y 286…298 (D8a). The nut (D3) is **flangeless and trapped axially** between two plates
+4. Mount the **ball screw** (D1, SFU1610 RH, **180 mm**) on its axis at **X = −62**: the **KP08** (D8)
+   at the lower end, and at the upper end a **608-2RS bonded into the motor plate's ⌀22 × 7 seat**
+   at Y 220…227 (D8a). The screw now stops just above the nut's travel instead of running past the
+   motor — see step 7. The nut (D3) is **flangeless and trapped axially** between two plates
    on the gantry, not clamped radially: a 36.4 mm bore through a 40 mm housing would sever it, and
    the load is along Y anyway.
    **File a flat on the nut** and lock it against rotation with the two radial **M5 set screws**
@@ -86,10 +87,37 @@ Full table: [`scripts/417_fastener_audit.py`](../scripts/417_fastener_audit.py),
 6. Fit the **29T HTD-8M idler** (S2b) on the centreline at **X 0, Y 255**, supported top and bottom.
    Its axle reaction is up to **1828 N — the largest single load in the machine**, so both bearings,
    both ends, no exceptions.
-7. Mount the **C6374 motor** (D5) with the **32T** pulley, and the **20T** on the screw. That is a
-   **1:1.6 overdrive**, not 1:1 — it is what puts the total ratio at 14.5:1
+7. Mount the **C6374 motor** (D5) **shaft down the limb** — turned over, hanging off the bracket's
+   motor plate at Y 220…228, body Y 228…302 — with the **32T** pulley, and the **20T** on the screw.
+   That is a **1:1.6 overdrive**, not 1:1 — it is what puts the total ratio at 14.5:1
    ([`404_link_ratio.py`](../scripts/404_link_ratio.py)). Close the **HTD-5M 15 mm** link belt (D6)
-   over them at 61 mm centres.
+   over them at 61 mm centres, **under** the motor at Y 208…220, 5 mm clear of the carriage's
+   proximal end at rest.
+
+   > **The link belt used to be on top, at Y 302…314, and the motor the other way up.** Turning the
+   > motor over is what took the screw from 257 mm to 175 mm — 82 mm of SFU1620 that existed only
+   > to reach a pulley above the motor, about **124 g** of steel off the thigh
+   > ([`433_drive_flip.py`](../scripts/433_drive_flip.py)). It also frees the motor's rear end,
+   > which is the only space in the pack the controller fits in.
+
+7a. Bolt **`P27_ControllerMount`** to the motor's **rear bolt circle** (4 × M5, same square as the
+   front) and sit the **ODrive-clone XDRIVE MINI** on its four bosses. The board's **AS5047P** then
+   looks straight down the motor's own shaft stub at the **⌀6 × 2.5 diametric magnet** (D5's
+   magnet, BOM line D5) bonded to the shaft end:
+
+   | surface | Y |
+   |---|---|
+   | shaft end | 304.0 |
+   | magnet's outer face | 306.5 |
+   | board's sensor face | 308.5 |
+
+   → a **2.0 mm air gap**, inside the AS5047P's 0.5…3.0 mm. The mount is built to that chain, not
+   to a stack-up guess ([`434_odrive_mount.py`](../scripts/434_odrive_mount.py)).
+
+   > **MEASURE THE BOARD FIRST.** Every XDRIVE MINI dimension in the CAD — 63 × 58 outline, a
+   > 55 × 50 M3 pattern, 10 mm of component height — is **guessed**. No mechanical drawing for this
+   > clone is published anywhere, and the AS5047P's position on it decides whether the sensor sits
+   > on the shaft's axis at all. The mount is a 20-minute reprint; the magnet bond is not.
 8. Fit `P30L` (**KX-1 proximal interface**) to the bracket's top plate on its 4 × M4, with the
    6 × M5 inserts and 2 dowels facing out. It is the module interface; it does nothing in a
    single-knee build except exist for the next one.
@@ -160,10 +188,17 @@ Full table: [`scripts/417_fastener_audit.py`](../scripts/417_fastener_audit.py),
     one M5 each, on rubber grommets (S4a), isolating rather than rigid. All three are the same part;
     they are interchangeable, which is why they share the mark `P23L`.
 23. `P21L_FairingThigh` onto those three mounts, 19 × M5.
-24. `P22L_DriveCap` and `P25L_MotorNacelle` — **these two are one wall split in two**, 160.9 + 85.0
-    cm³ tiling the same shell with **zero overlap and no void between them**. P22 goes on first; the
-    nacelle closes over the motor pod.
-25. `P20L_KneeCap` over the knee, `P24L_FairingShank` over the shank rail.
+24. `P22L_DriveCap` and `P25L_MotorNacelle` — **these two are one wall split in two**, tiling the
+    same shell with **zero overlap and no void between them**. P22 goes on first; the nacelle closes
+    over the motor pod, and its proximal end now carries the **blister over the controller** — the
+    nacelle no longer closes off at the motor's rear face, because that is where the board is
+    ([`434_odrive_mount.py`](../scripts/434_odrive_mount.py)). Fit `P27L_ControllerMount` and the
+    board (step 7a) **before** the nacelle goes on: there is no access to the magnet afterwards.
+25. `P20L_KneeCap` over the knee. **There is no shank fairing.** `P24L_FairingShank` is deleted —
+    the shank rail moved in-line under the knee joint, directly below the thigh rail, so it is
+    behind the limb's own line and the socket wraps its proximal end
+    ([`430_shank_inline_build.py`](../scripts/430_shank_inline_build.py)). Step 26 is what decides
+    whether that is acceptable, not the fact that a fairing used to be there.
 26. Check the cladding does what it is for: with everything on, no moving part should be reachable
     from the limb's side. That is verified in CAD at three poses with 187 rays
     ([`406_coverage.py`](../scripts/406_coverage.py)) and takes thirty seconds to confirm with a

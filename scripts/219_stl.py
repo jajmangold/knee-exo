@@ -42,8 +42,14 @@ for f in os.listdir(OUT):
 # not by load.
 STRUCT=["P1_KneeYoke","P2a_KneeHingePlate","P5_ThighCuff",
         "P6_ShankSocket","P7_ShankCuff","P30_InterfaceProx","P31_InterfaceDist",
-        "P3_Carriage","A7_DriveBox"]
-FAIR=["P20_KneeShroud","P21_ShellAnterior","P22_DriveCap","P25_MotorNacelle","P24_FairingShank",
+        "P3_Carriage","A7_DriveBox",
+        # The controller's mount (434_odrive_mount.py). Printed, and the one part in the set
+        # whose dimensions are not yet known: every board figure in 434 is flagged GUESSED or
+        # UNVERIFIED, so this STL is for fit-checking against the real board, not for the shelf.
+        "P27_ControllerMount"]
+# P24_FairingShank is gone, not merely unexported: 430_shank_inline_build.py moved the shank
+# rail in-line under the knee joint and there was nothing left for it to fair.
+FAIR=["P20_KneeShroud","P21_ShellAnterior","P22_DriveCap","P25_MotorNacelle",
       # posterior side-face mounts; the only thing holding the canopy now that the
       # spine is gone (398_sidemounts.py)
       "P23a_FairingMount","P23b_FairingMount","P23c_FairingMount",
