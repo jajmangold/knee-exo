@@ -74,16 +74,18 @@ end the magnet can go on -- pointing up the limb into empty space.
 
 | surface | Y |
 |---|---|
-| motor's rear face, where `P27_ControllerMount` bolts on | 302.0 |
-| shaft end | 304.0 |
-| magnet's outer face | 306.5 |
-| **board's sensor face** | **308.5** |
-| board's far side, components to | 320.1 |
+| motor's rear face, where `P27_ControllerMount` bolts on | 305.0 |
+| shaft end | 307.0 |
+| magnet's outer face | 309.5 |
+| **board's sensor face** | **311.5** |
+| board's far side, components to | 323.1 |
 
 That is a **2.0 mm air gap**, stated as a chain of surfaces rather than a stack-up, and the script
 refuses to finish if it lands outside the 0.5..3.0 above. The nacelle used to close off with a disc
-across the bore at Y 302 -- exactly where the mount bolts -- so that closure moves outboard and the
-shell grows a blister over the board instead.
+across the bore at the motor's rear face -- exactly where the mount bolts -- so that closure moves
+outboard and the rear of the pod is re-lofted over the board: a superelliptical swell of 5 mm,
+then a 45° blunt nose ending in the drive cap's own proximal plane. Not a blister; the first
+version of it was a rectangular box and read as one.
 
 **The board's own dimensions are still guesses**, all of them flagged in the script: a 63 x 58
 outline, a 55 x 50 M3 pattern, 10 mm of component height. The mount is a 20-minute reprint once

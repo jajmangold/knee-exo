@@ -60,7 +60,7 @@ Full table: [`scripts/417_fastener_audit.py`](../scripts/417_fastener_audit.py),
    drag. Check again after the belt is tensioned — tension changes it.
 4. Mount the **ball screw** (D1, SFU1610 RH, **180 mm**) on its axis at **X = −62**: the **KP08** (D8)
    at the lower end, and at the upper end a **608-2RS bonded into the motor plate's ⌀22 × 7 seat**
-   at Y 220…227 (D8a). The screw now stops just above the nut's travel instead of running past the
+   at Y 223…230 (D8a). The screw now stops just above the nut's travel instead of running past the
    motor — see step 7. The nut (D3) is **flangeless and trapped axially** between two plates
    on the gantry, not clamped radially: a 36.4 mm bore through a 40 mm housing would sever it, and
    the load is along Y anyway.
@@ -88,11 +88,13 @@ Full table: [`scripts/417_fastener_audit.py`](../scripts/417_fastener_audit.py),
    Its axle reaction is up to **1828 N — the largest single load in the machine**, so both bearings,
    both ends, no exceptions.
 7. Mount the **C6374 motor** (D5) **shaft down the limb** — turned over, hanging off the bracket's
-   motor plate at Y 220…228, body Y 228…302 — with the **32T** pulley, and the **20T** on the screw.
+   motor plate at Y 223…231, body Y 231…305 — with the **32T** pulley, and the **20T** on the screw.
    That is a **1:1.6 overdrive**, not 1:1 — it is what puts the total ratio at 14.5:1
    ([`404_link_ratio.py`](../scripts/404_link_ratio.py)). Close the **HTD-5M 15 mm** link belt (D6)
-   over them at 61 mm centres, **under** the motor at Y 208…220, 5 mm clear of the carriage's
-   proximal end at rest.
+   over them at 61 mm centres, **under** the motor at Y 208…223, 5 mm clear of the carriage's
+   proximal end at rest. **15 mm wide, and the CAD had it as 12** until
+   [`433_drive_flip.py`](../scripts/433_drive_flip.py) rebuilt it to BOM D6 — which is why every
+   Y above the belt moved up 3 mm from the first revision of this step.
 
    > **The link belt used to be on top, at Y 302…314, and the motor the other way up.** Turning the
    > motor over is what took the screw from 257 mm to 175 mm — 82 mm of SFU1620 that existed only
@@ -100,16 +102,16 @@ Full table: [`scripts/417_fastener_audit.py`](../scripts/417_fastener_audit.py),
    > ([`433_drive_flip.py`](../scripts/433_drive_flip.py)). It also frees the motor's rear end,
    > which is the only space in the pack the controller fits in.
 
-7a. Bolt **`P27_ControllerMount`** to the motor's **rear bolt circle** (4 × M5, same square as the
+7a. Bolt **`P27_ControllerMount`** to the motor's **rear bolt circle** (its face at Y 305) (4 × M5, same square as the
    front) and sit the **ODrive-clone XDRIVE MINI** on its four bosses. The board's **AS5047P** then
    looks straight down the motor's own shaft stub at the **⌀6 × 2.5 diametric magnet** (D5's
    magnet, BOM line D5) bonded to the shaft end:
 
    | surface | Y |
    |---|---|
-   | shaft end | 304.0 |
-   | magnet's outer face | 306.5 |
-   | board's sensor face | 308.5 |
+   | shaft end | 307.0 |
+   | magnet's outer face | 309.5 |
+   | board's sensor face | 311.5 |
 
    → a **2.0 mm air gap**, inside the AS5047P's 0.5…3.0 mm. The mount is built to that chain, not
    to a stack-up guess ([`434_odrive_mount.py`](../scripts/434_odrive_mount.py)).

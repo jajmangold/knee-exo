@@ -138,14 +138,22 @@ def stadium(rm, rs, y0, y1):
     return sol
 
 
+# AND IT IS A BAND, NOT A FILLED REGION. The hull of the two pulleys is where the belt runs,
+# but the belt is a loop: filling it in puts 0.754 cm3 of the ball screw inside the belt solid,
+# which the sweep reports as an interference between two parts that are supposed to be
+# concentric. 423_belt_envelope.py had already settled this for the main belt -- it models that
+# one as backing only -- and the link belt was simply never given the same treatment.
+BELT_T = 3.8                                    # HTD-5M belt thickness
 bb = a7b.Shape.BoundBox
-belt = stadium(R_M_BELT, R_S_BELT, BELT_Y[0], BELT_Y[1])
+belt = stadium(R_M_BELT, R_S_BELT, BELT_Y[0], BELT_Y[1]).cut(
+    stadium(R_M_BELT - BELT_T, R_S_BELT - BELT_T, BELT_Y[0] - 1.0, BELT_Y[1] + 1.0))
+assert len(belt.Solids) == 1, "the belt band came out as %d solids" % len(belt.Solids)
 belt.check(True)
 a7b.Shape = belt
 print("  belt  Y %.0f..%.0f (%.0f mm) -> %.0f..%.0f (%.0f mm), and rebuilt to the hull of the"
       % (bb.YMin, bb.YMax, bb.YLength, BELT_Y[0], BELT_Y[1], BELT_W))
-print("        two pulleys: r %.1f at the 32T, %.1f at the 20T, %.1f cm3 instead of %.1f"
-      % (R_M_BELT, R_S_BELT, belt.Volume / 1000.0, bb.XLength * 0.0 + 57.83))
+print("        two pulleys as a %.1f mm BAND: r %.1f at the 32T, %.1f at the 20T, %.1f cm3"
+      % (BELT_T, R_M_BELT, R_S_BELT, belt.Volume / 1000.0))
 
 # ---------------------------------------------------------------- the screw, 90 mm shorter
 was = a2.Shape.Volume / 1000.0

@@ -85,31 +85,76 @@ board_y = (ic_face, ic_face + BOARD[2])
 print("  shaft end Y %.1f -> magnet face %.1f -> board's sensor face %.1f (%.1f mm air gap)"
       % (shaft_end, magnet_face, ic_face, AIR_GAP))
 
+# ---------------------------------------------------------------- THE LIMB DECIDES THE ROTATION
+# 399_drivecap.py's central measurement: "motor axis sits 121.1 mm from the leg axis, can radius
+# 31.5 -> can face at 89.6; thigh surface 84.9 + 3.0 comfort clearance -> 87.9; radial room for a
+# cover between them -> 1.7 mm". The motor is tucked that hard against the quadriceps, and a
+# 63 x 58 board centred on its shaft has CORNERS at radius 42.8 -- which reach r 78.3 from the
+# limb axis, 6.6 mm INSIDE a thigh of 84.9. The mount's boss circle is 5.0 mm inside it.
+#
+# NOTHING IN THE MODEL SAID SO. REF_Thigh is truncated at Y 300 and the board sits at Y 311, so
+# every interference check in the repository -- including the 107-pose sweep -- reported the board
+# clear of the limb because the limb simply stops being modelled there. The real thigh does not
+# stop at Y 300; it gets thicker toward the hip. So the check here is against 399's own cylinder,
+# extended over the whole drive, and it is the reason for the two things that follow.
+#
+# THE BOARD IS ROTATED about the shaft axis so its 58 mm EDGE faces the limb instead of a corner:
+# 42.8 becomes 29.0, and r 78.3 becomes r 92.1 -- 7.2 mm clear. The rotation is computed from
+# where the limb actually is rather than typed, and it keeps the AS5047P on the axis, which is
+# the one thing that may not move. (If the IC turns out NOT to be at the board's centre, this
+# rotation moves it off-axis and the whole arrangement has to be re-derived -- which is why
+# IC_OFFSET is flagged as the measurement that matters.)
+LEG_R = 84.9                    # 399_drivecap.py's nominal thigh
+LEG_CLEAR = 0.1                 # what 399 already accepts under the pod, and no more
+LIMB_DIR = math.degrees(math.atan2(-MOT_Z, -MOT_X))
+ROT = LIMB_DIR + 90.0           # puts the board's short edge toward the limb
+AXIS_R = math.hypot(MOT_X, MOT_Z)
+print("  the limb axis lies %.1f deg from +X as seen from the motor, %.1f mm away;"
+      % (LIMB_DIR, AXIS_R))
+print("  the board is turned %.1f deg so its %.0f mm edge faces it, not a corner: the nearest"
+      % (ROT, BOARD[1]))
+print("  point goes from r %.1f (%.1f mm INSIDE a %.1f thigh) to r %.1f"
+      % (AXIS_R - math.hypot(BOARD[0] / 2.0, BOARD[1] / 2.0),
+         LEG_R - (AXIS_R - math.hypot(BOARD[0] / 2.0, BOARD[1] / 2.0)), LEG_R,
+         AXIS_R - BOARD[1] / 2.0))
+
+
+def rot(dx, dz):
+    """a point given in the board's own frame, placed in the model's"""
+    t = math.radians(ROT)
+    c, s_ = math.cos(t), math.sin(t)
+    return (MOT_X + dx * c - dz * s_, MOT_Z + sgn * (dx * s_ + dz * c))
+
 # ---------------------------------------------------------------- the mount
 cap = Part.makeCylinder(MOT_R, CAP_T, V(MOT_X, REAR_Y, MOT_Z), V(0, 1, 0))
 # clearance for the shaft and its magnet
 cap = cap.cut(Part.makeCylinder(MAGNET[0] / 2.0 + 4.0, CAP_T + 4.0,
                                 V(MOT_X, REAR_Y - 2.0, MOT_Z), V(0, 1, 0)))
-# bolts into the motor's rear face
+# bolts into the motor's rear face -- the motor's own pattern, NOT rotated with the board
 for dx in (-REAR_BOLTS, REAR_BOLTS):
     for dz in (-REAR_BOLTS, REAR_BOLTS):
         cap = cap.cut(Part.makeCylinder(M5 / 2.0, CAP_T + 4.0,
                                         V(MOT_X + dx, REAR_Y - 2.0, MOT_Z + sgn * dz),
                                         V(0, 1, 0)))
-# four bosses carrying the board, their top face at the sensor plane
+# four bosses carrying the board, their top face at the sensor plane, on the board's own frame
 boss_h = ic_face - (REAR_Y + CAP_T)
 assert boss_h > 0.5, "the board would sit inside the mount's own plate"
 for dx in (-BOARD_HOLES[0] / 2.0, BOARD_HOLES[0] / 2.0):
     for dz in (-BOARD_HOLES[1] / 2.0, BOARD_HOLES[1] / 2.0):
-        p = V(MOT_X + dx, REAR_Y + CAP_T, MOT_Z + sgn * dz)
+        px, pz = rot(dx, dz)
+        p = V(px, REAR_Y + CAP_T, pz)
         cap = cap.fuse(Part.makeCylinder(4.0, boss_h, p, V(0, 1, 0)))
         cap = cap.cut(Part.makeCylinder(M3 / 2.0, boss_h + 6.0,
                                         V(p.x, p.y - 3.0, p.z), V(0, 1, 0)))
-# the bosses sit outside the motor's circle, so tie them back with a web
-web = Part.makeBox(BOARD_HOLES[0] + 8.0, CAP_T, BOARD_HOLES[1] + 8.0,
-                   V(MOT_X - (BOARD_HOLES[0] + 8.0) / 2.0, REAR_Y,
-                     MOT_Z - sgn * (BOARD_HOLES[1] + 8.0) / 2.0 if mirrored
-                     else MOT_Z - (BOARD_HOLES[1] + 8.0) / 2.0))
+# the bosses sit outside the motor's circle, so tie them back with a web -- rotated with them,
+# built as a polygon rather than a box because a box cannot be given an angle without a
+# placement, and a placement on a shape that later gets cut is how this project lost an evening
+wpts = []
+for dx, dz in ((-1, -1), (1, -1), (1, 1), (-1, 1)):
+    px, pz = rot(dx * (BOARD_HOLES[0] + 8.0) / 2.0, dz * (BOARD_HOLES[1] + 8.0) / 2.0)
+    wpts.append(V(px, REAR_Y, pz))
+wpts.append(wpts[0])
+web = Part.Face(Part.makePolygon(wpts)).extrude(V(0, CAP_T, 0))
 cap = cap.fuse(web)
 cap = cap.cut(Part.makeCylinder(MAGNET[0] / 2.0 + 4.0, CAP_T + 4.0,
                                 V(MOT_X, REAR_Y - 2.0, MOT_Z), V(0, 1, 0)))
@@ -134,11 +179,20 @@ print("  mount %.1f cm3: a cap on the motor's rear bolts, four bosses %.1f mm ta
 
 # ---------------------------------------------------------------- the board itself
 zc = MOT_Z
-board = Part.makeBox(BOARD[0], BOARD[2], BOARD[1],
-                     V(MOT_X - BOARD[0] / 2.0, board_y[0], zc - BOARD[1] / 2.0))
-board = board.fuse(Part.makeBox(BOARD[0] - 8.0, COMPONENTS, BOARD[1] - 8.0,
-                                V(MOT_X - (BOARD[0] - 8.0) / 2.0, board_y[1],
-                                  zc - (BOARD[1] - 8.0) / 2.0)))
+
+
+def _slab(w, d, y0, h):
+    """a rectangle in the board's own frame, extruded along the limb"""
+    pts = []
+    for dx, dz in ((-1, -1), (1, -1), (1, 1), (-1, 1)):
+        px, pz = rot(dx * w / 2.0, dz * d / 2.0)
+        pts.append(V(px, y0, pz))
+    pts.append(pts[0])
+    return Part.Face(Part.makePolygon(pts)).extrude(V(0, h, 0))
+
+
+board = _slab(BOARD[0], BOARD[1], board_y[0], BOARD[2])
+board = board.fuse(_slab(BOARD[0] - 8.0, BOARD[1] - 8.0, board_y[1], COMPONENTS))
 tidy = board.removeSplitter()
 try:
     tidy.check(True)
@@ -199,7 +253,12 @@ NOSE_Y = 334.0                  # P22_DriveCap's proximal end, measured below an
 # 433_drive_flip.py corrected the link belt from 12 mm wide to the 15 mm BOM D6 specifies, and a
 # typed station list simply became wrong -- the full section ended 2.6 mm before the board's
 # components did. These follow the board.
-A_FULL = 39.0                           # the section over the controller
+# TWO SEMI-AXES, NOT ONE, and the small one points at the limb. A uniform a = 39 reaches
+# r 76.3 from the limb axis on its diagonal -- 8.6 mm inside a 84.9 thigh. Aligned to the board's
+# own frame the section only needs 39 across the board's 63 and 36 across its 58, and 36 toward
+# the limb leaves exactly the 0.1 mm 399_drivecap.py already accepts under the pod.
+A_FULL = 39.0                           # along the board's 63 mm dimension
+B_FULL = 36.0                           # across its 58, and this is the limb-facing one
 FULL_END = board_y[1] + COMPONENTS + 1.5
 SWELL_END = REAR_Y - 0.5                # full section before the mount's web, which is as wide
 SWELL_START = SWELL_END - 15.5          # 15.5 mm of blend: 5 mm of radius, and 43 deg on the
@@ -208,27 +267,41 @@ A_END = A_FULL - (NOSE_Y - FULL_END)    # a 45 deg nose, by construction
 assert A_END >= 24.0,     "the components reach Y %.1f and P22 ends at %.0f, which leaves no room for a 45 deg nose"     % (board_y[1] + COMPONENTS, NOSE_Y)
 assert FULL_END > SWELL_END, "the swell has not finished before the board's section ends"
 
-OUT = [(SWELL_START, 34.0, 2.0), (SWELL_START + 8.0, 35.5, 3.0), (SWELL_END, A_FULL, 5.5),
-       (FULL_END, A_FULL, 5.5), (NOSE_Y, A_END, 5.5)]
-IN_ = [(SWELL_START + 6.0, 33.0, 2.5), (SWELL_START + 8.0, 33.0, 3.0),
-       (SWELL_END - 0.5, A_FULL - WALL, 5.5), (FULL_END, A_FULL - WALL, 5.5),
-       (NOSE_Y - WALL, A_END, 5.5)]
+B_END = A_END - (A_FULL - B_FULL)
+# BOTH LOFTS START AT THE SAME STATION, at the tube's own radii: 35 outside, 32 inside. The
+# first version started the cavity 6 mm above the outer loft, which left the bell SOLID over
+# those 6 mm -- 18.7 cm3 of it containing the motor's own can. The sweep found that; nothing in
+# this file did. Matching the tube's radii also means the wall continues with no step and no
+# void, so the trim plane is the only joint.
+# N_FULL IS 6.5, NOT THE CAP'S 5.5, and the limb is why. The section can only be 36 deep (see
+# B_FULL), so the diagonal reach has to come from the exponent instead of from the semi-axis:
+# at 5.5 the board's corner clears the cavity wall by 0.85 mm, at 6.5 by 1.7. A squarer section
+# is the price of a motor tucked this hard against the quadriceps.
+N_FULL = 6.5
+OUT = [(SWELL_START, 35.0, 35.0, 2.0), (SWELL_START + 8.0, 36.5, 35.5, 3.0),
+       (SWELL_END, A_FULL, B_FULL, N_FULL), (FULL_END, A_FULL, B_FULL, N_FULL),
+       (NOSE_Y, A_END, B_END, N_FULL)]
+IN_ = [(SWELL_START, 32.0, 32.0, 2.0), (SWELL_START + 8.0, 33.5, 32.5, 3.0),
+       (SWELL_END, A_FULL - WALL, B_FULL - WALL, N_FULL),
+       (FULL_END, A_FULL - WALL, B_FULL - WALL, N_FULL),
+       (NOSE_Y - WALL, A_END, B_END, N_FULL)]
 
 
-def sell(y, a, n):
-    """one superelliptical wire about the motor's axis, in 399's own parameterisation"""
+def sell(y, a, bb, n):
+    """one superelliptical wire in the BOARD's frame, in 399's own parameterisation"""
     pts = []
     for i in range(N_PTS):
         t = 2.0 * math.pi * i / N_PTS
         ct, st = math.cos(t), math.sin(t)
-        pts.append(V(MOT_X + a * math.copysign(abs(ct) ** (2.0 / n), ct), y,
-                     MOT_Z + a * math.copysign(abs(st) ** (2.0 / n), st)))
+        px, pz = rot(a * math.copysign(abs(ct) ** (2.0 / n), ct),
+                     bb * math.copysign(abs(st) ** (2.0 / n), st))
+        pts.append(V(px, y, pz))
     pts.append(pts[0])
     return Part.makePolygon(pts)
 
 
-def contains(a, n, hx, hz):
-    return (hx / a) ** n + (hz / a) ** n
+def contains(a, bb, n, hx, hz):
+    return (hx / a) ** n + (hz / bb) ** n
 
 
 nac = doc.getObject("P25_MotorNacelle")
@@ -241,8 +314,8 @@ if nac is not None:
     p22y = cap22.Shape.BoundBox.YMax
     assert abs(p22y - NOSE_Y) < 0.6,         "P22 ends at Y %.1f, so the nose should too, not at %.1f" % (p22y, NOSE_Y)
     # the cavity must swallow the board at every station it covers, corners included
-    for y, a, n in IN_[2:4]:
-        c = contains(a, n, BOARD[0] / 2.0, BOARD[1] / 2.0)
+    for y, a, bb, n in IN_[2:4]:
+        c = contains(a, bb, n, BOARD[0] / 2.0, BOARD[1] / 2.0)
         assert c <= 0.85,             "the cavity at Y %.0f is %.2f of the way to the board's corner -- too close" % (y, c)
     assert board_y[1] + COMPONENTS <= IN_[3][0] - 1.0,         "the board's components reach Y %.1f and the full section ends at %.1f"         % (board_y[1] + COMPONENTS, IN_[3][0])
     # TRIM, DO NOT CUT. Above the Y where the new cavity is wider than the tube's own OUTER skin,
@@ -254,8 +327,8 @@ if nac is not None:
     # Above the Y where the cavity is wider than the tube's own OUTER skin, keeping the tube
     # would leave a void ring between the two walls belonging to neither part.
     pod_outer = 35.0
-    y0, a0_, _ = IN_[1]
-    y1, a1_, _ = IN_[2]
+    y0, a0_, _, _ = IN_[1]
+    y1, a1_, _, _ = IN_[2]
     TRIM_Y = y0 + (pod_outer - a0_) / (a1_ - a0_) * (y1 - y0) - 0.5
     assert y0 < TRIM_Y < y1, "the trim at Y %.1f is not inside the blend" % TRIM_Y
     cb = nac.Shape.BoundBox
@@ -265,18 +338,24 @@ if nac is not None:
     bell = outer.cut(inner)
     assert len(bell.Solids) == 1, "the nose came out as %d solids" % len(bell.Solids)
     grown = trimmed.fuse(bell)
+    # THE BRACKET REACHES Y 300 AND THE BELL STARTS AT 289, so they share that band and the
+    # cladding yields, as it does everywhere else here. Without this the sweep reports 0.430 cm3
+    # of A7_DriveBox inside the nacelle, and this file -- which checks only the two parts it
+    # adds -- reports everything clean.
+    if a7 is not None:
+        grown = grown.cut(a7.Shape)
     if len(grown.Solids) == 1:
         grown.check(True)
         nac.Shape = grown
-        print("  clad  nacelle re-nosed: circle r %.0f swells to an n=5.5 %.0f across over the"
-              % (OUT[0][1], 2 * OUT[2][1]))
+        print("  clad  nacelle re-nosed: circle r %.0f swells to an n=%.1f %.0f x %.0f over the"
+              % (OUT[0][1], N_FULL, 2 * OUT[2][1], 2 * OUT[2][2]))
         print("        controller, then 45 deg to a blunt end in P22's plane at Y %.0f"
               % NOSE_Y)
         print("        %.1f -> %.1f cm3, and the board's corners clear the wall by %.1f mm"
               % (v / 1000.0, grown.Volume / 1000.0,
                  math.hypot(BOARD[0] / 2.0, BOARD[1] / 2.0)
-                 * (contains(IN_[2][1], IN_[2][2], BOARD[0] / 2.0, BOARD[1] / 2.0)
-                    ** (-1.0 / IN_[2][2]) - 1.0)))
+                 * (contains(IN_[2][1], IN_[2][2], IN_[2][3], BOARD[0] / 2.0, BOARD[1] / 2.0)
+                    ** (-1.0 / IN_[2][3]) - 1.0)))
     else:
         print("  clad  REFUSED to re-nose the nacelle: %d solids" % len(grown.Solids))
 
@@ -309,6 +388,27 @@ print("     air gap %.2f mm, datasheet allows %.1f..%.1f  %s"
       % (gap, GAP_LIMITS[0], GAP_LIMITS[1], "" if ok else "<-- OUT OF RANGE"))
 if not ok:
     fail.append("air gap %.2f mm is outside the AS5047P's %.1f..%.1f" % (gap,) + GAP_LIMITS)
+# THE LIMB, WHICH THE MODEL CANNOT SHOW. REF_Thigh is truncated at Y 300 and everything this
+# file builds sits above it, so every interference check in the repository -- the 107-pose sweep
+# included -- reports the board, the mount and the nose clear of the leg because the leg stops
+# being modelled there. The real thigh does not stop at Y 300. So they are checked against
+# 399_drivecap.py's own cylinder instead, extended over the whole drive: r 84.9 + 0.1, which is
+# the clearance 399 already accepts under the pod and explicitly calls "skimming the quadriceps".
+limb = Part.makeCylinder(LEG_R + LEG_CLEAR, 400.0, V(0.0, 10.0, 0.0), V(0, 1, 0))
+print()
+print("     against a limb of r %.1f extended past REF_Thigh's truncation at Y %.0f:"
+      % (LEG_R + LEG_CLEAR, doc.getObject("REF_Thigh").Shape.BoundBox.YMax
+         if doc.getObject("REF_Thigh") else 0.0))
+for part, lbl in ((o, "mount"), (b, "board"), (doc.getObject("P25_MotorNacelle"), "nacelle")):
+    if part is None:
+        continue
+    c = part.Shape.common(limb)
+    v = 0.0 if c.isNull() else c.Volume / 1000.0
+    print("     %-8s %7.3f cm3 %s" % (lbl, v, "" if v <= 0.02 else "<-- IN THE LEG"))
+    if v > 0.02:
+        fail.append("%s is %.3f cm3 inside a limb of r %.1f" % (lbl, v, LEG_R + LEG_CLEAR))
+print()
+
 # THE CHECK THE BOX GOT PAST. This file grows the nacelle, so the nacelle is one of the things
 # it has to re-examine -- not just the two parts it adds. P22 and P25 are one wall split in two
 # and are claimed in ASSEMBLY.md to tile with zero overlap and no void between them, so the pair
