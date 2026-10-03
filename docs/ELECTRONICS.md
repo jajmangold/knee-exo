@@ -47,6 +47,52 @@ produce a wrong torque, never a runaway commutation.
 
 ---
 
+## 2a. Where the board physically goes, which is not optional
+
+The topology above puts the XDRIVE MINI between the tether and the motor and says nothing about
+where it is bolted. That reads like a free choice and it is not: **the AS5047P is ON the board**,
+and it reads BOM D5's 6 x 2.5 mm diametric magnet glued to the motor's shaft end. From the AMS
+datasheet:
+
+| | |
+|---|---|
+| air gap, package face to magnet | **0.5 to 3 mm** |
+| magnet centred on the package | **within 0.5 mm** |
+| magnet | 6 x 2.5 diametric, which is what D5 is |
+
+So the board sits a few millimetres off the end of the C6374's free shaft, concentric with it to
+half a millimetre. It cannot live in the backpack with the battery, and it cannot be tucked
+wherever there is room inside the nacelle.
+
+**It is not in the CAD.** Forty-two solids in the model and not one of them is electronic: no
+board, no standoffs, no cover, no space reserved. That is a gap of the same kind as the motor
+having no bolts -- the BOM orders it, the topology routes it, and nothing holds it.
+
+**And no mechanical drawing is published.** Makerbase's repository
+([makerbase-motor/MKS-ODrive](https://github.com/makerbase-motor/MKS-ODrive)) carries
+`Hardware/MKS ODrive MINI/MKS ODRIVE MINI V1.0 Schematic.pdf` and nothing mechanical; the
+community notes at [Smurf/xdrive-mini-docs](https://github.com/Smurf/xdrive-mini-docs) include a
+board drawing as a PNG with no dimensions in text; the vendor listings give none. A board size of
+63 x 58 mm circulates in search summaries and is not corroborated by the page it is attributed to.
+**Measure the board** -- four of them are on the bench -- and in particular find where the AS5047P
+sits on it, because that is the datum the mount is built around, not the board's outline.
+
+### Startup quirks of this PCB revision
+
+From the community notes, confirmed against the shipped firmware's behaviour: this board picks up
+enough noise at startup to throw encoder errors even with an external encoder, so both startup
+calibrations have to be off, and the onboard encoder needs telling what it is.
+
+```
+odrv0.axis0.config.startup_encoder_offset_calibration = False
+odrv0.axis0.config.startup_closed_loop_control        = False
+odrv0.axis0.encoder.config.mode                       = ENCODER_MODE_SPI_ABS_AMS
+odrv0.axis0.encoder.config.abs_spi_cs_gpio_pin        = 7
+odrv0.save_configuration()
+```
+
+Leave 100-200 ms between power-up and commanding closed loop.
+
 ## 2. The drive: MKS XDRIVE MINI, and what it costs
 
 Four of these are already here at **$29.48 each**. They are ODrive **v3.6** clones —

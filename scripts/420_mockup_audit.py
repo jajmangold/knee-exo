@@ -243,7 +243,9 @@ CHECKS = [
      lambda sh: cyls(sh, 3.0, 7.0) >= 1, "cladding still has to stay on"),
     ("P22_DriveCap", "some way of attaching", lambda sh: cyls(sh, 3.0, 7.0) >= 1, "as above"),
     ("P25_MotorNacelle", "some way of attaching", lambda sh: cyls(sh, 3.0, 7.0) >= 1, "as above"),
-    ("P24_FairingShank", "some way of attaching", lambda sh: cyls(sh, 3.0, 7.0) >= 1, "as above"),
+    # P24_FairingShank is gone: 430_shank_inline_build.py deleted it. Nothing powered runs below
+    # the knee -- the belt wraps the capstan and goes up -- so it was cladding over the limb's own
+    # structure, and 406_coverage.py confirms 0 of 187 rays reach a moving part without it.
     ("P21_ShellAnterior", "mounts to the three brackets",
      lambda sh: cyls(sh, 4.5, 5.6) >= 3, "the canopy hangs on P23a/b/c"),
     ("P23a_FairingMount", "a bolt into the extrusion slot",

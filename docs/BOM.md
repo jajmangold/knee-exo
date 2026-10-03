@@ -203,7 +203,7 @@ Architecture and reasoning in [`ELECTRONICS.md`](ELECTRONICS.md).
 
 | # | Part | Qty | Notes | ~USD |
 |---|---|---|---|---|
-| E1 | Makerbase MKS XDRIVE MINI | 1 | **Owned — 4 of them, $29.48 each.** ODrive v3.6 clone, 12–56 V, ~40 A, onboard AS5047P. Ships on modified fw **0.5.1** — do not let odrivetool upgrade it | 29 |
+| E1 | Makerbase MKS XDRIVE MINI | 1 | **Owned — 4 of them, $29.48 each.** ODrive v3.6 clone, 12–56 V, ~40 A, onboard AS5047P. Ships on modified fw **0.5.1** — do not let odrivetool upgrade it. **NOT IN THE CAD, and it cannot go in the pack**: its encoder is on the board, so it has to sit over the motor's shaft end — see ELECTRONICS §2a for the air gap that fixes its position, and measure your own board, because no mechanical drawing is published | 29 |
 | E1a | ST-Link V2 clone | 1 | Only to back up / recover the MINI's firmware. Buy it before you need it | 5 |
 | E2 | Brake resistor, ~2 Ω 50 W | 1 | **Not optional** — see the regen section | 15 |
 | E3 | ESP32-C3 SuperMini | 2 | One on the leg, one as a pocket remote. You already have these | — |

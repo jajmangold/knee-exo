@@ -138,10 +138,42 @@ JOBS = [("P30_InterfaceProx", 0.0, 255.0, 132.3, "A7_DriveBox", "C_Drive",
          (-15.0, 15.0), 34.0, 3.0),
         ("P31_InterfaceDist", 0.0, -275.0, 123.0, "P6_ShankSocket", "C_Shank",
          (-25.0, 25.0), 20.0, 0.0)]
+def face_top(host, xc, yc, mdx, mdy):
+    """the host's actual top face under the plate's footprint
+
+    The literal below was 123.0 because that is where P6_ShankSocket's top face was when this was
+    written. The socket has since closed down over a rail that moved 20 mm inboard, and a plate
+    pinned to an old number would have floated 26 mm above the part it bolts to. This file's own
+    note about the proximal plate says it: a mounting height that is really "the host's top face"
+    should not be a literal. Sample the corners and take the LOWEST top, so the plate seats on the
+    face rather than bridging a step in it.
+    """
+    # SAMPLE CLEAR OF THE MOUNT HOLES. Probing at (xc +- mdx, yc + mdy) is probing exactly where
+    # this script drills, so on a second run the rays drop through its own holes and report the
+    # far side of the part -- the distal face "moved" from 97.5 to 73.5 between two passes.
+    # And take the HIGHEST top, not the lowest: resting on the highest point can leave a plate
+    # bridging a step, but sitting on the lowest buries it in the face, which is a clash.
+    hi = None
+    for dx in (0.0, -0.5 * mdx, 0.5 * mdx):
+        for dy in (0.0, 0.5 * mdy[0], 0.5 * mdy[1]):
+            ln = Part.makeLine(V(xc + dx, yc + dy, -400.0), V(xc + dx, yc + dy, 400.0))
+            k = host.Shape.common(ln)
+            if k.isNull() or not k.Vertexes:
+                continue
+            t = max(v.Point.z for v in k.Vertexes)
+            hi = t if hi is None else max(hi, t)
+    return hi
+
+
 built = []
 for name, xc, yc, z0, hostname, grp, mdy, mdx, wing_t in JOBS:
     host = doc.getObject(hostname)
     assert host is not None, "%s missing -- cannot mount %s" % (hostname, name)
+    measured = face_top(host, xc, yc, mdx, mdy)
+    if measured is not None and abs(measured - z0) > 0.05:
+        print("%-20s host's top face is at Z %.1f, not the %.1f written here -- using the face"
+              % (name, measured, z0))
+        z0 = measured
     # GUARD: drilling the host is destructive and not idempotent. Run this twice without
     # rebuilding and the second pass finds its own holes already there, reports 0 mm of
     # engagement, and fails with a message blaming the geometry. Rebuild 393..399 and 409
