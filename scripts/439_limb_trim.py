@@ -41,6 +41,9 @@ import FreeCAD
 import Part
 from FreeCAD import Vector as V
 
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "tools"))
+import limbcone                                                     # noqa: E402
+
 DOCFILE = os.environ.get("KX_DOC", r"C:/Users/Josh/KneeExo_v6.FCStd").replace("\\", "/")
 _BASE = DOCFILE.rsplit("/", 1)[-1]
 try:
@@ -53,25 +56,7 @@ SLEEVE, MARGIN = 3.0, 0.5
 MIN_WALL = 1.2          # 411_printability.py's two-perimeter floor at a 0.4 mm nozzle
 CLAD = ("P20_KneeShroud", "P21_ShellAnterior", "P22_DriveCap", "P25_MotorNacelle")
 
-_cache = {}
-
-
-def limb_radius(ref, y):
-    key = round(y, 1)
-    if key in _cache:
-        return _cache[key]
-    bb = ref.BoundBox
-    yy = min(max(y, bb.YMin + 0.5), bb.YMax - 0.5)
-    best = 0.0
-    for ang in range(0, 360, 45):
-        a = math.radians(ang)
-        r = 40.0
-        while r <= 120.0:
-            if ref.isInside(V(r * math.cos(a), yy, r * math.sin(a)), 1e-7, True):
-                best = max(best, r)
-            r += 0.5
-    _cache[key] = best
-    return best
+limb_radius = limbcone.radius
 
 
 def wall_along(sh, y, bearing_deg):
@@ -103,16 +88,7 @@ assert ref is not None, "no REF_Thigh"
 rs = ref.Shape
 rb = rs.BoundBox
 
-steps = []
-y = rb.YMin
-while y < rb.YMax + 60.0:
-    steps.append((y, limb_radius(rs, y) + SLEEVE + MARGIN))
-    y += 10.0
-envelope = None
-for (y0, r0), (y1, r1) in zip(steps, steps[1:]):
-    seg = (Part.makeCylinder(r0, y1 - y0, V(0, y0, 0), V(0, 1, 0)) if abs(r1 - r0) < 1e-6
-           else Part.makeCone(r0, r1, y1 - y0, V(0, y0, 0), V(0, 1, 0)))
-    envelope = seg if envelope is None else envelope.fuse(seg)
+envelope = limbcone.envelope(rs)
 
 done, refused = [], []
 for nm in CLAD:

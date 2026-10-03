@@ -42,6 +42,9 @@ import FreeCAD
 import Part
 from FreeCAD import Vector as V
 
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "tools"))
+import limbcone                                                     # noqa: E402
+
 DOCFILE = os.environ.get("KX_DOC", r"C:/Users/Josh/KneeExo_v6.FCStd").replace("\\", "/")
 _BASE = DOCFILE.rsplit("/", 1)[-1]
 try:
@@ -381,8 +384,43 @@ if nac is not None:
     # adds -- reports everything clean.
     if a7 is not None:
         grown = grown.cut(a7.Shape)
+    # AND THE CAN COMES THROUGH THE CAVITY, which is not a mistake but a measurement. On the limb
+    # side the sleeve puts the cover's outer skin at r 88.0 from the limb axis and the motor's can
+    # is at 89.6: 1.6 mm for a wall, and the nose asks for 2.5. So where the blend still overlaps
+    # the motor -- Y 289..305, the last 16 mm of the can -- the can stands 1 mm inside the wall,
+    # 0.044 cm3 of it, and the full 107-pose sweep is what found it.
+    #
+    # The cladding yields to the mechanism, as it does everywhere else in this file and in 433.
+    # The alternative is to hold the blend off until the can has ended, and that pushes the
+    # mount's own web out of the full section it needs. A locally thinner skin over a motor is
+    # the cheaper of the two, and it is the same conflict the mount's cap had: a cover whose
+    # cavity is shallower than the thing it covers, because the leg says so.
+    _can = Part.makeCylinder(MOT_R + 0.25, (REAR_Y - mb.YMin) + 4.0,
+                             V(MOT_X, mb.YMin - 2.0, MOT_Z), V(0, 1, 0))
+    _v = grown.Volume
+    grown = grown.cut(_can)
+    if _v - grown.Volume > 1.0:
+        print("  clad  the can relieved out of the nose's blend: -%.3f cm3"
+              % ((_v - grown.Volume) / 1000.0))
     if len(grown.Solids) == 1:
         grown.check(True)
+        # AND THE COVER CUTS ITSELF BACK FROM THE LEG, here, in the file that draws it.
+        # 439_limb_trim.py used to do this afterwards, and re-running THIS file silently undid
+        # it: the bell spans Y 289..334 and is fused on every run, so it put 0.414 cm3 straight
+        # back inside the patient's sleeve with nothing reporting a thing. A trim that lives in
+        # a later script is a trim that can be lost by re-running an earlier one.
+        _ref = doc.getObject("REF_Thigh")
+        if _ref is not None:
+            _env = limbcone.envelope(_ref.Shape)
+            _v = grown.Volume
+            _cut = grown.cut(_env)
+            assert len(_cut.Solids) == 1, (
+                "cutting the limb's envelope gave %d solids" % len(_cut.Solids))
+            _cut.check(True)
+            if _v - _cut.Volume > 1.0:
+                print("  clad  cut back from the limb's taper + sleeve: -%.3f cm3"
+                      % ((_v - _cut.Volume) / 1000.0))
+            grown = _cut
         nac.Shape = grown
         print("  clad  nacelle re-nosed: circle r %.0f swells to an n=%.1f %.0f x %.0f over the"
               % (OUT[0][1], N_FULL, 2 * OUT[2][1], 2 * OUT[2][2]))

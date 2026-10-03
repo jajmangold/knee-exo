@@ -38,7 +38,7 @@ load case, not from a global profile:
 
 | Part | Orientation | Footprint | Height | Support | Volume | Est. filament | Est. time |
 |---|---|---|---|---|---|---|---|
-| `A7_DriveBracket_Idler` | +X up, 0° | 92 x 102 mm | 182 mm | 10.8% | 137 cm³ | 174 g | 10.9 h |
+| `A7_DriveBracket_Idler` | +X up, 0° | 92 x 102 mm | 182 mm | 10.8% | 135 cm³ | 172 g | 10.7 h |
 | `P1_KneeYoke` | -Y up, 0° | 90 x 12 mm | 167 mm | 5.8% | 125 cm³ | 127 g | 7.9 h |
 | `P20_KneeCap` | +Y up, 0° | 116 x 36 mm | 74 mm | 8.8% | 31 cm³ | 39 g | 2.4 h |
 | `P21_FairingThigh` | +Y up, 0° | 154 x 56 mm | 178 mm | 2.0% | 165 cm³ | 176 g | 11.0 h |
@@ -46,21 +46,21 @@ load case, not from a global profile:
 | `P23a_FairingMount` | +Z up, 0° | 27 x 16 mm | 39 mm | 12.7% | 6 cm³ | 8 g | 0.5 h |
 | `P23b_FairingMount` | +Z up, 0° | 27 x 16 mm | 39 mm | 12.7% | 6 cm³ | 8 g | 0.5 h |
 | `P23c_FairingMount` | +Z up, 0° | 27 x 16 mm | 39 mm | 12.7% | 6 cm³ | 8 g | 0.5 h |
-| `P25_MotorNacelle` | +Y up, 0° | 110 x 107 mm | 133 mm | 9.9% | 99 cm³ | 122 g | 7.6 h |
-| `P27_ControllerMount` | -X up, 0° | 6 x 84 mm | 82 mm | 5.1% | 18 cm³ | 20 g | 1.3 h |
+| `P25_MotorNacelle` | +Y up, 0° | 110 x 108 mm | 133 mm | 9.9% | 98 cm³ | 120 g | 7.5 h |
+| `P27_ControllerMount` | -X up, 0° | 6 x 84 mm | 82 mm | 5.4% | 18 cm³ | 20 g | 1.3 h |
 | `P2a_KneeHub_Pulley29T` | -Y up, 0° | 72 x 58 mm | 162 mm | 13.6% | 148 cm³ | 188 g | 11.8 h |
 | `P30_InterfaceProx` | -Y up, 0° | 80 x 10 mm | 56 mm | 6.6% | 27 cm³ | 34 g | 2.1 h |
-| `P31_InterfaceDist` | -Y up, 0° | 40 x 10 mm | 56 mm | 9.7% | 20 cm³ | 25 g | 1.6 h |
+| `P31_InterfaceDist` | +Y up, 0° | 40 x 10 mm | 56 mm | 9.9% | 20 cm³ | 25 g | 1.6 h |
 | `P3_GantryPlate_Printed` | +Y up, 0° | 116 x 41 mm | 84 mm | 12.8% | 80 cm³ | 102 g | 6.3 h |
 | `P5_ThighCuff` | -Y up, 0° | 120 x 180 mm | 140 mm | 0.8% | 161 cm³ | 195 g | 12.2 h |
 | `P6_ShankSocket` | -Y up, 0° | 60 x 30 mm | 114 mm | 5.4% | 100 cm³ | 99 g | 6.2 h |
 | `P7_ShankCuff` | -Y up, 0° | 86 x 126 mm | 160 mm | 2.2% | 136 cm³ | 159 g | 9.9 h |
 | `TEST_ToothCoupon_3xHTD8M` | +Z up, 0° | 12 x 30 mm | 12 mm | 13.6% | 2 cm³ | 3 g | 0.2 h |
-| | | | | **484 cm² total** | | **1646 g** | **103 h** |
+| | | | | **482 cm² total** | | **1643 g** | **103 h** |
 
 The right leg is the mirror image and measures the same to within meshing noise: 
-1419 cm³ against 1419 cm³, a 0.02% difference, all of it in facet placement.
-So budget **3292 g of filament and 206 printer-hours for the pair**, plus supports.
+1415 cm³ against 1416 cm³, a 0.01% difference, all of it in facet placement.
+So budget **3285 g of filament and 205 printer-hours for the pair**, plus supports.
 
 ## Before you assemble anything: holes
 
@@ -107,7 +107,7 @@ to finish to, from [`scripts/417_fastener_audit.py`](../scripts/417_fastener_aud
 Support fraction is of TOTAL surface area, so 10% is a few bosses rather than a disaster. What
 matters is a part that cannot be oriented below the threshold at all. Measured, per part over 8%:
 
-* **`A7_DriveBracket_Idler`** — 11% of its surface, 64.9 cm², overhangs past 45° in its best orientation
+* **`A7_DriveBracket_Idler`** — 11% of its surface, 64.0 cm², overhangs past 45° in its best orientation
   (+X up, 0°).
 * **`P20_KneeCap`** — 9% of its surface, 25.7 cm², overhangs past 45° in its best orientation
   (+Y up, 0°).
@@ -117,12 +117,12 @@ matters is a part that cannot be oriented below the threshold at all. Measured, 
   (+Z up, 0°).
 * **`P23c_FairingMount`** — 13% of its surface, 4.4 cm², overhangs past 45° in its best orientation
   (+Z up, 0°).
-* **`P25_MotorNacelle`** — 10% of its surface, 74.9 cm², overhangs past 45° in its best orientation
+* **`P25_MotorNacelle`** — 10% of its surface, 73.9 cm², overhangs past 45° in its best orientation
   (+Y up, 0°).
 * **`P2a_KneeHub_Pulley29T`** — 14% of its surface, 82.5 cm², overhangs past 45° in its best orientation
   (-Y up, 0°).
-* **`P31_InterfaceDist`** — 10% of its surface, 7.3 cm², overhangs past 45° in its best orientation
-  (-Y up, 0°).
+* **`P31_InterfaceDist`** — 10% of its surface, 7.5 cm², overhangs past 45° in its best orientation
+  (+Y up, 0°).
 * **`P3_GantryPlate_Printed`** — 13% of its surface, 46.8 cm², overhangs past 45° in its best orientation
   (+Y up, 0°).
 * **`TEST_ToothCoupon_3xHTD8M`** — 14% of its surface, 2.1 cm², overhangs past 45° in its best orientation
