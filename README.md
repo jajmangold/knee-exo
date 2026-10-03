@@ -395,6 +395,63 @@ sitting inside that channel. It is the only guard on either nip — `P21` starts
 the nips are at Y≈0 — and the channel is open only medially, through an 8 mm slot between
 the yoke at Z 88 and the shroud at Z 96.5, which no finger fits through.
 
+### How much leg this fits, and the one adjustment it has
+
+Asked at the bench: could the motor nacelle swing out and lock further from the leg, for a fatter
+leg? The nacelle *is* the part closest to the limb, so the instinct was right — but answering it
+turned up something the whole repository had been blind to.
+
+**Every limb cut here is a cylinder and the leg is a taper.** `399_drivecap.py` carves the
+cladding with cylinders of r 87.9 and r 85.0 about the limb axis, which is correct at the top of
+`REF_Thigh` and 20 mm too generous at the knee. A cylinder cannot express "3 mm clear of the leg"
+on a conical leg, so nothing ever asked whether the **3 mm neoprene sleeve** of BOM S5 fits
+underneath. [`438_limb_clearance.py`](scripts/438_limb_clearance.py) asks it, against the limb's
+own measured radius at each station:
+
+| | clearance to limb + sleeve + 0.5 mm |
+|---|---|
+| `A3_Motor_6374` can | +1.6 mm |
+| `P27_ControllerMount` | +1.6 mm |
+| the controller board | +4.1 mm |
+| `A7_DriveBracket_Idler` | **0.0 mm** |
+| `P25_MotorNacelle`, as first drawn | **−2.9 mm** |
+
+So nothing in the drivetrain was too close. The offender was the **cover over the controller**,
+and its cavity had 4.5 mm of slack over the board on that side: it had been sized against the
+r 85.0 cylinder, which is the bare leg at the top of the taper. Flattening its section — 80 × 66
+at n = 10 instead of 78 × 72 at n = 6.5, shallower toward the limb, the corner reach bought back
+from the exponent rather than the semi-axis — cleared it, and made the part smaller.
+[`439_limb_trim.py`](scripts/439_limb_trim.py) took the last 0.64 cm³ off the two drive shells,
+and the check now reports nothing but the cuffs touching the limb.
+
+**The swing was built and reverted, and it is worth keeping the arithmetic.** Swinging the motor
+about the **screw's** axis is the only motion that leaves the link belt's 60.8 mm centre distance
+untouched, so it needs no tensioner; the belt's pull on the motor acts along the line to the pivot,
+so the lock would carry none of it. 10° buys 10 mm of radius and a bare can is clear of every part
+to 10° (only at 20° does it graze `P22` by 0.5 cm³).
+
+| swing | motor at | gap at the can |
+|---|---|---|
+| 0° | X −104, Z 62 | 7.6 mm |
+| 10° | X −111, Z 70 | 17.7 mm |
+| 20° | X −117, Z 79 | 27.3 mm |
+
+What it costs is the pod: that tube is wrapped concentrically around the can, so moving the can
+pierces its wall (12.8 cm³), re-centring the pod moves the seam it shares with `P22`, and
+re-centring it by fusing a new tube put 51 cm³ into a cosmetic shell. Swinging the motor to fix a
+cover is the wrong lever. But if a tape measure on the patient says the whole drive end has to
+stand further off — which is what a genuinely fatter leg needs, since the frame's standoff is set
+by the cuff and moving *that* carries the knee pivot away from the bone with it — the swing is one
+constant in [`433_drive_flip.py`](scripts/433_drive_flip.py) and the numbers are in
+[`437_leg_size.py`](scripts/437_leg_size.py).
+
+Two measurement lessons from the same afternoon, both recorded in the files: a predicted 0.7 mm of
+surviving wall came out at 2.90 mm because the deepest intrusion was an *edge* at bearing +149°
+rather than the closest face — right about the geometry, wrong about where it mattered — and a
+wall measured with one ray through a sliver's bounding-box centre read 0.00 mm because the ray
+missed the material entirely.
+
+
 ### Where it stops
 
 Honest limits, because they are the parts a photo hides:
@@ -607,8 +664,9 @@ The other three checks, all of which have caught something nothing else did:
 | [`411_printability.py`](scripts/411_printability.py) | bed, overhangs, mean wall, closed mesh | **18 of 18 watertight** (17 parts + the tooth coupon), all inside 220 × 220 |
 | [`413_mark_visibility.py`](scripts/413_mark_visibility.py) | is each engraved number actually hidden? | **16 of 16 covered**, both legs |
 | [`tools/readmark.py`](tools/readmark.py) | …and does it read forwards? | **32 of 32 marks**, after 12 were found mirrored |
-| [`417_fastener_audit.py`](scripts/417_fastener_audit.py) | does the hardware fit the holes? | **136 holes**, every one identified; no printed part left unbolted |
-| [`420_mockup_audit.py`](scripts/420_mockup_audit.py) | **is each part the part, or only its shape?** | 22 features, all present — 8 were missing |
+| [`417_fastener_audit.py`](scripts/417_fastener_audit.py) | does the hardware fit the holes? | **151 holes**, every one identified; no printed part left unbolted |
+| [`420_mockup_audit.py`](scripts/420_mockup_audit.py) | **is each part the part, or only its shape?** | 23 features, all present — 8 were missing |
+| [`438_limb_clearance.py`](scripts/438_limb_clearance.py) | **is anything inside the leg and its 3 mm sleeve?** | nothing but the cuffs. It found three things first: the controller cover 2.9 mm deep, a 0.07 cm³ sliver of `P22`, and the fact that every limb cut here is a cylinder while the leg is a taper |
 | [`902_doc_audit.py`](scripts/902_doc_audit.py) | **do these documents still describe this model?** | 6 documents, 0 stale claims |
 
 That last one exists because this README was stale in five places at once, and every one was a fact

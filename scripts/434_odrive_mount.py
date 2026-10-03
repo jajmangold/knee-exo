@@ -255,16 +255,39 @@ NOSE_Y = 334.0                  # P22_DriveCap's proximal end, measured below an
 # components did. These follow the board.
 # TWO SEMI-AXES, NOT ONE, and the small one points at the limb. A uniform a = 39 reaches
 # r 76.3 from the limb axis on its diagonal -- 8.6 mm inside a 84.9 thigh. Aligned to the board's
-# own frame the section only needs 39 across the board's 63 and 36 across its 58, and 36 toward
-# the limb leaves exactly the 0.1 mm 399_drivecap.py already accepts under the pod.
-A_FULL = 39.0                           # along the board's 63 mm dimension
-B_FULL = 36.0                           # across its 58, and this is the limb-facing one
+# own frame the section only needs to be WIDE across the board's 63 and SHALLOW across its 58,
+# and the shallow one is the limb-facing one.
+#
+# B IS SET BY THE SLEEVE, NOT BY THE BOARD. 438_limb_clearance.py measures every part against the
+# limb's own tapered radius plus the 3 mm neoprene of BOM S5, and the first version of this nose
+# failed it by 2.9 mm: B was 36, chosen against 399_drivecap.py's r 85.0 CYLINDER, which is the
+# bare leg at the top of the taper and says nothing about a sleeve. The motor axis is 121.1 mm
+# out and the envelope at this station is r 88.0, so the limb-facing reach may be 33.1 at most.
+#
+# THAT DEPTH IS FREE. The cavity only has to swallow the board's 58 mm dimension on this axis, so
+# b = 30.5 clears its edge by 1.5 mm. What it costs is the CORNER, and the corner is bought back
+# with the exponent instead: at n = 6.5 the section would have to be 91 mm wide to reach a corner
+# at radius 42.8, where at n = 10 it is 77. A squarer section for a rectangular board under a
+# tight leg -- the alternative was swinging the motor out, and 433 records why that is the wrong
+# lever and what it costs.
+LIMB_ENV = 88.0                         # limb + sleeve + air at this station, measured by 438
+A_FULL = 40.0                           # along the board's 63 mm dimension
+B_FULL = 33.0                           # across its 58 -- the limb-facing one, set by LIMB_ENV
 FULL_END = board_y[1] + COMPONENTS + 1.5
 SWELL_END = REAR_Y - 0.5                # full section before the mount's web, which is as wide
 SWELL_START = SWELL_END - 15.5          # 15.5 mm of blend: 5 mm of radius, and 43 deg on the
                                         # diagonals, which is what has to print
 A_END = A_FULL - (NOSE_Y - FULL_END)    # a 45 deg nose, by construction
-assert A_END >= 24.0,     "the components reach Y %.1f and P22 ends at %.0f, which leaves no room for a 45 deg nose"     % (board_y[1] + COMPONENTS, NOSE_Y)
+# THE CHECK FOR THE DEFECT THIS SECTION HAD: the nose's limb-facing reach is B_FULL from an
+# axis AXIS_R out, so it must leave the sleeve's envelope standing. The first version of it
+# was 2.9 mm inside and only 438_limb_clearance.py could see that, because every limb cut in
+# the repository is a cylinder and the leg is a taper.
+assert AXIS_R - B_FULL >= LIMB_ENV - 0.05, (
+    "the nose reaches r %.1f toward the limb, inside the %.1f sleeve envelope"
+    % (AXIS_R - B_FULL, LIMB_ENV))
+assert A_END >= 24.0, (
+    "the components reach Y %.1f and P22 ends at %.0f, which leaves no room for a 45 deg nose"
+    % (board_y[1] + COMPONENTS, NOSE_Y))
 assert FULL_END > SWELL_END, "the swell has not finished before the board's section ends"
 
 B_END = A_END - (A_FULL - B_FULL)
@@ -273,11 +296,9 @@ B_END = A_END - (A_FULL - B_FULL)
 # those 6 mm -- 18.7 cm3 of it containing the motor's own can. The sweep found that; nothing in
 # this file did. Matching the tube's radii also means the wall continues with no step and no
 # void, so the trim plane is the only joint.
-# N_FULL IS 6.5, NOT THE CAP'S 5.5, and the limb is why. The section can only be 36 deep (see
-# B_FULL), so the diagonal reach has to come from the exponent instead of from the semi-axis:
-# at 5.5 the board's corner clears the cavity wall by 0.85 mm, at 6.5 by 1.7. A squarer section
-# is the price of a motor tucked this hard against the quadriceps.
-N_FULL = 6.5
+# N_FULL IS 10, NOT THE CAP'S 5.5, and the limb is why -- see B_FULL above. The diagonal reach
+# has to come from the exponent because the depth is spoken for by the sleeve.
+N_FULL = 10.0
 OUT = [(SWELL_START, 35.0, 35.0, 2.0), (SWELL_START + 8.0, 36.5, 35.5, 3.0),
        (SWELL_END, A_FULL, B_FULL, N_FULL), (FULL_END, A_FULL, B_FULL, N_FULL),
        (NOSE_Y, A_END, B_END, N_FULL)]
@@ -308,6 +329,22 @@ nac = doc.getObject("P25_MotorNacelle")
 cap22 = doc.getObject("P22_DriveCap")
 outer = Part.makeLoft([sell(*st) for st in OUT], True, True)
 inner = Part.makeLoft([sell(*st) for st in IN_], True, True)
+
+# THE MOUNT HAS TO FIT INSIDE ITS OWN COVER, and it did not. The cap is a disc of the motor's
+# OWN radius, 31.5, because that is the face it bolts to -- and the cavity over it is only 30.5
+# deep on the limb side, because the sleeve sets that and nothing else may. So the disc's rim
+# stood 1 mm proud of the wall it lives in: 0.108 cm3, which this file's own pair check caught
+# only after the section was flattened. Trim the mount to the cavity rather than deepen the
+# cavity: a millimetre off a rim whose bolts are at radius 17.7 costs nothing, and deepening the
+# cavity costs the patient's quadriceps.
+_capped = o.Shape.common(inner)
+assert len(_capped.Solids) == 1, "trimming the mount to its cover gave %d solids" % len(
+    _capped.Solids)
+_capped.check(True)
+if o.Shape.Volume - _capped.Volume > 1.0:
+    print("  mount trimmed to the cover's cavity: %.2f cm3 off the cap's rim"
+          % ((o.Shape.Volume - _capped.Volume) / 1000.0))
+o.Shape = _capped
 if nac is not None:
     v = nac.Shape.Volume
     assert cap22 is not None, "no P22 to end flush with"

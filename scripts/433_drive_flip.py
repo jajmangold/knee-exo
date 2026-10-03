@@ -51,8 +51,28 @@ except StopIteration:
     doc = FreeCAD.openDocument(DOCFILE)
 
 M5 = 5.2
-MOT_X, MOT_Z, MOT_R = -104.0, 62.0, 31.5
 SCREW_X, SCREW_Z = -62.0, 106.0
+
+# THE MOTOR STAYS WHERE IT IS, and this is where a swing was tried and abandoned.
+# 437_leg_size.py found the drive end 0.9 mm off the BARE thigh at Y 299, so the 3 mm sleeve of
+# BOM S5 does not fit under it, and the obvious fix was to swing the motor out about the SCREW's
+# axis -- the one direction that does not change the belt's 60.8 mm centre distance, so the only
+# one available without a tensioner. 4 degrees buys 4.1 mm and a bare can is clear of everything
+# to 10 degrees.
+#
+# IT IS NOT THE MOTOR THAT IS TOO CLOSE. 438_limb_clearance.py measured which parts are actually
+# inside the sleeve, and the motor has 1.6 mm, its mount 1.6, the board 4.1, the bracket exactly
+# 0.0 -- every one of them clear. The offender is the COVER over the controller, 2.9 mm deep, and
+# its cavity has 4.5 mm of slack over the board on that side: it was drawn deeper than it needs
+# to be, not pushed there by the motor. Swinging the motor to fix a cover is the wrong lever, and
+# it costs a great deal: the pod is wrapped concentrically around the can, so moving the can
+# pierces the pod wall (12.8 cm3), re-centring the pod moves the seam it shares with P22, and
+# re-centring it by fusing a new tube instead put 51 cm3 into a cosmetic shell.
+#
+# 434_odrive_mount.py flattens the cover's section instead. The swing remains the right answer if
+# a tape measure on the patient ever says the whole drive end has to stand further off -- it is
+# four lines and one constant, and the arithmetic is in 437.
+MOT_X, MOT_Z, MOT_R = -104.0, 62.0, 31.5
 # THE BELT IS 15 mm WIDE. BOM D6 says so and 404_link_ratio.py sized it so -- "15 mm, not 9:
 # it now carries the overdrive, ~153 N tight side" -- and the solid in the document was 12 mm
 # thick, which put the motor's plate 3 mm into the belt it was supposed to clear. Everything
@@ -191,6 +211,17 @@ sh = sh.cut(Part.makeCylinder(MOT_R + 1.0, (MOTOR_Y[1] + 4.0) - MOTOR_Y[0],
 # 0.25 cm3 wafer floating at Z 120..122, which is a second solid and an invalid part.
 _bz = zspan(SCREW_Z - 22.0, SCREW_Z + 22.0)
 sh = sh.cut(Part.makeBox(34.0, 14.0, _bz[1] - _bz[0], V(SCREW_X - 17.0, 285.0, _bz[0])))
+# AND THE OLD MOTOR PLATE GOES WITH IT. It is at Y 291..299 and it is what the motor used to
+# hang from; the motor now hangs from Y 223..231 and this is vestigial. Cutting only the motor's
+# envelope through it leaves an ANNULUS, which happened to stay connected to the channel while
+# the motor was concentric with it -- and stopped being connected the moment the motor swung
+# 3 mm, leaving a 1.429 cm3 crescent floating inside the pod at X -122..-72, Z 30..80. The
+# channel itself lives at X >= -45 and is untouched.
+OLDPLATE_Y = (289.0, 301.0)
+_sb = sh.BoundBox                       # the BRACKET's own Z span: _bz is the screw's, and using
+                                        # it put this cut 20 mm above the crescent it was aimed at
+sh = sh.cut(Part.makeBox(95.0, OLDPLATE_Y[1] - OLDPLATE_Y[0], _sb.ZLength + 8.0,
+                         V(-140.0, OLDPLATE_Y[0], _sb.ZMin - 4.0)))
 # and a window for the belt to run through. NOT a box across the bracket: a full-height slice at
 # the belt's Y separates everything distal of it from everything proximal and the bracket falls
 # into four pieces. Cut what the belt and its two pulleys actually sweep -- the belt's own solid
@@ -246,6 +277,13 @@ sh = sh.cut(Part.makeCylinder(11.0, BRG_Y[1] - BRG_Y[0], V(SCREW_X, BRG_Y[0], z(
                               V(0, 1, 0)))
 sh = sh.cut(Part.makeCylinder(4.6, 16.0, V(SCREW_X, BRG_Y[0] - 4.0, z(SCREW_Z)), V(0, 1, 0)))
 sh.check(True)
+if len(sh.Solids) != 1:
+    # say WHERE, not just how many: a 0.25 cm3 wafer and a severed channel need opposite fixes,
+    # and this assertion has fired four times in this file's history
+    for _s in sorted(sh.Solids, key=lambda q: -q.Volume):
+        _b = _s.BoundBox
+        print("     piece %8.3f cm3  X %7.1f..%7.1f Y %7.1f..%7.1f Z %7.1f..%7.1f"
+              % (_s.Volume / 1000.0, _b.XMin, _b.XMax, _b.YMin, _b.YMax, _b.ZMin, _b.ZMax))
 assert len(sh.Solids) == 1, "the bracket came out as %d solids" % len(sh.Solids)
 a7.Shape = sh
 print("  brkt  608 seated in the motor plate at Y %.0f..%.0f, pulley below it: %+.1f cm3"
