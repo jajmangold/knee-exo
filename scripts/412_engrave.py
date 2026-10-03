@@ -157,16 +157,20 @@ JOBS = [
     # identifiable without a BOM; that is only true if the interface itself is marked.
     ("P30_InterfaceProx", "P30", "P2", (20.0, 255.0, 137.0)),
     # UNDERSIDE, not the side face. 413 found the X=20 face open to the world, 13 of 13
-    # rays escaping; the underside at Z 123 beds on P6_ShankSocket. A 0.8 mm recess in a
-    # bolted joint face is harmless, a readable part number on the outside is not.
-    ("P31_InterfaceDist", "P31", "P3", (0.0, -275.0, 123.0)),
+    # rays escaping; the underside beds on P6_ShankSocket. A 0.8 mm recess in a bolted joint
+    # face is harmless, a readable part number on the outside is not.
+    # Z 98, NOT THE 123 THIS SAID FOR MONTHS. 432_shank_2040_build.py cut the socket's top down
+    # to Z 98 and 502_interface_build.py re-seated the interface on it, so the old station was
+    # 15 mm above the part -- in air. The cut removed nothing, every check passed because there
+    # was no mark to find, and P31 has been going out unnumbered on BOTH legs.
+    ("P31_InterfaceDist", "P31", "P3", (0.0, -275.0, 98.0)),
     # The controller mount, on the face that beds against the motor's rear -- the same argument
     # as P31's underside: a 0.8 mm recess in a bolted joint face is harmless, a readable part
     # number on an outside face is not. Y 302 is that face; Z 86 is 24 mm above the motor's
     # axis, which clears the four M5 at Z 49.5/74.5 and still has 40 mm of disc across it.
     # NEEDS A FOURTH PLANAR MODE: this is the only mark in the device on a face normal to the
     # limb axis, so neither X mode nor the bed face frames it. markframe grew "P4" for it.
-    ("P27_ControllerMount", "P27", "P4", (MOT.x, 302.0, 86.0)),
+    ("P27_ControllerMount", "P27", "P4", (MOT.x, 305.0, 86.0)),
 ]
 
 

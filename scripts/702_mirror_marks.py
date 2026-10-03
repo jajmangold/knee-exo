@@ -94,7 +94,24 @@ for name in sorted(left):
 
     pm, _ = mark_matrix(axis, pt, nrm, standoff=0.0)
     frac, _ = skin(sh, pm)
-    if frac < SKIN:
+    # IS THERE ANYTHING TO FILL? The absolute threshold alone says yes far too often. P22's
+    # reflected site reads 79% against SKIN's 80%, so this tried to fill a patch whose glyphs the
+    # left leg had ALREADY had filled before 701 mirrored it -- the fill added 0.000 cm3, was
+    # correctly refused, and the part was then skipped with no mark at all. The same reference the
+    # acceptance test below uses settles it: a site as solid as the blank surface either side of
+    # it has nothing in it. P22 reads 79% against a local 68%, which is blanker than its own
+    # neighbourhood.
+    base = 0.0
+    nb = []
+    for dy in (14.0, -14.0):
+        bm, _ = mark_matrix(axis, V(pt.x, pt.y + dy, pt.z), nrm, standoff=0.0)
+        try:
+            nb.append(skin(sh, bm)[0])
+        except Exception:
+            pass
+    if nb:
+        base = sum(nb) / len(nb)
+    if frac < SKIN and frac < base - 0.05:
         # The site is already engraved -- and on a freshly mirrored leg it ALWAYS is, with the
         # left leg's text reflected into backwards glyphs. This used to skip, which is why a
         # mirrored document got 6 of 14: the eight it did cut were the ones whose reflected site
@@ -129,16 +146,6 @@ for name in sorted(left):
         # pod 14 mm along reads 77.9% and 83.3%, and the fill reaches 77%. Only the NEAREST
         # patches are usable as a reference; 28 mm away the pod is flat and reads 100%, which no
         # fill near a curved edge can match.
-        base = 0.0
-        nb = []
-        for dy in (14.0, -14.0):
-            bm, _ = mark_matrix(axis, V(pt.x, pt.y + dy, pt.z), nrm, standoff=0.0)
-            try:
-                nb.append(skin(sh, bm)[0])
-            except Exception:
-                pass
-        if nb:
-            base = sum(nb) / len(nb)
         filled, how, fchk, after, used = None, "none", "FAILED", 0.0, 0.0
         for f in (1.06, 1.02, 1.0, 1.12, 1.20):
             t = inflate(ltb, f) if f > 1.0 else ltb
@@ -158,7 +165,6 @@ for name in sorted(left):
         print("  %-20s %-6s %-24s %7.3f cm3 %7.3f cm3  fill %s %.0f%%->%.0f%% of %.0f%%%s"
               % (name, ltext, "filling the mirrored glyphs (x%.2f)" % used, fadd, fwant, fchk,
                  100 * frac, 100 * after, 100 * base, "" if fok else "   <-- FILL REFUSED"))
-        del base
         if not fok:
             missed += 1
             continue
