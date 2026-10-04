@@ -234,6 +234,56 @@ A useful side effect: comparing the two gives you a free integrity check. If the
 angle and the motor position disagree by more than a couple of degrees, the belt has
 slipped or a tooth has stripped — drop torque to zero and fault.
 
+## 3a. Two IMUs, and the question the encoders cannot be asked
+
+The AS5048A on the knee pin measures the **angle between** two segments. It cannot measure
+where either of them is *pointing*, so it reads the same number sitting in a chair as lying in
+bed with the knees up — and those two want opposite things from a powered brace. Neither
+encoder can tell you which way up the patient is.
+
+Two IMUs — **thigh cuff and shank cuff** — answer that, and the important half of the answer
+needs no gyro at all. At rest an accelerometer reports one thing: the direction of gravity in
+its own frame. Two degrees of freedom per segment, no integration, no fusion, **no drift**. That
+is the half that still works while the patient is asleep.
+
+[`441_posture.py`](../scripts/441_posture.py) computes what each IMU reads in thirteen postures
+and how far apart they are, so the thresholds below are measured rather than chosen:
+
+| | knee angle | the IMUs differ by |
+|---|---|---|
+| supine flat **vs** prone flat | identical | **180°** |
+| standing **vs** inverted / fallen | 8° | **180°** |
+| standing **vs** supine flat | identical | **90°** |
+| walking mid-swing **vs** side-lying curled | identical | **95°** |
+| **sitting vs supine with knees bent up** | identical | **45°** |
+
+The tightest of those is 45°, against the ~2° a well-mounted static accelerometer is good for.
+These are not close calls. The only pair in the whole table closer than 10° is standing against
+mid-stance — 8°, because mid-stance very nearly *is* standing, and both are treated the same
+way. A leg-only sensor set was expected to need a third IMU on the trunk to resolve something;
+it does not.
+
+**MPU-6050, not BNO085.** The BNO085 fuses on-chip and hands the host a quaternion, which is
+worth paying for when you need yaw. Nothing here needs yaw: pitch and roll are gravity-
+referenced and do not drift, and the sagittal plane is the only one the knee works in. A 6-axis
+part with a complementary filter on the ESP32 — a few multiply-adds at 400 Hz — is enough, and
+it is a part already in the drawer. Two notes: calibrate the gyro bias at startup while the leg
+is still, and buy more than you need, because the MPU-6050 is end-of-life and the supply is full
+of clones.
+
+**What they are not for.** Fused well, a pair of these is good for about a degree dynamically —
+the same order as the structural compliance [`431_shank_2040.py`](../scripts/431_shank_2040.py)
+measured when it sized the shank rail. So they **cannot** see that, and must never be used as an
+angle reference against the AS5048A's 0.022°. They are a gross-disagreement detector: cuff slip,
+a skipped tooth at 12.9°, and which way up the patient is. Cuff slip is worth singling out —
+nothing else in this design can detect it at all, because every other sensor is inboard of the
+straps.
+
+**Mount them in the pockets, not with tape.** The pocket on each cuff exists to fix the sensor's
+frame relative to the limb. "Roll" only means something if the sensor's axes are known, and a
+sensor taped on at whatever angle the tape allowed makes every number in the table above a
+guess.
+
 ## 4. What the ESP32s do
 
 The C3 SuperMini is a good fit for this. Single RISC-V core at 160 MHz is plenty for a
@@ -460,6 +510,40 @@ ODrive at 500 kbit/s. Do not put the BMS on that bus unless you have checked bot
 rate and the node IDs. The clean answer is to take the BMS on **UART or RS485** — the C3 has
 spare UARTs — and leave CAN to the motor controller.
 
+## 6b. Bulk bus capacitance, and why a 47 mF can is not the answer
+
+The question comes up because a big screw-terminal electrolytic looks like free regen headroom.
+Put the numbers on it against **this** bus — 12S LiFePO4, 43.8 V charged, tripping at 46.0 V:
+
+| | |
+|---|---|
+| energy a 47 000 µF cap holds at 43.8 V | **45 J** |
+| energy it can *absorb* in the 2.2 V window before the trip | **4.6 J** |
+| a controlled sit-down, 80 kg through ~0.45 m | ~350 J at the body, tens of joules at the knee |
+
+So roughly **one part in ten of a single sit**, and nothing at all for stairs. Bulk capacitance
+is not a regen strategy here; the 2 Ω / 50 W brake resistor in section 6 is, and it stays.
+
+Three further reasons not to put that particular part on the patient's bus:
+
+1. **Voltage class.** A 50 V capacitor sits at 88 % of its rating on a 43.8 V bus continuously,
+   and 92 % at the overvoltage trip. Electrolytics want derating, not margin-free operation, and
+   this one would spend its life at the top of its range. Anything added here should be **63 V
+   or better**.
+2. **Inrush.** Connecting 47 mF to a charged pack dumps ~45 J into the connector in
+   milliseconds, at a peak current limited only by ESR and wiring. It will pit or weld a
+   connector and can trip the BMS. Bulk capacitance above a few hundred µF needs a **precharge
+   resistor and a soft-start**, which is a circuit, not a part.
+3. **Stored energy on a worn device.** 45 J remains on that bus after the power is off. A
+   **bleed resistor** is then mandatory, and it is one more thing to get wrong on something
+   strapped to a patient.
+
+**Where it genuinely helps: the bench.** A laboratory supply cannot absorb regen at all, so the
+first hand-spin test in section 10 — "confirm the resistor gets warm rather than the bus voltage
+spiking" — is exactly where a large capacitor earns its keep, and at a 24 V bench voltage a 50 V
+part has real margin and gives ~7.6 J of buffer. Use it there, with a precharge resistor, and
+leave it out of the pack.
+
 ## 7. Control strategy
 
 Start with the simplest thing that helps with stairs, which is what this is for.
@@ -519,6 +603,29 @@ Testing progression, and do not skip steps:
 
 This is not a certified device and should not be treated as one. Get the physio involved
 before step 3, and keep the assist ceiling under their control rather than the patient's.
+
+## 8a. The posture gate
+
+Assist is **armed only when the leg's attitude is consistent with being upright**: standing,
+either phase of walking, sitting, sit-to-stand, stair ascent. In every other posture in the
+table above — in bed, prone, side-lying, inverted — the controller commands zero torque and
+will not leave that state however the gait machine is feeling.
+
+The closest any armed posture comes to any disarmed one is **45°**, so this is not a delicate
+threshold.
+
+Three properties make it worth more than the classification it rests on:
+
+- it is **accelerometer-only**, so it cannot drift, and it is still correct after eight hours
+  of sleep with the device powered;
+- it is evaluated **outside the gait state machine**, so a bug in the gait code cannot arm it.
+  That is the same argument section 1 already makes one level down about keeping gait logic off
+  the motor controller;
+- it fails **closed**. Lose an IMU, lose I²C, read something not in the table — disarm.
+
+28.2 N·m into a post-operative knee, in bed, at three in the morning, because a state machine
+mis-fired, is the failure this design should be most afraid of. The guard against it costs two
+parts that are already in the drawer.
 
 ## 9. Noise
 

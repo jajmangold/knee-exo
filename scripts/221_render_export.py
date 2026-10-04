@@ -3,6 +3,7 @@
 script can assign shaders without a lookup table. Placements are baked in (Shape already
 carries them), which is what we want for a still."""
 import os, sys, math, json, FreeCAD, Part, Mesh, MeshPart
+import sys
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "tools"))
 from fingerprint import write as _write_fp
 from FreeCAD import Vector as V
@@ -32,8 +33,9 @@ g["_kx_timer"]=None
 # is the TWO-screw file and its C0/C1 no longer mean anything here.
 R = 29 * 8.0 / (2 * math.pi)
 A0 = 161.0
-SHANK=["A4_Shank2020_VSlot","P2a_KneeHingePlate","P6_ShankSocket","P7_ShankCuff",
-       "P24_FairingShank","P31_InterfaceDist","HW_JointBolts"]
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "tools"))
+from movers import shank as _shank                                    # noqa: E402
+SHANK = _shank(include_ref=False)
 # posed with the shank but never exported: the renders leave the reference limb out.
 # vlow.py has always posed REF_Shank; this script used not to, which was invisible while
 # the limb was hidden and wrong the moment it was shown.

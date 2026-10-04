@@ -46,7 +46,11 @@ STRUCT=["P1_KneeYoke","P2a_KneeHingePlate","P5_ThighCuff",
         # The controller's mount (434_odrive_mount.py). Printed, and the one part in the set
         # whose dimensions are not yet known: every board figure in 434 is flagged GUESSED or
         # UNVERIFIED, so this STL is for fit-checking against the real board, not for the shelf.
-        "P27_ControllerMount"]
+        "P27_ControllerMount",
+        # the IMU covers (442_imu_mounts.py). Two of them, identical, one per cuff -- they
+        # are modelled in place rather than at the origin so the sweep sees them where they
+        # actually are.
+        "P28a_IMUCover", "P28b_IMUCover"]
 # P24_FairingShank is gone, not merely unexported: 430_shank_inline_build.py moved the shank
 # rail in-line under the knee joint and there was nothing left for it to fair.
 FAIR=["P20_KneeShroud","P21_ShellAnterior","P22_DriveCap","P25_MotorNacelle",

@@ -181,7 +181,15 @@ for name in sorted(left):
         chk = "clean"
     except Exception:
         chk = "SELF-INTERSECT"
-    ok = 0.35 * want < removed < 1.8 * want and chk == "clean" and len(cut.Solids) == 1
+    # NUMERICAL DUST IS NOT A SPLIT PART. Cutting 0.8 mm of text into the 2 mm IMU covers threw
+    # off two solids of 0.0000 cm3 each -- glyph edges grazing the lid's own boundary -- and the
+    # old test, len(Solids) == 1, called a mark that had removed 95% of its expected volume
+    # MISSED. A real detached fragment has real volume; count only those.
+    DUST = 1.0          # mm3
+    solid = [q for q in cut.Solids if q.Volume > DUST]
+    if len(solid) == 1 and len(cut.Solids) > 1:
+        cut = solid[0]
+    ok = 0.35 * want < removed < 1.8 * want and chk == "clean" and len(solid) == 1
     print("  %-20s %-6s %-24s %7.3f cm3 %7.3f cm3  %s%s"
           % (name, text, "(%.0f, %.0f, %.0f) h%.0f" % (pt.x, pt.y, pt.z, h),
              removed, want, chk, "" if ok else "   <-- MISSED"))

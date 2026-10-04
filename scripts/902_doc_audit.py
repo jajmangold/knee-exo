@@ -45,7 +45,9 @@ DOCS = ["README.md", "docs/BOM.md", "docs/PRINT.md", "docs/ASSEMBLY.md",
 GHOSTS_OK = {"P3b_CarriageB", "P11_SprungAnchor", "P2b_RodClevisBlock", "P4_Rod_8mm",
              "P8_RodEndHousing_PETG", "P3b_Carriage", "P2b_Clevis",
              "P2a_KneeHub"}
-PRINTED = 17      # 15 + the drive bracket and gantry plate, printed since 802
+PRINTED = 19      # 15 + the drive bracket and gantry plate (802), + P27_ControllerMount
+                  # (434) and the two IMU covers (442). P24_FairingShank left when the
+                  # shank rail went in-line, so the count moved 17 -> 19 rather than 20.
 # TEST_* are not parts of the device. The tooth coupon is exported so it can be sliced and
 # printed before the capstan, but counting it would make the printed set 18 and every per-leg
 # total in the documentation wrong by one part.

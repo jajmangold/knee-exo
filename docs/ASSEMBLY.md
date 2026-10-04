@@ -184,6 +184,21 @@ Full table: [`scripts/417_fastener_audit.py`](../scripts/417_fastener_audit.py),
 21. **Practise the release.** Squeeze both side-release buckles; the whole device should come off in
     about two seconds. Do this before it is ever powered.
 
+21a. **The two IMUs**, one into the pocket on each cuff's platform — thigh at Y 160, shank at
+    Y −260, both on the +55° bearing — with `P28aL`/`P28bL` over them on 2 × M2.5 × 8 each.
+    Run the cable out through the slot in the pocket's end.
+
+    > **The pocket is the measurement.** Everything
+    > [`441_posture.py`](../scripts/441_posture.py) computes — sitting against lying with the
+    > knees up at 45°, standing against inverted at 180° — is an angle *in the sensor's own
+    > frame*. The pocket's long axis runs along the limb, so the module's X is the segment's
+    > axis and those numbers mean what they say. A module taped on at whatever angle the tape
+    > allowed makes every one of them a guess, and the posture gate in ELECTRONICS §8a is
+    > exactly as trustworthy as this step.
+
+    Both modules go in **the same way up and the same way round**. Mark one corner of each
+    before you fit them; "roll +180" is a real distinction and it is lost if one is flipped.
+
 ## 7. Fairings, last
 
 22. `P23aL`, `P23bL`, `P23cL` into the extrusion's **posterior** side slot at Y 88, 124 and 160 —
@@ -225,6 +240,24 @@ a given motor direction the nut travels the same way — which means the knee go
 One constant, in one place — the joint direction in firmware, or the axis map in the gait
 controller. Getting this wrong drives the knee the wrong way under a 28.2 N·m assist, which is not a
 subtle failure. [`700_handedness.py`](../scripts/700_handedness.py).
+
+## 9a. Before the leg: the bench rig
+
+Do this with the motor on the bench, not on him. [`440_bench_rig.py`](../scripts/440_bench_rig.py)
+prints four parts that bolt the 6374 flange-down to a plate, put the magnet on the shaft end that
+comes through it, and face the controller at it from a second plate on pillars. Nothing in it
+depends on the motor having a stationary rear face — which is the exo's biggest unverified
+assumption, and this is what settles it.
+
+Three numbers come out of that session, and all three are things the CAD currently guesses:
+
+1. **Does the 6374 have a usable stationary rear face at all?** If it does,
+   `P27_ControllerMount` is right. If the rear is the rotating can, the controller has to hang
+   off a cage from the front flange instead and §2's step 7a changes.
+2. **The motor's bolt pattern.** The rig's eight radial slots take any square from 17 to 31 mm,
+   so one print fits; measure what it actually is and put it in the BOM.
+3. **The recess from the board's mounting face down to the AS5047P**, through the window in its
+   backplate. That sets the air gap and nothing can derive it — the rig prints the arithmetic.
 
 ## 10. First power
 

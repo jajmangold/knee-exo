@@ -54,6 +54,8 @@ SETTING = {
     # (430_shank_inline_build.py) and there was nothing left for it to fair.
     "P25_MotorNacelle": (3, 0.15, "cosmetic; prints nose-down on its domed end"),
     "P27_ControllerMount": (4, 0.40, "carries the controller 2 mm off the shaft magnet"),
+    "P28a_IMUCover": (3, 0.20, "holds an MPU-6050 in its pocket; 2 mm, prints flat"),
+    "P28b_IMUCover": (3, 0.20, "the same lid again, on the shank cuff"),
     "P30_InterfaceProx": (6, 0.60, "KX-1 interface, 1.2 MPa of bearing standalone"),
     "P31_InterfaceDist": (6, 0.60, "KX-1 interface, 1.2 MPa of bearing standalone"),
     # printed since 802_no_metal.py -- these were the only two fabricated aluminium parts
@@ -180,6 +182,8 @@ HOLES = {
     "P23b_FairingMount": "1 x M5 clearance (on the build axis)",
     "P23c_FairingMount": "1 x M5 clearance (on the build axis)",
     "P27_ControllerMount": "4 x M5 into the motor's rear, 4 x M3 into the board's bosses",
+    "P28a_IMUCover": "2 x M2.5 x 8 into the platform's bosses",
+    "P28b_IMUCover": "2 x M2.5 x 8 into the platform's bosses",
     "P25_MotorNacelle": "none",
     "P30_InterfaceProx": "4 x M4 clearance, 2 x 5 mm dowel H7, 6 x M5 heat-set insert",
     "P31_InterfaceDist": "6 x M4 clearance, 2 x 5 mm dowel H7, 6 x M5 heat-set insert",

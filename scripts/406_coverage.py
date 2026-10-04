@@ -25,6 +25,7 @@ Run with:  freecadcmd.exe scripts/406_coverage.py   (all three poses, no chunkin
 """
 import math
 import os
+import sys
 
 import FreeCAD
 import Part
@@ -57,7 +58,10 @@ LEG_R = 84.9
 # and the drive bracket stand between them and the limb, and a static aluminium part
 # shields a finger exactly as well as a printed cover does. That was a flaw in the test,
 # not in the device.
-BLOCK = ["P20_KneeShroud", "P21_ShellAnterior", "P22_DriveCap", "P25_MotorNacelle", "P24_FairingShank",
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "tools"))
+from movers import shank as _shank                                    # noqa: E402
+
+BLOCK = ["P20_KneeShroud", "P21_ShellAnterior", "P22_DriveCap", "P25_MotorNacelle",
          "P1_KneeYoke", "P5_ThighCuff", "P7_ShankCuff",
          "P6_ShankSocket", "P23a_FairingMount", "P23b_FairingMount", "P23c_FairingMount",
          "A1_Extrusion_20x60_VSlot", "A7_DriveBox", "A4_Shank2020_VSlot",
@@ -94,8 +98,7 @@ def pose(th):
     # This tuple is the SHANK group and it is separate from BLOCK, so a part can be listed
     # as an occluder and still never get posed. P31_InterfaceDist was: it sat at identity
     # while the shank rotated, 88 mm from its host, and blocked rays from where it was not.
-    for n in ("A4_Shank2020_VSlot", "P2a_KneeHingePlate", "P6_ShankSocket",
-              "P7_ShankCuff", "P24_FairingShank", "P31_InterfaceDist", "HW_JointBolts"):
+    for n in _shank(include_ref=False):
         if O(n):
             O(n).Placement = FreeCAD.Placement(V(0, 0, 0), r, V(0, 0, 0))
     for n in GANTRY:

@@ -242,7 +242,14 @@ CHECKS = [
     # The controller's mount. It carries a board whose only fixing is four M3 into bosses, and
     # bolts to the motor on four M5 -- and it has to let the shaft and its magnet through, which
     # is the feature that is easiest to leave out of a plate that otherwise looks finished.
-    ("P27_ControllerMount", "4 x M5 to the motor, 4 x M3 bosses, a bore for the magnet",
+    # A lid with no holes in it is a coaster. Both covers want the two M2.5 that hold the
+    # module down -- the pocket is the sensor's frame, and a cover that cannot be screwed
+    # shut does not hold it in that frame.
+    ("P28a_IMUCover", "2 x M2.5 clearance", lambda sh: cyls(sh, 2.8, 3.1) >= 2,
+     "it clamps an IMU into a known frame"),
+    ("P28b_IMUCover", "2 x M2.5 clearance", lambda sh: cyls(sh, 2.8, 3.1) >= 2,
+     "the same lid on the shank"),
+    ("P27_ControllerMount", "4 x M5 to the motor, 6 x M3 bosses, a bore for the magnet",
      lambda sh: cyls(sh, 5.1, 5.4) >= 4 and cyls(sh, 3.1, 3.4) >= 4
      and cyls(sh, 13.8, 14.2) >= 1, "it mounts a PCB 2 mm off a magnet"),
     ("P20_KneeShroud", "some way of attaching",

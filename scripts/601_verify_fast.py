@@ -49,10 +49,9 @@ R_CAP = TEETH * PITCH / (2 * math.pi)
 A0 = 161.0
 THETA = [float(i) for i in range(-2, 105)]
 
-SHANK = ["A4_Shank2020_VSlot", "P2a_KneeHingePlate", "P6_ShankSocket", "P7_ShankCuff",
-         "P24_FairingShank", "P31_InterfaceDist", "REF_Shank", "HW_JointBolts"]
-GANTRY = ["P3_Carriage", "A2b_BallNut_SFU1620",
-          "P10a_VWheel", "P10b_VWheel", "P10c_VWheel", "P10d_VWheel"]
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "tools"))
+from movers import SHANK, GANTRY                                    # noqa: E402
+
 MOVERS = set(SHANK) | set(GANTRY)
 
 t_start = time.time()

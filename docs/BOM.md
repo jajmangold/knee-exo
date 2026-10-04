@@ -122,7 +122,7 @@ drifting, and there is no adjustment for it. Each screw only needs **162 mm of t
 
 ## 5. Printed parts
 
-**17 per leg, 34 for the pair** — [`stl/`](../stl) is the left leg and [`stl_R/`](../stl_R) the
+**19 per leg, 38 for the pair** — [`stl/`](../stl) is the left leg and [`stl_R/`](../stl_R) the
 right. Seventeen, not fifteen, because the **drive bracket and the gantry plate are printed now**:
 they were the only two parts in this build needing a workshop, and
 [`802_no_metal.py`](../scripts/802_no_metal.py) shows neither was ever sized by load. The bracket
@@ -152,6 +152,7 @@ became a bought aluminium plate (S2d) and the other two were deleted with the se
 | `P3_GantryPlate_Printed` | 1 | 6 perimeters, 50% — in-plane loads only, 1.5–7.6 MPa. **Has no bolt holes drawn yet**, see the README's open items |
 | `P30_InterfaceProx`, `P31_InterfaceDist` | 1 each | **KX-1 module interface.** 6 perimeters, 60% — structural. 6 × M5 heat-set inserts + 2 × ⌀5 dowels. Printed here because standalone this module needs 1.2 MPa of bearing; the same six holes in 6 mm aluminium carry the 1472 N load-to-ground case ([`501_interface.py`](../scripts/501_interface.py)) |
 | `P27_ControllerMount` | 1 | 4 perimeters, 40%. Bolts to the motor's **rear** bolt circle and carries the XDRIVE MINI on four bosses, with the board's AS5047P 2.0 mm off a magnet on the shaft stub. **Do not print it until the board is measured** — every dimension in it is guessed ([`434_odrive_mount.py`](../scripts/434_odrive_mount.py)) |
+| `P28a_IMUCover`, `P28b_IMUCover` | 1 each | 3 perimeters, 20%, 2 mm. The lid over each cuff's IMU pocket. **The pocket is the measurement, not the retention** — it fixes the sensor's axes to the limb, which is what makes every angle in ELECTRONICS §3a mean something. Fit both modules the same way up and the same way round ([`442_imu_mounts.py`](../scripts/442_imu_mounts.py)) |
 
 **~1.64 kg of filament and ~102 printer-hours per leg**, so 3.3 kg and about ten days of printing
 for the pair — up from 1.38 kg because the bracket and gantry plate joined the printed set, and
@@ -205,15 +206,15 @@ Architecture and reasoning in [`ELECTRONICS.md`](ELECTRONICS.md).
 
 | # | Part | Qty | Notes | ~USD |
 |---|---|---|---|---|
-| E1 | Makerbase MKS XDRIVE MINI | 1 | **Owned — 4 of them, $29.48 each.** ODrive v3.6 clone, 12–56 V, ~40 A, onboard AS5047P. Ships on modified fw **0.5.1** — do not let odrivetool upgrade it. **NOT IN THE CAD, and it cannot go in the pack**: its encoder is on the board, so it has to sit over the motor's shaft end — see ELECTRONICS §2a for the air gap that fixes its position, and measure your own board, because no mechanical drawing is published | 29 |
+| E1 | Makerbase MKS XDRIVE MINI | 1 | **Owned — 4 of them, $29.48 each.** ODrive v3.6 clone, 12–56 V, ~40 A, onboard AS5047P. Ships on modified fw **0.5.1** — do not let odrivetool upgrade it. **It cannot go in the pack**: its encoder is on the board, so it has to sit over the motor's shaft end — see ELECTRONICS §2a for the air gap that fixes its position. **63.00 × 58.00 mm on SIX ⌀3.3 holes**, two columns 56.60 apart, rows 51.50 corner to corner with the middle row 24.00 below the top — from the "Size" drawing in `Smurf/xdrive-mini-docs`, corroborated by the board in hand. That replaces a guessed four-hole 55 × 50 pattern. The AS5047P sits central, in a round window in a **backplate** on the encoder face, so the air gap is NOT measured from the board's mounting face — that recess depth is the one number still to be measured, and `440_bench_rig.py` exists partly to measure it | 29 |
 | E1a | ST-Link V2 clone | 1 | Only to back up / recover the MINI's firmware. Buy it before you need it | 5 |
 | E2 | Brake resistor, ~2 Ω 50 W | 1 | **Not optional** — see the regen section | 15 |
 | E3 | ESP32-C3 SuperMini | 2 | One on the leg, one as a pocket remote. You already have these | — |
 | E4 | AS5048A magnetic encoder breakout | 1 | Absolute knee angle over SPI. Removes the power-on homing routine | 12 |
 | E5 | Diametric magnet 6 x 2.5 mm | 1 | Into the flush counterbore in the knee pin head | 3 |
 | E6 | SN65HVD230 CAN transceiver | 1 | ESP32-C3 TWAI to ODrive CAN | 4 |
-| E7 | IMU — BNO085 or ICM-42688-P | 1 | Thigh-mounted, for gait phase | 20 |
-| E8 | XT90-S anti-spark connector pair | 1 | The drive's bus caps will arc a plain XT60 | 5 |
+| E7 | IMU — **MPU-6050** | **2** | **Owned.** One on the thigh cuff, one on the shank cuff, each in the printed pocket that fixes its axes to the limb. This line used to read "BNO085 or ICM-42688-P, 1 off, thigh-mounted, for gait phase" — the BNO085 fuses on-chip and hands over a quaternion, which is worth paying for only if you need YAW, and nothing here does: the knee works in the sagittal plane and pitch/roll are gravity-referenced, so they cannot drift. The second one is the real change. Two of them give POSTURE, which no encoder in this device can give at any price — the AS5048A reads the same angle sitting in a chair as lying in bed with the knees up, and those want opposite things from a powered brace. See ELECTRONICS §3a for the separation table and §8a for the assist gate it enables. Calibrate the gyro bias at startup while the leg is still; buy spares, the part is end-of-life and the supply is full of clones | 6 |
+| E8 | XT90-S anti-spark connector pair | 1 | The drive's bus caps will arc a plain XT60. **Do not add bulk capacitance to this bus without a precharge circuit**: a 47 000 µF can dumps ~45 J into the connector on mating, and buys only 4.6 J of regen headroom in the 2.2 V between a charged pack and the overvoltage trip — a fraction of one sit-down. ELECTRONICS §6b does that arithmetic. The brake resistor is the regen path, not a capacitor | 5 |
 | E9 | Inline fuse holder + **15 A** blade fuse | 1 | At the pack, before anything else. 15 A, not 30 — peak BUS current is 4.9 A | 6 |
 | E10 | Latching e-stop, 22 mm, NC | 1 | On the waist belt where a hand falls naturally | 10 |
 | E11 | Silicone wire 12 AWG | 4 m | Pack to leg. 0.55 V drop at 22 A over 1.5 m each way | 12 |

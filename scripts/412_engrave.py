@@ -171,6 +171,13 @@ JOBS = [
     # NEEDS A FOURTH PLANAR MODE: this is the only mark in the device on a face normal to the
     # limb axis, so neither X mode nor the bed face frames it. markframe grew "P4" for it.
     ("P27_ControllerMount", "P27", "P4", (MOT.x, 305.0, 86.0)),
+    # The two IMU covers share one mark, as the three fairing mounts do: they are the same
+    # part printed twice and are interchangeable. RADIAL, because a cover sitting on a cuff
+    # at bearing +55 has no axis-aligned face for any of the planar modes -- but its
+    # underside normal IS radial, and the material lies outboard of it, which is exactly
+    # what mode "r" assumes. The underside faces the module and is hidden once assembled.
+    ("P28a_IMUCover", "P28", "Y", (160.0, 157.0, 163.0)),
+    ("P28b_IMUCover", "P28", "Y", (-260.0, -257.0, -263.0)),
 ]
 
 

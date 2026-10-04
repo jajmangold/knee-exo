@@ -25,6 +25,8 @@ load case, not from a global profile:
 | `P23c_FairingMount` | 4 | 40% | carries the canopy |
 | `P25_MotorNacelle` | 3 | 15% | cosmetic; prints nose-down on its domed end |
 | `P27_ControllerMount` | 4 | 40% | carries the controller 2 mm off the shaft magnet |
+| `P28a_IMUCover` | 3 | 20% | holds an MPU-6050 in its pocket; 2 mm, prints flat |
+| `P28b_IMUCover` | 3 | 20% | the same lid again, on the shank cuff |
 | `P2a_KneeHub_Pulley29T` | 6 | 60% | the 29T capstan; tooth flanks want a fresh nozzle |
 | `P30_InterfaceProx` | 6 | 60% | KX-1 interface, 1.2 MPa of bearing standalone |
 | `P31_InterfaceDist` | 6 | 60% | KX-1 interface, 1.2 MPa of bearing standalone |
@@ -47,20 +49,22 @@ load case, not from a global profile:
 | `P23b_FairingMount` | +Z up, 0° | 27 x 16 mm | 39 mm | 12.7% | 6 cm³ | 8 g | 0.5 h |
 | `P23c_FairingMount` | +Z up, 0° | 27 x 16 mm | 39 mm | 12.7% | 6 cm³ | 8 g | 0.5 h |
 | `P25_MotorNacelle` | +Y up, 0° | 110 x 108 mm | 133 mm | 9.9% | 98 cm³ | 120 g | 7.5 h |
-| `P27_ControllerMount` | -X up, 0° | 6 x 84 mm | 82 mm | 5.4% | 18 cm³ | 20 g | 1.3 h |
+| `P27_ControllerMount` | +X up, 0° | 6 x 84 mm | 82 mm | 5.6% | 18 cm³ | 21 g | 1.3 h |
+| `P28a_IMUCover` | -Y up, 0° | 20 x 15 mm | 28 mm | 3.8% | 1 cm³ | 2 g | 0.1 h |
+| `P28b_IMUCover` | -Y up, 0° | 20 x 15 mm | 28 mm | 4.5% | 1 cm³ | 2 g | 0.1 h |
 | `P2a_KneeHub_Pulley29T` | -Y up, 0° | 72 x 58 mm | 162 mm | 13.6% | 148 cm³ | 188 g | 11.8 h |
 | `P30_InterfaceProx` | -Y up, 0° | 80 x 10 mm | 56 mm | 6.6% | 27 cm³ | 34 g | 2.1 h |
 | `P31_InterfaceDist` | +Y up, 0° | 40 x 10 mm | 56 mm | 9.9% | 20 cm³ | 25 g | 1.6 h |
 | `P3_GantryPlate_Printed` | +Y up, 0° | 116 x 41 mm | 84 mm | 12.8% | 80 cm³ | 102 g | 6.3 h |
-| `P5_ThighCuff` | -Y up, 0° | 120 x 180 mm | 140 mm | 0.8% | 161 cm³ | 195 g | 12.2 h |
+| `P5_ThighCuff` | -Y up, 0° | 120 x 180 mm | 140 mm | 0.9% | 163 cm³ | 197 g | 12.3 h |
 | `P6_ShankSocket` | -Y up, 0° | 60 x 30 mm | 114 mm | 5.4% | 100 cm³ | 99 g | 6.2 h |
-| `P7_ShankCuff` | -Y up, 0° | 86 x 126 mm | 160 mm | 2.2% | 136 cm³ | 159 g | 9.9 h |
+| `P7_ShankCuff` | -Y up, 0° | 86 x 126 mm | 160 mm | 2.4% | 138 cm³ | 161 g | 10.1 h |
 | `TEST_ToothCoupon_3xHTD8M` | +Z up, 0° | 12 x 30 mm | 12 mm | 13.6% | 2 cm³ | 3 g | 0.2 h |
-| | | | | **482 cm² total** | | **1643 g** | **103 h** |
+| | | | | **487 cm² total** | | **1651 g** | **103 h** |
 
 The right leg is the mirror image and measures the same to within meshing noise: 
-1415 cm³ against 1416 cm³, a 0.01% difference, all of it in facet placement.
-So budget **3285 g of filament and 205 printer-hours for the pair**, plus supports.
+1422 cm³ against 1422 cm³, a 0.01% difference, all of it in facet placement.
+So budget **3301 g of filament and 206 printer-hours for the pair**, plus supports.
 
 ## Before you assemble anything: holes
 
@@ -93,6 +97,8 @@ to finish to, from [`scripts/417_fastener_audit.py`](../scripts/417_fastener_aud
 | `P23c_FairingMount` | 1 x M5 clearance (on the build axis) |
 | `P25_MotorNacelle` | none |
 | `P27_ControllerMount` | 4 x M5 into the motor's rear, 4 x M3 into the board's bosses |
+| `P28a_IMUCover` | 2 x M2.5 x 8 into the platform's bosses |
+| `P28b_IMUCover` | 2 x M2.5 x 8 into the platform's bosses |
 | `P2a_KneeHub_Pulley29T` | 3 x M5 clearance, 2 x dia 12.3 pin bore (clamped, not a journal), and 29 HTD-8M grooves on the dia 72.48 belt land |
 | `P30_InterfaceProx` | 4 x M4 clearance, 2 x 5 mm dowel H7, 6 x M5 heat-set insert |
 | `P31_InterfaceDist` | 6 x M4 clearance, 2 x 5 mm dowel H7, 6 x M5 heat-set insert |

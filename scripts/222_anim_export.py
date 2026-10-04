@@ -16,6 +16,7 @@ loops seamlessly with no duplicated end frame. Meshing is coarser than the still
 90 s GUI dispatch limit -- hence CHUNK, run 0..7.
 """
 import os, math, json, FreeCAD, Part, Mesh, MeshPart
+import sys
 from FreeCAD import Vector as V
 
 CHUNK = __CHUNK__
@@ -53,8 +54,9 @@ g["_kx_timer"] = None
 R = 29 * 8.0 / (2 * math.pi)
 A0 = 161.0
 
-SHANK = ["A4_Shank2020_VSlot", "P2a_KneeHingePlate", "P6_ShankSocket", "P7_ShankCuff",
-         "P24_FairingShank", "P31_InterfaceDist", "HW_JointBolts"]
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "tools"))
+from movers import shank as _shank                                    # noqa: E402
+SHANK = _shank(include_ref=False)
 # posed with the shank but never exported -- the renders leave the reference limb out
 # One moving group. The belt is a closed loop whose strands and wraps are static, so
 # nothing is rebuilt per frame.
