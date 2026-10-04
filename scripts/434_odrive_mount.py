@@ -55,7 +55,21 @@ except StopIteration:
 
 M5, M3 = 5.2, 3.2
 BOARD = (63.0, 58.0, 1.6)       # UNVERIFIED
-BOARD_HOLES = (55.0, 50.0)      # GUESSED
+# SOURCED, NOT GUESSED, as of the "Size" drawing in Smurf/xdrive-mini-docs and a photograph of
+# the board's encoder face. This used to read (55.0, 50.0) with a comment saying GUESSED, and it
+# was wrong in both the spacing and the COUNT: there are SIX M3 holes, not four, in two columns
+# of three, and the middle row is not centred.
+#
+#     board          63.00 x 58.00          (the drawing, and two vendor listings)
+#     holes          dia 3.3 x 6
+#     columns        56.60 apart            -> +-28.30, inset 3.20 from each edge
+#     rows           51.50 corner to corner, the middle one 24.00 below the top and 27.50
+#                    above the bottom -- so it sits 1.75 ABOVE the board's centre line
+#
+# The corner four are symmetric about the board's centre, which is what lets the sensor sit on
+# the shaft axis with the board centred on them.
+BOARD_HOLES = (56.60, 51.50)    # corner-to-corner, from the published Size drawing
+MID_ROW_UP = 1.75               # the middle pair, above the centre line
 COMPONENTS = 10.0               # GUESSED, the tall side faces away from the motor
 SHAFT_PROUD = 2.0               # UNVERIFIED
 MAGNET = (6.0, 2.5)             # BOM D5, and what the datasheet asks for
@@ -142,19 +156,23 @@ for dx in (-REAR_BOLTS, REAR_BOLTS):
 # four bosses carrying the board, their top face at the sensor plane, on the board's own frame
 boss_h = ic_face - (REAR_Y + CAP_T)
 assert boss_h > 0.5, "the board would sit inside the mount's own plate"
-for dx in (-BOARD_HOLES[0] / 2.0, BOARD_HOLES[0] / 2.0):
-    for dz in (-BOARD_HOLES[1] / 2.0, BOARD_HOLES[1] / 2.0):
-        px, pz = rot(dx, dz)
-        p = V(px, REAR_Y + CAP_T, pz)
-        cap = cap.fuse(Part.makeCylinder(4.0, boss_h, p, V(0, 1, 0)))
-        cap = cap.cut(Part.makeCylinder(M3 / 2.0, boss_h + 6.0,
-                                        V(p.x, p.y - 3.0, p.z), V(0, 1, 0)))
+BOSSES = [(dx, dz)
+          for dx in (-BOARD_HOLES[0] / 2.0, BOARD_HOLES[0] / 2.0)
+          for dz in (-BOARD_HOLES[1] / 2.0, MID_ROW_UP, BOARD_HOLES[1] / 2.0)]
+for dx, dz in BOSSES:
+    px, pz = rot(dx, dz)
+    p = V(px, REAR_Y + CAP_T, pz)
+    cap = cap.fuse(Part.makeCylinder(4.0, boss_h, p, V(0, 1, 0)))
+    cap = cap.cut(Part.makeCylinder(M3 / 2.0, boss_h + 6.0,
+                                    V(p.x, p.y - 3.0, p.z), V(0, 1, 0)))
 # the bosses sit outside the motor's circle, so tie them back with a web -- rotated with them,
 # built as a polygon rather than a box because a box cannot be given an angle without a
 # placement, and a placement on a shape that later gets cut is how this project lost an evening
+# the web is the BOARD'S OWN OUTLINE now, not the hole pattern plus a guess: the holes are
+# inset 3.2 mm from the edges, so the outline covers every one of the six and nothing more
 wpts = []
 for dx, dz in ((-1, -1), (1, -1), (1, 1), (-1, 1)):
-    px, pz = rot(dx * (BOARD_HOLES[0] + 8.0) / 2.0, dz * (BOARD_HOLES[1] + 8.0) / 2.0)
+    px, pz = rot(dx * BOARD[0] / 2.0, dz * BOARD[1] / 2.0)
     wpts.append(V(px, REAR_Y, pz))
 wpts.append(wpts[0])
 web = Part.Face(Part.makePolygon(wpts)).extrude(V(0, CAP_T, 0))
@@ -177,8 +195,10 @@ assert len(cap.Solids) == 1, "the mount came out as %d solids" % len(cap.Solids)
 o = doc.getObject("P27_ControllerMount") or doc.addObject("Part::Feature", "P27_ControllerMount")
 o.Shape = cap
 o.Label = "P27_ControllerMount"
-print("  mount %.1f cm3: a cap on the motor's rear bolts, four bosses %.1f mm tall"
-      % (cap.Volume / 1000.0, boss_h))
+print("  mount %.1f cm3: a cap on the motor's rear bolts, %d bosses %.1f mm tall on the"
+      % (cap.Volume / 1000.0, len(BOSSES), boss_h))
+print("        board's %.2f x %.2f pattern -- six holes, from the published Size drawing"
+      % BOARD_HOLES)
 
 # ---------------------------------------------------------------- the board itself
 zc = MOT_Z
