@@ -236,26 +236,57 @@ print("5. THE POD -- the %dT belt run reaches r %.2f" % (MOT_T, tip_r(MOT_T) + 2
 # Y 200..226 takes the wall out in one piece.
 RELIEF_Y = (200.0, 226.0)
 relief = cylY(GUARD_R, RELIEF_Y[0], RELIEF_Y[1], MX, MZ)
+refused = []
 for n in ("P25_MotorNacelle", "A7_DriveBox", "P22_DriveCap"):
     sh = g[n].Shape
     k = sh.common(relief)
     if k.Volume < 1.0:
         print("   %-22s nothing in the way" % n)
         continue
+    # DOES THE CUT TAKE A WHOLE CROSS-SECTION? This is the check that was missing, and it cost
+    # P25_MotorNacelle its nose. The nacelle tapers to a dome centred ON the motor axis, so over
+    # Y 194..202 its ENTIRE section lies inside r 32.67 -- a relief bore there does not shave a
+    # wall, it amputates the end of the part, and everything below falls off as a fragment. The
+    # BOM describes P25 as "prints nose-down on its domed end"; there was no dome left.
+    eaten = []
+    for y0 in range(int(RELIEF_Y[0]) - 12, int(RELIEF_Y[1]) + 1, 4):
+        slab = Part.makeBox(500, 4.0, 500, V(-300, y0, -250))
+        tot = sh.common(slab).Volume
+        if tot < 50.0:
+            continue
+        if sh.common(slab).common(relief).Volume > 0.95 * tot:
+            eaten.append(y0)
+    if eaten:
+        print("   %-22s REFUSED: the bore removes the WHOLE section at Y %s"
+              % (n, ", ".join(str(y) for y in eaten)))
+        print("   %-22s          that is not a wall, it is the end of the part. P25's nose is"
+              % "")
+        print("   %-22s          434_odrive_mount.py's to shape, and 434 rebuilds it every run"
+              % "")
+        print("   %-22s          anyway -- the same trap that silently undid 439's trim." % "")
+        refused.append(n)
+        continue
     cut = sh.cut(relief)
     sols = sorted(cut.Solids, key=lambda x: -x.Volume)
     drop = sum(x.Volume for x in sols[1:]) / 1000.0
-    if len(sols) > 1 and drop > 0.5:
+    if len(sols) > 1 and drop > 0.1:
         print("   %-22s relief would orphan %.2f cm3 -- SKIPPED" % (n, drop))
+        refused.append(n)
         continue
     keep = sols[0] if len(sols) > 1 else cut
     g[n].Shape = keep
-    extra = ("  (and %.3f cm3 of loose fragment discarded: %s)"
-             % (drop, " ".join("%.0f" % v for v in (sols[1].BoundBox.XMin, sols[1].BoundBox.YMin,
-                                                    sols[1].BoundBox.ZMin)))) if len(sols) > 1 else ""
-    print("   %-22s relieved %.2f cm3 to r %.2f%s" % (n, k.Volume / 1000.0, GUARD_R, extra))
+    print("   %-22s relieved %.2f cm3 to r %.2f" % (n, k.Volume / 1000.0, GUARD_R))
 
 # ---------------------------------------------------------------- 6. P32_ScrewFoot
+if refused:
+    print()
+    print("   STILL OPEN: the 38T pulley and its belt run foul %s by about 0.3 cm3."
+          % " and ".join(refused))
+    print("   It is a real interference and it is not fixed here. The nose has to be RESHAPED --")
+    print("   drawn with its dome clear of r %.2f -- rather than bored, and that belongs in the"
+          % GUARD_R)
+    print("   script that builds it.")
+
 print()
 print("6. P32_ScrewFoot -- the screw's lower end has never had a mount")
 foot = box(FOOT_PLATE).fuse(box(FOOT_ARM)).fuse(box(FOOT_TONGUE))
