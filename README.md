@@ -1188,6 +1188,14 @@ straddles the sagittal plane and every printed part is chiral. The right leg is 
 [`scripts/701_mirror_build.py`](scripts/701_mirror_build.py):
 `KneeExo_v6.FCStd` (left) and `KneeExo_v6_R.FCStd` (right), 37 solids each.
 
+### v8, and why it is one script rather than a new lineage
+
+`KneeExo_v8.FCStd` is **v6-left plus [`scripts/459_v8_drivetrain.py`](scripts/459_v8_drivetrain.py)**, the same arrangement [`419_knee_coaxial.py`](scripts/419_knee_coaxial.py) used for its v7. v6 is ~300 scripts run in an order recorded nowhere; v8 is v6 and one file, reproducible in seconds, and that file says what changed and why. Left leg only for now.
+
+What it carries that v6 does not: the **drivetrain the bench actually has**. A 200 mm SFU1605 set arrived — 5 mm lead, BK/BF12 ends, flanged nut, DSG16H housing — where the model was drawn around an SFU1610 at a 10 mm lead with invented ⌀8 journals. So the screw becomes ⌀10 × 11 floating / ⌀12 × 25 fixed with 135 mm of thread between; the link pulleys become **38T:20T** because 5 mm doubles the screw's own reduction and 32T would leave the leg feeling 87% heavier unpowered; the belt is an exact **54T** at the 60.83 mm centres; the screw's upper bearing goes from a 608 to a **6001** because ⌀8 was never real; the pod is bored out to clear a 38T belt run; and **`P32_ScrewFoot` exists at last** — [`445_screw_foot.py`](scripts/445_screw_foot.py) went looking for something to bolt the screw's lower bearing to and found “a yoke corner, a belt and cladding. No mount.”
+
+What it deliberately does **not** carry, because the dimensions do not exist yet: `P3_GantryPlate` redrawn for the flanged nut and its housing, the main belt's tunnel lengthened from 5 grooves to 8 for an open-ended belt, and the joint encoder's mounting — which [`457_knee_bearings.py`](scripts/457_knee_bearings.py) invalidated by making the knee rod static, and whose magnet carrier, axial retention and sensor bracket have to be designed as one piece.
+
 Separate documents, not more objects in one, for two reasons: every verification script works on
 "each Part::Feature in the document", so doubling the objects would double every sweep and halve
 what the results mean; and interference, coverage and contact pressure are all invariant under
