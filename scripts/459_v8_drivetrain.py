@@ -314,10 +314,14 @@ print()
 print("7. CLEARANCE")
 doc.recompute()
 names = [o.Name for o in doc.Objects if o.isDerivedFrom("Part::Feature")]
-check = [("A2_BallScrew_SFU1620", n) for n in names if n != "A2_BallScrew_SFU1620"]
-check += [("P32_ScrewFoot", n) for n in names if n != "P32_ScrewFoot"]
-check += [("A6b_ScrewPulley20T", n) for n in names if n not in ("A6b_ScrewPulley20T",)]
-check += [("A6c_MotorPulley38T", n) for n in names if n not in ("A6c_MotorPulley38T",)]
+# EVERY part this script touched, against everything. The first version of this check listed the
+# screw, the foot and the two pulleys and left out A7b_LinkBelt -- so it reported 0.271 cm3 of
+# pulley fouling the nacelle and missed 6.9 cm3 of BELT doing the same thing, which the 107-pose
+# sweep then found. A check you write by naming the suspects only finds the suspects.
+TOUCHED = ["A2_BallScrew_SFU1620", "P32_ScrewFoot", "A6b_ScrewPulley20T", "A6c_MotorPulley38T",
+           "A7b_LinkBelt", "HW_Bearing_6001_Screw", "A7_DriveBox", "P22_DriveCap",
+           "P21_ShellAnterior"]
+check = [(a, n) for a in TOUCHED for n in names if n != a]
 bad = []
 for a, b in check:
     if a not in g and doc.getObject(a) is None:
@@ -337,13 +341,47 @@ for a, b in check:
 EXPECT = {("A2_BallScrew_SFU1620", "A2b_BallNut_SFU1620"),
           ("A2_BallScrew_SFU1620", "P3_Carriage"),
           ("A2_BallScrew_SFU1620", "A7_DriveBox"),
+          ("A2_BallScrew_SFU1620", "A6b_ScrewPulley20T"),
+          ("A2_BallScrew_SFU1620", "HW_Bearing_6001_Screw"),
           ("A6b_ScrewPulley20T", "A7b_LinkBelt"),
-          ("A6c_MotorPulley38T", "A7b_LinkBelt")}
+          ("A6c_MotorPulley38T", "A7b_LinkBelt"),
+          ("A7_DriveBox", "P22_DriveCap"), ("A7_DriveBox", "P25_MotorNacelle"),
+          ("P21_ShellAnterior", "A1_Extrusion_20x60_VSlot"),
+          # pre-existing and signed off: the fairing mounts sit inside the shell they carry,
+          # and the 107-pose sweep has reported these three for as long as it has existed
+          ("P21_ShellAnterior", "P23a_FairingMount"),
+          ("P21_ShellAnterior", "P23b_FairingMount"),
+          ("P21_ShellAnterior", "P23c_FairingMount")}
+seen_pairs = set()
+real = 0
 for a, b, v in sorted(bad, key=lambda r: -r[2]):
-    tag = "   expected" if (a, b) in EXPECT or (b, a) in EXPECT else "   <-- LOOK"
-    print("   %-26s ^ %-26s %8.3f cm3%s" % (a, b, v, tag))
+    if (a, b) in seen_pairs or (b, a) in seen_pairs:
+        continue
+    seen_pairs.add((a, b))
+    ok = (a, b) in EXPECT or (b, a) in EXPECT
+    if not ok:
+        real += 1
+    print("   %-26s ^ %-26s %8.3f cm3%s"
+          % (a, b, v, "   expected" if ok else "   <-- UNRESOLVED"))
 if not bad:
     print("   nothing over 0.02 cm3")
+print("   %d unresolved" % real)
+if real:
+    belt_r = tip_r(MOT_T) + BAND_T
+    print()
+    print("   THE 38T DRIVE DOES NOT FIT THE POD, and that is the headline of this build.")
+    print("   The belt's back sits at r %.2f from the motor axis (tip %.2f + %.1f of belt) and"
+          % (belt_r, tip_r(MOT_T), BAND_T))
+    print("   P25_MotorNacelle's bore there is r 29.7, so about %.1f mm of belt is inside the"
+          % (belt_r - 29.7))
+    print("   wall the whole way round -- %.1f cm3 of it, not the 0.3 the pulley alone suggested."
+          % 6.9)
+    print("   The bore has to reach r %.1f and the NOSE has to be reshaped rather than bored,"
+          % (belt_r + 1.0))
+    print("   because its dome is centred on the motor axis. Both belong in 434_odrive_mount.py.")
+    print()
+    print("   446_sfu1605_set.py predicted 0.2 mm of this from the pulley's pitch radius alone.")
+    print("   It was out by a factor of twenty because it never added the belt's own thickness.")
 
 doc.recompute()
 doc.save()
