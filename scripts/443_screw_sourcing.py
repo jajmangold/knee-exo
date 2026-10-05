@@ -19,6 +19,13 @@ WHAT CAN ABSORB A LEAD CHANGE. Only the link belt, and it is bounded at both end
     (the vendor drawing: dia 10 x 15, M12x1 x 14, dia 12 x 25). Below about 18T in HTD-5M the
     wall between the bore and the tooth root is thinner than the teeth.
 
+    THAT BORE WAS READ OFF THE WRONG END. 446_sfu1605_set.py works the stack out from the
+    BK12 the set actually ships with: the dia 12 x 25 is the BEARING seat, inboard of the
+    M12 locknut, and the dia 10 x 15 tip outboard of it is the pulley/coupler seat. So the
+    pulley bore is 10 if the block is used as designed, and 12 only if the tip and the
+    locknut thread are parted off. 12 happened to be a safe number to size teeth against,
+    which is why nothing downstream caught it.
+
 So the achievable overdrive is roughly 1.0 to 1.9, not the 3.2 a 5 mm lead would need to get
 back to where the 10 mm lead already is.
 
