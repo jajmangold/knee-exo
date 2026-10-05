@@ -47,10 +47,14 @@ LINES = [
     # ---------------------------------------------------------------- knee transmission
     ("K1", "HTD-8M open-ended belt, 30 mm wide, 1 m", "1", "BUY", 20,
      "cut to length on the machine. 448"),
-    ("K2", "dia 12 x 70 316 stainless rod", "1 (2-pack)", "BUY", 8,
-     "the knee pin. NON-MAGNETIC is the requirement, not hardness -- it carries the encoder "
-     "magnet. Check the diameter to a hundredth for the 6001 bore, and it needs retention "
-     "adding. 451"),
+    ("K2", "dia 12 x 70 ground rod, h6 (silver steel)", "1", "BUY", 8,
+     "the knee pin. h6 NOT m6 -- an ISO 8734 dowel's m6 is a press fit in the 6001. Not HSS: "
+     "brittle. Check the diameter to a hundredth on arrival. 451, 452"),
+    ("K2a", "Rigid flange collar, dia 12 bore", "1 (4-pack)", "BUY", 5,
+     "the pin's head and its retention, into the counterbore opened dia 20 -> dia 17. Its "
+     "4 x M4 also carry the non-magnetic magnet carrier. 452"),
+    ("K2b", "Plain shaft collar, dia 12", "1", "BUY", 3,
+     "the tail end. A flange there would have nothing to bolt to. 452"),
     ("K3", "6001-2RS (12 x 28 x 8)", "1", "BUY", 3, "the knee bearing. See D8a -- one order of 2"),
     ("K4", "Compression spring, ~500 N/mm, 3 mm travel", "1", "BUY", 5,
      "idler carrier. Keep it even with a cut belt until the clamp is proven"),
