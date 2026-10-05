@@ -47,7 +47,10 @@ LINES = [
     # ---------------------------------------------------------------- knee transmission
     ("K1", "HTD-8M open-ended belt, 30 mm wide, 1 m", "1", "BUY", 20,
      "cut to length on the machine. 448"),
-    ("K2", "ISO 7379 12 x 70 shoulder screw, or 12 x 70 dowel", "1", "BUY", 8, "the knee pin"),
+    ("K2", "dia 12 x 70 316 stainless rod", "1 (2-pack)", "BUY", 8,
+     "the knee pin. NON-MAGNETIC is the requirement, not hardness -- it carries the encoder "
+     "magnet. Check the diameter to a hundredth for the 6001 bore, and it needs retention "
+     "adding. 451"),
     ("K3", "6001-2RS (12 x 28 x 8)", "1", "BUY", 3, "the knee bearing. See D8a -- one order of 2"),
     ("K4", "Compression spring, ~500 N/mm, 3 mm travel", "1", "BUY", 5,
      "idler carrier. Keep it even with a cut belt until the clamp is proven"),
