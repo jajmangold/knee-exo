@@ -1395,8 +1395,10 @@ quietly leave one leg's STLs under names that look like a complete set.
   aluminium from the machine. Before that it read 1.59 kg, because it counted two parts that no
   longer exist: `P3b_CarriageB` and `P11_SprungAnchor` went with the second ball screw. The
   remaining candidates for a diet are `P21_FairingThigh` (165 cm³), `P5_ThighCuff` (161 cm³),
-  `P22_DriveCap` (152 cm³), `P2a_KneeHub_Pulley29T` (148 cm³) and
-  `A7_DriveBracket_Idler` (137 cm³).
+  `P22_DriveCap` (152 cm³), `A7_DriveBracket_Idler` (137 cm³),
+  `P1_KneeYoke` (134 cm³) and `P2a_KneeHub_Pulley29T` (134 cm³ — **it was 148 until
+  [`457_knee_bearings.py`](scripts/457_knee_bearings.py) deleted the 44 mm of reach it only
+  had because the bearing sat beside the belt instead of in it**).
 - ~~**Carriage guides are sliding, not rolling**~~ — **changed.** Four **mini** V-wheels
   (`P10a-d_VWheel_Mini`, OD 15.23) on the extrusion's corners, 70 mm apart in Y. A solid wheel
   reaches |X| 37.6, inside the belt's backing at 36.24…38.46; a mini reaches 31.0 and clears the
