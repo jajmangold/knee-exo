@@ -36,7 +36,27 @@ claim("38T belt plane Y min", b.YMin, 206.0)
 claim("38T belt plane width", b.YLength, 15.0)
 b = g["A6b_ScrewPulley20T"].Shape.BoundBox
 claim("20T tip radius", max(b.XLength, b.ZLength) / 2, 20 * 5.0 / (2 * math.pi) - 0.571)
-claim("P25_MotorNacelle cm3", g["P25_MotorNacelle"].Shape.Volume / 1000., 103.9, 0.2)
+claim("P25_MotorNacelle cm3", g["P25_MotorNacelle"].Shape.Volume / 1000., 116.7, 0.2)
+claim("P25 reaches down to Y", g["P25_MotorNacelle"].Shape.BoundBox.YMin, 146.0, 0.5)
+claim("P21_ShellAnterior cm3", g["P21_ShellAnterior"].Shape.Volume / 1000., 163.8, 0.2)
+# the blend's own promise: a ramp no steeper than 30 degrees across the pod's leading edge
+import Part as _P
+def _sect_r(y):
+    best = 0.0
+    for w in (g["P21_ShellAnterior"].Shape.fuse(g["P22_DriveCap"].Shape)
+              .fuse(g["P25_MotorNacelle"].Shape)).slice(FreeCAD.Vector(0, 1, 0), y):
+        for q in w.discretize(Distance=1.0):
+            a = math.degrees(math.atan2(q.z, q.x)) % 360.0
+            if 138.0 <= a <= 172.0:
+                best = max(best, math.hypot(q.x, q.z))
+    return best
+_prev, _worst = 0.0, 0.0
+for _y in range(160, 206, 5):
+    _r = _sect_r(float(_y))
+    if _prev and _r:
+        _worst = max(_worst, math.degrees(math.atan2(_r - _prev, 5.0)))
+    _prev = _r
+claim("steepest face on the pod ramp, deg", _worst, 31.0, 1.5)
 claim("A7_DriveBox cm3", g["A7_DriveBox"].Shape.Volume / 1000., 121.4, 0.2)
 claim("P22_DriveCap cm3", g["P22_DriveCap"].Shape.Volume / 1000., 149.8, 0.2)
 claim("P32_ScrewFoot cm3", g["P32_ScrewFoot"].Shape.Volume / 1000., 13.3, 0.2)

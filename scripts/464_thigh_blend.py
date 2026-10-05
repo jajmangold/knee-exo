@@ -56,11 +56,15 @@ MAX_RAMP_DEG = 30.0                     # above this a ledge still catches
 # loft's last leg was still climbing when it met the pod and the pod's own face poked through.
 # The constraint is simple once written down -- rise 32 mm at 30 degrees needs 55 mm of run --
 # so the stations are evenly spaced and the radius steps are equal. A straight ramp, not a curve.
+# and it has to ARRIVE at the pod's radius by Y 205, not Y 206. Ending one station late left
+# the blend at 156.6 where the pod is already 158, so the pod's own face poked 1.4 mm through
+# and the measured step was 33 degrees however shallow the blend itself was.
 PROFILE = [(146.0, 126.0, 140.0),
-           (161.0, 134.0, 150.0),
-           (176.0, 142.0, 158.0),
-           (191.0, 150.0, 166.0),
-           (206.0, 158.0, SECT_TIP),
+           (158.0, 132.5, 148.0),
+           (170.0, 139.0, 156.0),
+           (182.0, 145.5, 163.0),
+           (193.0, 152.0, 169.0),
+           (205.0, 158.0, SECT_TIP),
            (220.0, 158.0, SECT_TIP)]
 
 
