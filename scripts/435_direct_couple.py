@@ -72,7 +72,10 @@ for lbl, lead, link in (("as built: 10 mm + 1:1.6", 10.0, 0.625),
     n_tot = n_screw * link
     tau_m = TAU_KNEE / (n_tot * ETA_S)
     amps = tau_m / KT
-    rpm_m = RPM_SCREW * (lead / 10.0) / link
+    # motor rpm = screw rpm / the overdrive. An earlier version divided by `link` (0.625),
+    # which is the overdrive's RECIPROCAL, and reported 1856 rpm for the as-built case where
+    # 404_link_ratio.py says 725. The ratio and torque columns were right; only this was not.
+    rpm_m = RPM_SCREW * (lead / 10.0) * link
     j = J_ROTOR * n_tot ** 2
     rows.append((lbl, n_tot, tau_m, amps, rpm_m, j))
     print("     %-26s %7.1f:1 %7.2f Nm %6.1f A %8.0f %9.3f %8.2fx %s"
