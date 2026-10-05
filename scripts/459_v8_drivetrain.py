@@ -70,7 +70,11 @@ BRG_OD, BRG_W = 28.0, 8.0       # 6001-2RS
 BRG_Y = (223.0, 231.0)
 SEAT_BOSS_R = 19.0              # 5 mm of wall around the dia 28 seat
 
-GUARD_R = tip_r(MOT_T) + 2.0 + 1.0      # the 38T belt run plus a millimetre
+# The BELT's back, not the pulley's pitch radius. 446_sfu1605_set.py used PD/2 + 2 and predicted
+# 0.2 mm of pod interference; the real figure is tip + the belt's own 3.8 mm thickness, and the
+# 107-pose sweep found 6.9 cm3 of belt inside the nacelle. Out by a factor of twenty.
+GUARD_R = tip_r(MOT_T) + BAND_T + 1.0   # 34.47
+POD_OUT_R = 37.0                        # the nacelle's new outer wall round the belt bay
 
 # ---------------------------------------------------------------- P32_ScrewFoot, from 445
 # 445 drew this against a screw ending at Y 57. The bought screw's floating journal starts at
@@ -120,6 +124,28 @@ class _Tee(object):
 
 
 sys.stdout = _Tee(sys.__stdout__, sys.__stderr__)
+def hull(r1, r2, y0, y1):
+    """the band a belt makes round two pulleys: outer hull minus inner hull"""
+    import math as _m
+    d = _m.hypot(MX - SX, MZ - SZ)
+    ux, uz = (MX - SX) / d, (MZ - SZ) / d
+    px, pz = -uz, ux
+    faces = []
+    for t in (0.0, 1.0):
+        pass
+    outer = cylY(r1, y0, y1).fuse(cylY(r2, y0, y1, MX, MZ))
+    # the straight run: a box joining the two tangent lines, built in the pulleys' own frame
+    L = d
+    quad = Part.makePolygon([V(SX + px * r1, y0, SZ + pz * r1),
+                             V(MX + px * r2, y0, MZ + pz * r2),
+                             V(MX - px * r2, y0, MZ - pz * r2),
+                             V(SX - px * r1, y0, SZ - pz * r1),
+                             V(SX + px * r1, y0, SZ + pz * r1)])
+    slab = Part.Face(quad).extrude(V(0, y1 - y0, 0))
+    return outer.fuse(slab), L
+
+
+
 doc = kx_doc()
 g = {o.Name: o for o in doc.Objects}
 
@@ -176,27 +202,6 @@ print("   centres %.2f mm -> total ratio %.1f:1, reflected %.3f kg.m2 = %.2fx th
       % (CENTRES, n_tot, 3.10e-4 * n_tot ** 2, 3.10e-4 * n_tot ** 2 / 0.30))
 
 
-def hull(r1, r2, y0, y1):
-    """the band a belt makes round two pulleys: outer hull minus inner hull"""
-    import math as _m
-    d = _m.hypot(MX - SX, MZ - SZ)
-    ux, uz = (MX - SX) / d, (MZ - SZ) / d
-    px, pz = -uz, ux
-    faces = []
-    for t in (0.0, 1.0):
-        pass
-    outer = cylY(r1, y0, y1).fuse(cylY(r2, y0, y1, MX, MZ))
-    # the straight run: a box joining the two tangent lines, built in the pulleys' own frame
-    L = d
-    quad = Part.makePolygon([V(SX + px * r1, y0, SZ + pz * r1),
-                             V(MX + px * r2, y0, MZ + pz * r2),
-                             V(MX - px * r2, y0, MZ - pz * r2),
-                             V(SX - px * r1, y0, SZ - pz * r1),
-                             V(SX + px * r1, y0, SZ + pz * r1)])
-    slab = Part.Face(quad).extrude(V(0, y1 - y0, 0))
-    return outer.fuse(slab), L
-
-
 print()
 print("3. THE LINK BELT -- rebuilt as a band, %.0f mm wide" % BELT_W5)
 outer, _ = hull(tip_r(SCR_T) + BAND_T, tip_r(MOT_T) + BAND_T, BELT_Y[0], BELT_Y[1])
@@ -234,8 +239,13 @@ print("5. THE POD -- the %dT belt run reaches r %.2f" % (MOT_T, tip_r(MOT_T) + 2
 # band alone orphans the 4.4 cm3 of wall below it, and an r 31.5..32.67 annulus is worse -- it
 # starts INSIDE the material and frees the sleeve between 29.7 and 31.5. A solid bore over
 # Y 200..226 takes the wall out in one piece.
+# THE BELT IS A STADIUM, NOT A CIRCLE. Relieving a cylinder around the motor axis left 0.95 cm3
+# of belt still buried, because the straight runs reach 60.83 mm across to the screw pulley and a
+# cylinder does not follow them. The relief is the belt's own swept shape plus a millimetre.
 RELIEF_Y = (200.0, 226.0)
-relief = cylY(GUARD_R, RELIEF_Y[0], RELIEF_Y[1], MX, MZ)
+relief = hull(tip_r(SCR_T) + BAND_T + 1.0, GUARD_R, RELIEF_Y[0] + 2.0, RELIEF_Y[1] + 0.5)[0]
+POD_CAVITY = hull(tip_r(SCR_T) + BAND_T + 1.0 + 2.5, GUARD_R + 2.5,
+                  RELIEF_Y[0], RELIEF_Y[1])[0]
 refused = []
 for n in ("P25_MotorNacelle", "A7_DriveBox", "P22_DriveCap"):
     sh = g[n].Shape
@@ -277,15 +287,32 @@ for n in ("P25_MotorNacelle", "A7_DriveBox", "P22_DriveCap"):
     g[n].Shape = keep
     print("   %-22s relieved %.2f cm3 to r %.2f" % (n, k.Volume / 1000.0, GUARD_R))
 
+# P25 cannot simply be bored -- its dome is on the motor axis, so the bore amputates it. GROW the
+# wall outward first and the dome stays attached through the new tube, which is the same move the
+# knee capstan needed in 457_knee_bearings.py: fuse a sleeve, then bore it.
+p25 = g["P25_MotorNacelle"].Shape
+grown = p25.fuse(POD_CAVITY)
+assert len(grown.Solids) == 1, "the pod sleeve fused into %d solids" % len(grown.Solids)
+# the grown bay now wraps the screw as well as the belt, so give the screw its running clearance
+bored = grown.cut(relief).cut(cylY(THREAD_D / 2.0 + 1.1, RELIEF_Y[0] - 1.0, RELIEF_Y[1] + 1.0))
+sols = sorted(bored.Solids, key=lambda x: -x.Volume)
+assert len(sols) == 1, "boring the pod sleeve left %d solids" % len(sols)
+# cladding yields to structure, and P22/P25 are one wall split in two (434_odrive_mount.py), so
+# the nacelle gives up anything it has just grown into either of them
+for host in ("A7_DriveBox", "P22_DriveCap"):
+    bored = bored.cut(g[host].Shape)
+    sols = sorted(bored.Solids, key=lambda x: -x.Volume)
+    drop = sum(x.Volume for x in sols[1:]) / 1000.0
+    assert drop < 0.05, "trimming P25 to %s orphaned %.3f cm3" % (host, drop)
+    bored = sols[0]
+g["P25_MotorNacelle"].Shape = bored
+sols = [bored]
+print("   %-22s belt bay grown then cut to the belt's own shape: %.2f -> %.2f cm3"
+      % ("P25_MotorNacelle", p25.Volume / 1000.0, sols[0].Volume / 1000.0))
+dome = sols[0].common(Part.makeBox(500, 10.0, 500, V(-300, 194.0, -250))).Volume / 1000.0
+print("   %-22s the domed end at Y 194..204 survives: %.3f cm3" % ("", dome))
+
 # ---------------------------------------------------------------- 6. P32_ScrewFoot
-if refused:
-    print()
-    print("   STILL OPEN: the 38T pulley and its belt run foul %s by about 0.3 cm3."
-          % " and ".join(refused))
-    print("   It is a real interference and it is not fixed here. The nose has to be RESHAPED --")
-    print("   drawn with its dome clear of r %.2f -- rather than bored, and that belongs in the"
-          % GUARD_R)
-    print("   script that builds it.")
 
 print()
 print("6. P32_ScrewFoot -- the screw's lower end has never had a mount")
@@ -367,21 +394,24 @@ if not bad:
     print("   nothing over 0.02 cm3")
 print("   %d unresolved" % real)
 if real:
+    print()
+    print("   %d overlap(s) above remain unaccounted for. Nothing here is hidden behind a bored" % real)
+    print("   hole: the pod's bay is GROWN and then cut to the belt's own shape, so whatever is")
+    print("   left is a genuine conflict to resolve, not a wall that wanted thinning.")
+else:
     belt_r = tip_r(MOT_T) + BAND_T
     print()
-    print("   THE 38T DRIVE DOES NOT FIT THE POD, and that is the headline of this build.")
-    print("   The belt's back sits at r %.2f from the motor axis (tip %.2f + %.1f of belt) and"
-          % (belt_r, tip_r(MOT_T), BAND_T))
-    print("   P25_MotorNacelle's bore there is r 29.7, so about %.1f mm of belt is inside the"
-          % (belt_r - 29.7))
-    print("   wall the whole way round -- %.1f cm3 of it, not the 0.3 the pulley alone suggested."
-          % 6.9)
-    print("   The bore has to reach r %.1f and the NOSE has to be reshaped rather than bored,"
-          % (belt_r + 1.0))
-    print("   because its dome is centred on the motor axis. Both belong in 434_odrive_mount.py.")
-    print()
-    print("   446_sfu1605_set.py predicted 0.2 mm of this from the pulley's pitch radius alone.")
-    print("   It was out by a factor of twenty because it never added the belt's own thickness.")
+    print("   THE POD NOW CLEARS THE 38T DRIVE. It did not: the belt's back sits at r %.2f from"
+          % belt_r)
+    print("   the motor axis (tip %.2f plus the belt's own %.1f) and the nacelle's bore was r 29.7,"
+          % (tip_r(MOT_T), BAND_T))
+    print("   which buried 6.9 cm3 of belt. 446_sfu1605_set.py predicted 0.2 mm of this from the")
+    print("   pulley's PITCH radius and was out by a factor of twenty, having never added the")
+    print("   belt's thickness. Two more things had to be right after that:")
+    print("     * the bay is GROWN before it is cut. P25's dome sits ON the motor axis, so a")
+    print("       relief bore amputates the end of the part instead of thinning a wall.")
+    print("     * the relief is the belt's own stadium, not a cylinder. A cylinder round the")
+    print("       motor leaves the straight runs buried -- 0.95 cm3 of them, 60.83 mm away.")
 
 doc.recompute()
 doc.save()

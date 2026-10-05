@@ -50,7 +50,11 @@ STRUCT=["P1_KneeYoke","P2a_KneeHingePlate","P5_ThighCuff",
         # the IMU covers (442_imu_mounts.py). Two of them, identical, one per cuff -- they
         # are modelled in place rather than at the origin so the sweep sees them where they
         # actually are.
-        "P28a_IMUCover", "P28b_IMUCover"]
+        "P28a_IMUCover", "P28b_IMUCover",
+        # the screw's lower bearing mount (459_v8_drivetrain.py). Built in v8 only, so it is
+        # exported from v8 and simply reported MISSING from v6 -- which is the behaviour wanted:
+        # a part list that silently skipped absent parts would hide a document that had lost one.
+        "P32_ScrewFoot"]
 # P24_FairingShank is gone, not merely unexported: 430_shank_inline_build.py moved the shank
 # rail in-line under the knee joint and there was nothing left for it to fair.
 FAIR=["P20_KneeShroud","P21_ShellAnterior","P22_DriveCap","P25_MotorNacelle",
