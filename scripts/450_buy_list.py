@@ -41,21 +41,17 @@ LINES = [
      "cut 0.1 mm proud of the printed hub so the clamp load misses the plastic. 449"),
     ("D8", "BF12 floating-end support", "1", "HAVE", 0, "in the screw set"),
     ("D8a", "6001-2RS (12 x 28 x 8)", "1", "BUY", 3,
-     "screw's upper bearing under Path B. SAME PART AS K3 -- order 2"),
+     "screw's upper bearing under Path B. SAME PART AS K3, which now needs 2 -- order 3"),
     ("D9", "Flexible coupler", "1", "HAVE", 0, "in the box, unused -- the motor is belted"),
 
     # ---------------------------------------------------------------- knee transmission
     ("K1", "HTD-8M open-ended belt, 30 mm wide, 1 m", "1", "BUY", 20,
      "cut to length on the machine. 448"),
-    ("K2", "dia 12 x 70 ground rod, h6 (silver steel)", "1", "BUY", 8,
-     "the knee pin. h6 NOT m6 -- an ISO 8734 dowel's m6 is a press fit in the 6001. Not HSS: "
-     "brittle. Check the diameter to a hundredth on arrival. 451, 452"),
-    ("K2a", "Rigid flange collar, dia 12 bore", "1 (4-pack)", "BUY", 5,
-     "the pin's head and its retention, into the counterbore opened dia 20 -> dia 17. Its "
-     "4 x M4 also carry the non-magnetic magnet carrier. 452"),
-    ("K2b", "Plain shaft collar, dia 12", "1", "BUY", 3,
-     "the tail end. A flange there would have nothing to bolt to. 452"),
-    ("K3", "6001-2RS (12 x 28 x 8)", "1", "BUY", 3, "the knee bearing. See D8a -- one order of 2"),
+    ("K2", "dia 12 x 60 ground rod, h6 (silver steel)", "1", "BUY", 8,
+     "the knee stub axle. h6 NOT m6 -- an ISO 8734 dowel's m6 is a press fit in the 6001. Not "
+     "HSS: brittle. The collars are gone: the yoke bore IS the clamp now. 457"),
+    ("K3", "6001-2RS (12 x 28 x 8)", "2", "BUY", 6,
+     "BOTH knee bearings, inside the capstan. Same part as D8a -- one order of 3"),
     ("K4", "Compression spring, ~500 N/mm, 3 mm travel", "1", "BUY", 5,
      "idler carrier. Keep it even with a cut belt until the clamp is proven"),
     ("S2b", "29T HTD-8M idler", "1", "PRINT", 0, "zero torque -- it only turns the belt round"),
