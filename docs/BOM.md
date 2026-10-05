@@ -145,8 +145,8 @@ became a bought aluminium plate (S2d) and the other two were deleted with the se
 
 | Part | Qty/leg | Suggested |
 |---|---|---|
-| `P1_KneeYoke` | 1 | 5 perimeters, 60% gyroid — carries the full knee reaction |
-| `P2a_KneeHub_Pulley29T` | 1 | 6 perimeters, 60%. The tooth flanks want a fresh nozzle |
+| `P1_KneeYoke` | 1 | 5 perimeters, 60% gyroid — carries the full knee reaction, and since [`457_knee_bearings.py`](../scripts/457_knee_bearings.py) it is **the knee rod's only support**: an 18 mm ⌀12.2 clamp bore over Z 76…94 through a boss that replaced the old ⌀28 bearing seat, plus an M4 grub cross-hole. The rod cantilevers out of it through both 6001s, so this bore being square in two planes is what decides whether the knee points where the leg does. 124.8 → 134.4 cm³ |
+| `P2a_KneeHub_Pulley29T` | 1 | 6 perimeters, 60%. The tooth flanks want a fresh nozzle. **It is now the knee's bearing housing too** — two ⌀28 × 8 seats at Z 96…104 and Z 118…126, bored in ONE setup so they end up collinear, with a ⌀26 abutment between them. Losing the pin lugs took it from 148.1 to 134.2 cm³. **Print it with the knee axis vertical**: both seats and the belt land are then concentric by construction rather than by luck ([`457_knee_bearings.py`](../scripts/457_knee_bearings.py)) |
 | `P5_ThighCuff`, `P7_ShankCuff`, `P6_ShankSocket` | 1 each | 4 perimeters, 30% |
 | `P20_KneeCap` | 1 | 3 perimeters, 15%, cosmetic |
 | `P21_FairingThigh`, `P22_DriveCap` | 1 each | 3 perimeters, 15%, cosmetic. the shank fairing (`P24`) **used to be here and is deleted**: the shank rail moved in-line under the knee joint ([`430_shank_inline_build.py`](../scripts/430_shank_inline_build.py)) and there was nothing left for it to fair |

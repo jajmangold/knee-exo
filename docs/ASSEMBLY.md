@@ -30,14 +30,14 @@ as well. Budget an hour per leg for this and do all of it before you pick up a b
 | Drill 4.3 | every ⌀4.2 — `P1`, `P6` (16 of them), `P30`, `P31` |
 | Drill 5.3 | every ⌀5.2 — `P1` (4, at X ±10), `P2a`, `P3` (4 wheel + 2 set screws), `P5`, `P7`, `P21` (19), `P23a/b/c`, `P6` (12 clamp bolts at |X| 24 + the cap's 2 axial), `P27` (4 into the motor's rear), `A7` (2 into the rail's end) |
 | **Ream** 5.0 H7 | the ⌀5.0 dowel holes in `P30` and `P31` — these set the interface alignment, so ream, do not drill |
-| Ream 12.3, on a drill press | the ⌀12.3 knee-pin holes in **`P2a`** (the hub). This is the joint axis; a hole drilled crooked by hand becomes a knee that binds at one end of its travel |
-| **Bore 28.2, on a drill press** | the ⌀28 bearing seat in **`P1_KneeYoke`**. 28.2 rather than 28.0 deliberately: the 6001 is **bonded**, not pressed, and 0.1 mm is the bond line |
+| **Bore 28.2, on a drill press** | the **two** ⌀28 bearing seats in **`P2a`**, at Z 96…104 and Z 118…126. 28.2 rather than 28.0 deliberately: the 6001s are **bonded**, not pressed, and 0.1 mm is the bond line. **Bore them in one setup without moving the part** — they are the knee axis, and two seats bored separately will not be collinear |
+| Ream 12.2, on a drill press | the ⌀12.2 rod bore through **`P1_KneeYoke`**, Z 76…94. The yoke is now the rod's only clamp, so a crooked bore is a knee that points the wrong way. **The pin holes in `P2a` are gone** — the hub no longer touches the rod |
 | Melt in M5 heat-set inserts | the ⌀6.4 holes — 4 in `P6`, 6 each in `P30` and `P31`. Leave the holes as printed; an M5 insert is ⌀7.0 and wants 6.4 |
 | Leave alone | the ⌀10.4 counterbores on `P5` and `P7` — the cap heads sit in them |
 
-Then dry-fit the knee: `P1L` and `P2aL` on the pin — **bearing not yet bonded** — no belt, and swing
-it. It must move freely through **−2° to +104°** with no tight spot. Fix that here, not later: once
-the 6001 is bonded in, getting back out of the seat means destroying the bearing.
+Then dry-fit the knee: the rod through `P1L`, both 6001s dropped into `P2aL` **not yet bonded**, no
+belt, and swing it. It must move freely through **−2° to +104°** with no tight spot. Fix that here,
+not later: once the bearings are bonded in, getting back out of the seats means destroying them.
 
 Full table: [`scripts/417_fastener_audit.py`](../scripts/417_fastener_audit.py), 136 holes.
 
@@ -133,13 +133,16 @@ Full table: [`scripts/417_fastener_audit.py`](../scripts/417_fastener_audit.py),
    `P2aL_KneeHub_Pulley29T` is the shank-side capstan and the 29T the main belt wraps — handle its
    tooth flanks carefully, they are printed, and they are an approximation of the HTD-8M form until
    the coupon says otherwise.
-10. **Bond the 6001 into `P1L`'s seat** (K3) — structural methacrylate or epoxy, bearing square to
-    the face, wiped clean, left to cure before anything loads it. Do **not** press it in: PETG
-    creeps under hoop stress and the interference is gone within months.
-11. **Knee pin** (K2 — ISO 7379 12 × 70 shoulder screw, or an ISO 8734 ⌀12 × 70 dowel) through
-    `P2aL`'s lower lug, the bearing's bore, and `P2aL`'s upper lug, into the flush counterbore.
-    The collars clamp the **hub** to the pin; the bearing is the only thing that rotates. Nothing
-    about the device is right if this is not square.
+10. **Bond BOTH 6001s into `P2aL`** (K3, two off) — one at Z 96…104, one at Z 118…126, flush to
+    each face of the belt land. Structural methacrylate or epoxy, each square to its face, wiped
+    clean, left to cure before anything loads it. Do **not** press them in: PETG creeps under
+    hoop stress and the interference is gone within months. **They are 22 mm apart and that span
+    is what resists varus/valgus** — a bearing sitting cocked in its seat spends the span.
+11. **The knee rod** (K2, ⌀12 × 60 ground) into `P1L`'s bore, Z 76…94, bonded, with the M4 grub
+    through its heat-set insert as the mechanical backup. **It is a stub axle, not a pin**: the
+    yoke is its only support and it cantilevers through both bearings. Set its depth so it ends
+    at Z 130 — 1.5 mm short of `P20`'s inner face — and check it is square in two planes before
+    the bond goes off. Nothing about the device is right if this is not square.
 12. Swing the joint again, now loaded by the yoke: −2° to +104°. It should feel **free** — that is
     the point of the bearing. If it drags, the bearing is cocked in its seat or the pin is bent.
 

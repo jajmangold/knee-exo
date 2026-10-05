@@ -139,7 +139,11 @@ print()
 print("2. P1_KneeYoke")
 p1 = g["P1_KneeYoke"].Shape
 yz = z(*YOKE_Z)
-plug = Part.makeCylinder(BRG[0] / 2.0, yz[1] - yz[0] + 1.0, V(0, 0, yz[0] - 0.5), V(0, 0, 1))
+# r 15, not r 14: a plug the exact radius of the seat it fills leaves coincident CYLINDRICAL faces
+# and 417_fastener_audit.py then reports a phantom "28 x 0" bearing seat in P1. Overlap 1 mm into
+# solid material instead. Its END faces, though, must be exactly flush with the yoke's own: let the
+# plug stand 0.5 mm proud and the phantom simply moves to dia 30, as a real 0.5 mm nub this time.
+plug = Part.makeCylinder(BRG[0] / 2.0 + 1.0, yz[1] - yz[0], V(0, 0, yz[0]), V(0, 0, 1))
 new1 = p1.fuse(plug)
 assert len(new1.Solids) == 1, "filling the old 6001 seat split P1"
 print("   filled the old dia %.0f x %.0f 6001 seat   +%.2f cm3"

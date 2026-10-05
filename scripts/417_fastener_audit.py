@@ -76,8 +76,12 @@ CLASS = [
     # head recess, not a hole for hardware of its own.
     (10.30, 10.60, "M5/M6 cap head counterbore", "nothing to do; the head sits in it"),
     (9.80, 10.29, "10 mm pin or 10 mm ID bearing", "ream 10.0"),
-    # The knee pin, BOM K2: an M12 x 70 shoulder bolt or hardened dowel through P1 and P2a.
-    (12.10, 12.45, "M12 knee pin clearance", "ream 12.3; this is the joint axis, so do it on a mill"),
+    # The knee rod, BOM K2: a dia 12 ground stub axle, and since 457_knee_bearings.py it is held
+    # by P1 ALONE -- P2a's old pin lugs are gone, the hub runs on two 6001s instead. So this is no
+    # longer a clearance hole in two parts; it is one bonded clamp bore in one part, and whether
+    # the knee points straight is decided entirely by how square it is.
+    (12.10, 12.45, "dia 12 knee rod clamp bore (P1 only)",
+     "ream 12.2 on a drill press; the yoke is the rod's only support, so square in two planes"),
     (12.80, 13.20, "13 mm OD bearing seat (695)", "press fit: print 12.9 and face it"),
     (18.80, 19.20, "19 mm OD bearing seat (6800)", "press fit: print 18.9 and face it"),
     (21.80, 22.20, "22 mm OD bearing seat (6900)", "press fit: print 21.9 and face it"),
