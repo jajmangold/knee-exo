@@ -150,7 +150,7 @@ became a bought aluminium plate (S2d) and the other two were deleted with the se
 | `P5_ThighCuff`, `P7_ShankCuff`, `P6_ShankSocket` | 1 each | 4 perimeters, 30% |
 | `P20_KneeCap` | 1 | 3 perimeters, 15%, cosmetic |
 | `P21_FairingThigh`, `P22_DriveCap` | 1 each | 3 perimeters, 15%, cosmetic. the shank fairing (`P24`) **used to be here and is deleted**: the shank rail moved in-line under the knee joint ([`430_shank_inline_build.py`](../scripts/430_shank_inline_build.py)) and there was nothing left for it to fair |
-| `P25_MotorNacelle` | 1 | 3 perimeters, 15%. Prints nose-down on its domed end, no supports |
+| `P25_MotorNacelle` | 1 | 3 perimeters, 15%. Prints nose-down on its domed end, no supports. **In v8 it carries the thigh blend** ([`464_thigh_blend.py`](../scripts/464_thigh_blend.py)): a teardrop fairing growing out of `P21_ShellAnterior` over Y 146…206 that turns the pod's 77° leading face into a 28° ramp. 103.9 → 116.3 cm³. The pod never stuck out — it started abruptly, and a wall facing down the leg is what snags |
 | `P23a/b/c_FairingMount` | 3 | 4 perimeters, 40% — they carry the canopy. All three are the **same part**, so they share one mark |
 | `A7_DriveBracket_Idler` | 1 | 6 perimeters, 60% — the heaviest load path in the machine, 1828 N through the idler. **Seat the two idler bearings in its plates and bond them**; a bare axle through 6 mm of PETG is 15.2 MPa and beds in |
 | `P3_GantryPlate_Printed` | 1 | 6 perimeters, 50% — in-plane loads only, 1.5–7.6 MPa. **Has no bolt holes drawn yet**, see the README's open items |
