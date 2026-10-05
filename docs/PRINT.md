@@ -80,9 +80,9 @@ to finish to, from [`scripts/417_fastener_audit.py`](../scripts/417_fastener_aud
 | ⌀5.2 | 5.3 | M5 clearance |
 | ⌀6.4 | leave as printed | M5 heat-set insert, OD ~7.0, melted in |
 | ⌀10.4 | leave as printed | cap head counterbore |
-| ⌀12.3 | 12.3 | knee pin through the hub — the joint axis, so do it on a drill press |
+| ⌀12.2 | 12.2 | the knee rod's clamp bore in **`P1_KneeYoke`** — the yoke is the rod's only support now, so square in two planes, on a drill press. **The hub has no pin holes any more** |
 | ⌀26 | 26.2 | the two idler bearing seats in the bracket. Bonded, same reason |
-| ⌀28 | 28.2 | the 6001 seat in the yoke. 28.2, not 28.0: the bearing is **bonded**, and that |
+| ⌀28 | 28.2 | the **two** 6001 seats in **`P2a`**, Z 96…104 and Z 118…126. Bore both in ONE setup — they are the knee axis and separately-bored seats will not be collinear. 28.2, not 28.0: the bearings are **bonded**, and that |
 | | | 0.2 is the bond line. A press fit into PETG creeps and lets go within months |
 
 | Part | Holes |

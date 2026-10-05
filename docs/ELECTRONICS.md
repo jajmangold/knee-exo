@@ -221,10 +221,22 @@ So:
   GPIO 7. Commutation and velocity. Absolute over one turn, which is all commutation
   needs. **It is not enabled by the factory configuration** — the board ships set up for
   something else and §5 turns it on.
-- **Joint side** — AS5048A, 14-bit absolute, reading a 6 mm diametric magnet sunk into the
-  counterbore in the knee pin head. The counterbore is already in the model — `210_flush.py`
-  recesses the pin head flush at Z = 126 with a r = 10 bore, which is exactly the pocket a
-  magnet and a small PCB want.
+- **Joint side** — AS5048A, 14-bit absolute, reading a 6 mm diametric magnet.
+  **THIS MOUNTING IS NOW INVALID AND NOTHING REPLACES IT YET.** The magnet used to sit in a
+  counterbore in the knee pin's head, which worked because the pin was clamped to the HUB and
+  so rotated with the shank while the sensor stayed still. Since
+  [`457_knee_bearings.py`](../scripts/457_knee_bearings.py) the rod is clamped to the YOKE and
+  is therefore **static**, and the capstan rotates around it — so a magnet in the rod's end
+  would never move and would read a constant angle.
+
+  The arrangement that replaces it, not yet drawn: magnet in a small carrier bolted to the
+  **capstan's outer face** at Z 126 (it rotates, which is what is wanted), sensor on
+  **`P20_KneeShroud`'s inner face**, which is static and reaches the knee axis at Z 131.5 — an
+  air gap of about 2.5 mm, inside the 0.5–3.0 mm the part wants. The complication is that the
+  same piece of axis is where the capstan's axial retention has to go, since a cantilevered
+  stub axle locates its bearings with a washer and a screw into the rod's end. Magnet carrier,
+  retention and sensor bracket are one small sub-assembly and they have to be designed
+  together.
 
 The joint encoder is the one that matters for control: it measures the *actual* knee angle
 including belt stretch and any slip, which the motor-side encoder cannot see. Resolution

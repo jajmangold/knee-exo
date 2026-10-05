@@ -23,6 +23,23 @@ A bare 6001's dia 28 leaves 18.8 mm of wall inside a real 29T rim.
 
 AND IT COSTS NO NEW PART NUMBER: BOM K3 is a 6001-2RS and so is D8a.
 
+419_knee_coaxial.py GOT HERE FIRST AND THIS IS NOT A NEW IDEA. It built a coaxial knee in its own
+document -- ONE 6808-2RS (40 x 52 x 7) nested inside the toothed ring -- and the README has
+carried "a better knee exists and is not built" ever since. What this adds is the second bearing,
+and the reason is the one thing a single ring cannot do:
+
+    one 6808, tilt reacted inside its own race width      order 10 N.m before C0
+    two 6001, tilt reacted as a couple over 22 mm         52 N.m
+
+419 explicitly weighed a two-bearing fork and rejected it -- "two dia 95 seats that must be
+coaxial, in printed parts" -- but that objection was priced against 6815s. Two dia 28 seats bored
+in one setup is an ordinary drill-press job, which is what makes the pair affordable now.
+
+WHAT 419 HAS THAT THIS DOES NOT: a hollow dia 40 centre for cabling, and 47 g. This keeps the
+dia 12 rod filling the bore, so the knee is solid. If a cable path through the joint ever matters
+more than varus/valgus stiffness, 419's layout is the one to go back to -- it is still in the
+repository and still reproducible in nine seconds.
+
 WHAT THIS SCRIPT DOES NOT DO. The rod CANTILEVERS from the yoke, because the thigh has nothing
 outboard of the belt to support it -- P20_KneeShroud is the only static thing out there and it
 only reaches the axis at Z 131.5. That leaves 94 MPa in a dia 12 rod against the 38 MPa a straddle

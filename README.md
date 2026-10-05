@@ -1326,7 +1326,7 @@ quietly leave one leg's STLs under names that look like a complete set.
   collars **clamp** — nothing printed turns against steel any more, and
   [`417_fastener_audit.py`](scripts/417_fastener_audit.py) now checks that as a standing question.
 
-- **A better knee exists and is not built.** The pin-and-6001 joint is sound, but the bearing sits
+- ~~**A better knee exists and is not built.**~~ — **built, in a second form.** [`457_knee_bearings.py`](scripts/457_knee_bearings.py) moved the joint into the belt plane on both legs, using **two 6001s at Z 96…104 and Z 118…126** rather than 419's single 6808: a lone ring reacts tilt only inside its own race width, order 10 N·m, where a pair reacts it as a couple over 22 mm and takes ~52. 419 had weighed a two-bearing fork and rejected it on "two ⌀95 seats that must be coaxial, in printed parts" — true of 6815s, ordinary of ⌀28. P2a went 148.1 → 134.2 cm³ and the pin, its collars, the hub's lugs and the clamp stack are all gone. **419 still has what this gave up**: a hollow ⌀40 centre for cabling, and 47 g. The original note follows. The pin-and-6001 joint is sound, but the bearing sits
   beside the belt rather than in it, and the pin still passes through the hub's plastic (clamped, so
   it does not rub — but it is three parts and a clamp stack where one bearing would do).
   [`419_knee_coaxial.py`](scripts/419_knee_coaxial.py) models the alternative in its own document:
