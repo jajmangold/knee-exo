@@ -36,7 +36,10 @@ BORE = 12.0
 LUG1 = (70.0, 76.0)
 YOKE = (76.0, 88.0)
 LUG2 = (88.0, 113.0)
-CBORE = (113.0, 126.0)          # the existing pin-head counterbore, measured at r 11
+CBORE = (113.0, 126.0)          # the existing pin-head counterbore
+CBORE_R = 10.0                  # r 10, measured twice: a coarse scan put it at 11 because
+                                # its radius list skipped from 10 to 11. A 0.5 mm march
+                                # found material at 10.5, which is BOM K2's dia 20 exactly.
 HUB_FACE = 126.0
 SHROUD = 131.87                 # P20_KneeShroud's nearest material on the axis
 LIMB = 52.0                     # REF_Knee's top on the axis -- the pin may not go below this
@@ -75,7 +78,8 @@ print("     Z %.0f .. %.0f      open, clear to r 25+. NOTHING TO BOLT TO." % (LI
 print("     Z %.0f .. %.0f      hub lug 1, bored r 6.5" % LUG1)
 print("     Z %.0f .. %.0f      the yoke and the 6001 -- the rotating interface" % YOKE)
 print("     Z %.0f .. %.0f     hub lug 2, bored r 6.5" % (LUG2[0], CBORE[0]))
-print("     Z %.0f .. %.0f    the existing pin-head counterbore, bored r 11" % CBORE)
+print("     Z %.0f .. %.0f    the existing pin-head counterbore, bored r %.0f"
+      % (CBORE[0], CBORE[1], CBORE_R))
 print("     Z %.0f            the hub's outer face  <-- THE ONE FLAT FACE THIS PIN HAS"
       % HUB_FACE)
 print("     Z %.0f .. %.1f   open; P20_KneeShroud's nearest material is Z %.1f"
@@ -100,8 +104,11 @@ print("     4 x M4 heat-set inserts at r %.0f in the hub face. The dia 17 counte
       % (PCD / 2))
 print("     r 8.5 and the bolt holes span r %.0f..%.0f, so every one lands in solid material"
       % (PCD / 2 - BOLT_D / 2, PCD / 2 + BOLT_D / 2))
-print("     -- which the dia 20 counterbore would NOT have allowed: r 10 against a hole")
-print("     starting at r %.0f." % (PCD / 2 - BOLT_D / 2))
+print("     -- which the dia %.0f counterbore it replaces would NOT have allowed: its edge is"
+      % (2 * CBORE_R))
+print("     at r %.0f and the hole starts at r %.0f, so they graze exactly. That is the whole"
+      % (CBORE_R, PCD / 2 - BOLT_D / 2))
+print("     reason the counterbore has to come IN rather than go out.")
 print()
 print("  TAIL END -- nothing to bolt to, so the flange is dead weight. Use a PLAIN dia %.0f shaft"
       % BORE)
