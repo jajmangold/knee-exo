@@ -81,13 +81,13 @@ to finish to, from [`scripts/417_fastener_audit.py`](../scripts/417_fastener_aud
 | ⌀6.4 | leave as printed | M5 heat-set insert, OD ~7.0, melted in |
 | ⌀10.4 | leave as printed | cap head counterbore |
 | ⌀12.2 | 12.2 | the knee rod's clamp bore in **`P1_KneeYoke`** — the yoke is the rod's only support now, so square in two planes, on a drill press. **The hub has no pin holes any more** |
-| ⌀26 | 26.2 | the two idler bearing seats in the bracket. Bonded, same reason |
-| ⌀28 | 28.2 | the **two** 6001 seats in **`P2a`**, Z 96…104 and Z 118…126. Bore both in ONE setup — they are the knee axis and separately-bored seats will not be collinear. 28.2, not 28.0: the bearings are **bonded**, and that |
+| ⌀37 | 37.2 | the **two 6904 seats**, in `P2a` (the capstan) and again in `P2b` (the idler) — the same bearing in both, on the same ⌀20 shaft. Bonded, and **bore each pair in ONE setup**: they are the joint axis and separately-bored seats will not be collinear |
+| ⌀28 | 28.2 | the 6001 seat for the **screw's upper bearing** in `A7_DriveBracket_Idler`. 28.2, not 28.0: the bearing is **bonded**, and that |
 | | | 0.2 is the bond line. A press fit into PETG creeps and lets go within months |
 
 | Part | Holes |
 |---|---|
-| `A7_DriveBracket_Idler` | 4 x M4 motor clearance, 2 x dia 26 idler bearing seats (bond), dia 22 x 7 seat for the screw's 608 (bond), dia 9.2 screw bore, 2 x M5 along Y into the rail's end |
+| `A7_DriveBracket_Idler` | 4 x M4 motor clearance, dia 20 clamp for the idler's axle, dia 28 x 8 seat for the screw's 6001 (bond), dia 9.2 screw bore, 2 x M5 along Y into the rail's end |
 | `P1_KneeYoke` | 2 x M4 clearance, 4 x M5 into the rail at X +-10, 4 x M5 clearance for the canopy's lip at X +-20, 1 x dia 28 bearing seat (bore 28.2, bond) |
 | `P20_KneeCap` | none |
 | `P21_FairingThigh` | 19 x M5 clearance |
