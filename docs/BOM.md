@@ -230,8 +230,8 @@ Architecture and reasoning in [`ELECTRONICS.md`](ELECTRONICS.md).
 
 | # | Part | Qty | Notes | ~USD |
 |---|---|---|---|---|
-| B1 | **A123 LiFePO4 36 V, 736 Wh (M1B module)** | 1 | **Bought.** 12S, 43.8 V full, 30 V empty — inside the S1's 12–50 V window | — |
-| B2 | **7–17S LiFePO4 smart BMS, 100 A, CAN/RS485/UART, low-temp cutoff** | 1 | **Bought.** Take it on UART or RS485: the ESP32-C3 has one CAN controller and the ODrive already has it | — |
+| B1 | **12S LiFePO4 pack, ≥ 25 A continuous, repacked** | 1 | **Cells owned** — the A123 736 Wh M1B module, to be broken down and re-laid out around B2 in a case shaped for this device rather than for whatever it came out of. That makes the pack a generic item anyone can build, which is the point. **What the repack MUST preserve, because the rest of the electronics is sized against it and not against the module:** 12S (43.8 V full, 30 V empty, inside the drive's 12–56 V window), ≥ 25 A continuous so the 23.5 A peak of D7 is not the limit, and the BMS's low-temperature cutoff of B2. The numbers that follow from it and would have to be redone if the series count changed: the ODrive's 46 V overvoltage / 31 V undervoltage trips, the 2 Ω 50 W brake resistor, E9's 15 A fuse and E11's 12 AWG. Was: A123 LiFePO4 36 V, 736 Wh (M1B module), 12S, 43.8 V full, 30 V empty **Bought.** 12S, 43.8 V full, 30 V empty — inside the S1's 12–50 V window | — |
+| B2 | **7–17S LiFePO4 smart BMS, 100 A, CAN/RS485/UART, low-temp cutoff** | 1 | **Bought, and it is the off-the-shelf half of the repack** — B1's cells are laid out around this rather than the other way round. Take it on UART or RS485: the ESP32-C3 has one CAN controller and the ODrive already has it **Bought.** Take it on UART or RS485: the ESP32-C3 has one CAN controller and the ODrive already has it | — |
 | B3 | Backpack with an internal frame | 1 | The pack is **7–8 kg** — the waist belt must carry it, not the shoulders | 60 |
 
 Runtime from `300_drivetrain.py`, against the 736 Wh now bought:
