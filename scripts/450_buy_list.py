@@ -48,9 +48,10 @@ LINES = [
     # ---------------------------------------------------------------- knee transmission
     ("K1", "HTD-8M open-ended belt, 30 mm wide, 1 m", "1", "BUY", 20,
      "cut to length on the machine. 448"),
-    ("K2", "dia 20 x 70 hardened ground shaft, h6", "1", "BUY", 10,
-     "the knee stub axle, and the idler's. dia 20 because the PRINTED capstan takes a 6904 "
-     "with 14.3 mm of wall -- cantilever 94 MPa -> 20. h6. Not HSS: brittle"),
+    ("K2", "dia 20 hardened ground shaft, h6, 150 mm", "1", "BUY", 12,
+     "ONE 150 mm length cut into two: the knee stub axle and the idler's. dia 20 because "
+     "the PRINTED capstan takes a 6904 with 14.3 mm of wall -- cantilever 94 -> 20 MPa. h6, "
+     "and not HSS: brittle"),
     ("K3", "6904-2RS (20 x 37 x 9)", "4", "BUY", 14,
      "2 in the capstan, 2 in the idler, both printed. Seat dia 37.2, BONDED (418). 69 N.m of "
      "tilt against the 6001 pair's 52, and 1046 mm2 of bond area against 704"),
@@ -59,8 +60,10 @@ LINES = [
      "one seller is a window, not a part, and this has to be reproducible by anyone"),
     ("K4", "Compression spring, ~500 N/mm, 3 mm travel", "1", "BUY", 5,
      "idler carrier. Keep it even with a cut belt until the clamp is proven"),
-    ("S2c", "Idler axle (8 mm) + 2 x 608-2RS", "1", "BUY", 10,
-     "1828 N total, 914 N on each bearing -- under a 608's static rating, but only just"),
+    ("S2c", "Idler axle + bearings", "1", "HAVE", 0,
+     "covered by K2 and K3 now: the idler runs on the same dia 20 shaft and the same 6904s as "
+     "the knee. 1828 N over two of them is 914 N each -- 3.6x on C0, where the dia 8 axle and "
+     "two 608s this line used to ask for were 1.5x"),
 
     # ---------------------------------------------------------------- structure
     ("S1", "V-slot extrusion 20x40 black, 160 mm", "1", "BUY", 12, "thigh rail, Y 51..207"),
