@@ -1,5 +1,15 @@
 # -*- coding: utf-8 -*-
-"""The motor pod is not a bulge, it is a cliff. Blend it into the thigh.
+"""The motor pod is not a bulge, it is a cliff. MEASURED HERE; THE FIX IS NOT APPLIED.
+
+STATUS: the finding stands, the geometry was reverted. The blend this script builds is a
+lofted pie wedge with flat radial sides, and seen in the GUI it reads as a fin stuck on the
+pod rather than a fairing grown out of it -- "it looks bad", which is the only test that
+matters for a part whose whole purpose is to not catch on things. It also left P25 with a
+bounding box reaching the limb axis at X 0 Z 0 on zero volume, which is a degenerate edge
+and the kind of thing 436_socket_mesh.py exists because of. Run it only after the wedge is
+replaced by a proper surface blend.
+
+WHAT IT FOUND, which is worth keeping:
 
 Asked at the bench: make the whole thigh one cohesive unit, the motor box hanging off separately
 is the thing I do not like, and watch for snags.
