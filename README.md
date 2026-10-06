@@ -1188,6 +1188,14 @@ straddles the sagittal plane and every printed part is chiral. The right leg is 
 [`scripts/701_mirror_build.py`](scripts/701_mirror_build.py):
 `KneeExo_v6.FCStd` (left) and `KneeExo_v6_R.FCStd` (right), 37 solids each.
 
+### Sourceability is a design constraint, not a preference
+
+This is meant to be reproducible by someone who is not me, somewhere else, later. That makes **“can a stranger buy this?”** a hard requirement on anything in the critical path, and it has teeth: a bought HTD-8M 28T × 32 aluminium pulley was specced for the capstan and the idler for about a day. It was genuinely better — it retires [`421`](scripts/421_pulley_teeth.py)'s unproven tooth profile on the highest-loaded pulley in the machine, and lets the bearings press into metal instead of bonding into PETG. It was dropped anyway, because “10 available from one eBay seller” is a window, not a part.
+
+The rule that came out of it: **everything on the critical path is either printed, or a catalogue number anyone can order.** A 6904 is a bike-shop bearing. ⌀20 linear shaft is stocked by every 3D-printer supplier. A 29T HTD-8M pulley in a specific width and bore is not, so it is printed — which puts `TEST_ToothCoupon` on the critical path for real, since the printed tooth form is `421`'s approximation of an unpublished curve and the coupon is the only thing that can qualify it.
+
+Chasing that constraint also found a mistake. [`457`](scripts/457_knee_bearings.py) chose a 6001 for the knee on the grounds that “it costs no new part number” — and that commonality argument cost the shaft three quarters of its section. The printed capstan takes a **6904** with 14.3 mm of wall to spare, so the bigger bearing was available all along: **cantilever 94 → 20 MPa**, tilt 52 → 69 N·m, and the bond area 418 cares about 704 → 1046 mm². Strictly better, and no less sourceable than what it replaces.
+
 ### v8, and why it is one script rather than a new lineage
 
 `KneeExo_v8.FCStd` is **v6-left plus [`scripts/459_v8_drivetrain.py`](scripts/459_v8_drivetrain.py)**, the same arrangement [`419_knee_coaxial.py`](scripts/419_knee_coaxial.py) used for its v7. v6 is ~300 scripts run in an order recorded nowhere; v8 is v6 and one file, reproducible in seconds, and that file says what changed and why. Left leg only for now.

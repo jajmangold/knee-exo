@@ -49,16 +49,14 @@ LINES = [
     ("K1", "HTD-8M open-ended belt, 30 mm wide, 1 m", "1", "BUY", 20,
      "cut to length on the machine. 448"),
     ("K2", "dia 20 x 70 hardened ground shaft, h6", "1", "BUY", 10,
-     "the knee stub axle, and the idler's. dia 20 because the capstan is now a bought pulley "
-     "bored dia 37 -- cantilever 94 MPa -> 20. h6. Not HSS: brittle"),
+     "the knee stub axle, and the idler's. dia 20 because the PRINTED capstan takes a 6904 "
+     "with 14.3 mm of wall -- cantilever 94 MPa -> 20. h6. Not HSS: brittle"),
     ("K3", "6904-2RS (20 x 37 x 9)", "4", "BUY", 14,
-     "2 in the capstan, 2 in the idler -- the same bought pulley, bored dia 37, seat H7. "
-     "76 N.m of tilt against the 6001 pair's 57, pressed into aluminium not bonded into PETG"),
-    ("S2b", "HTD-8M 28T pulley, 32 mm wide, bore 24", "2", "BUY", 79,
-     "THE CAPSTAN AND THE IDLER, and they must be identical (421). Bore both dia 37 past the "
-     "8 x 3.3 keyway. Buying the capstan retires 421's unproven tooth profile on the "
-     "highest-loaded pulley. CONFIRM: aluminium not steel, and that the toothed land is still "
-     "30 mm once the AF flanges are counted"),
+     "2 in the capstan, 2 in the idler, both printed. Seat dia 37.2, BONDED (418). 69 N.m of "
+     "tilt against the 6001 pair's 52, and 1046 mm2 of bond area against 704"),
+    ("S2b", "29T HTD-8M idler", "1", "PRINT", 0,
+     "printed, with the capstan -- a bought pair was specced and dropped: 10 available from "
+     "one seller is a window, not a part, and this has to be reproducible by anyone"),
     ("K4", "Compression spring, ~500 N/mm, 3 mm travel", "1", "BUY", 5,
      "idler carrier. Keep it even with a cut belt until the clamp is proven"),
     ("S2c", "Idler axle (8 mm) + 2 x 608-2RS", "1", "BUY", 10,
