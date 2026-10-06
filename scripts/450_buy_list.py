@@ -40,21 +40,27 @@ LINES = [
     ("D7c", "Steel spacers for the 4 bolt holes", "4", "BUY", 2,
      "cut 0.1 mm proud of the printed hub so the clamp load misses the plastic. 449"),
     ("D8", "BF12 floating-end support", "1", "HAVE", 0, "in the screw set"),
-    ("D8a", "6001-2RS (12 x 28 x 8)", "1", "BUY", 3,
-     "screw's upper bearing under Path B. SAME PART AS K3, which now needs 2 -- order 3"),
+    ("D8a", "6001-2RS (12 x 28 x 8)", "1", "HAVE", 0,
+     "the screw's upper bearing under Path B -- covered by the 6001s already bought, which K3 "
+     "no longer needs now that the knee runs on 6904s in a bought pulley"),
     ("D9", "Flexible coupler", "1", "HAVE", 0, "in the box, unused -- the motor is belted"),
 
     # ---------------------------------------------------------------- knee transmission
     ("K1", "HTD-8M open-ended belt, 30 mm wide, 1 m", "1", "BUY", 20,
      "cut to length on the machine. 448"),
-    ("K2", "dia 12 x 60 ground rod, h6 (silver steel)", "1", "BUY", 8,
-     "the knee stub axle. h6 NOT m6 -- an ISO 8734 dowel's m6 is a press fit in the 6001. Not "
-     "HSS: brittle. The collars are gone: the yoke bore IS the clamp now. 457"),
-    ("K3", "6001-2RS (12 x 28 x 8)", "2", "BUY", 6,
-     "BOTH knee bearings, inside the capstan. Same part as D8a -- one order of 3"),
+    ("K2", "dia 20 x 70 hardened ground shaft, h6", "1", "BUY", 10,
+     "the knee stub axle, and the idler's. dia 20 because the capstan is now a bought pulley "
+     "bored dia 37 -- cantilever 94 MPa -> 20. h6. Not HSS: brittle"),
+    ("K3", "6904-2RS (20 x 37 x 9)", "4", "BUY", 14,
+     "2 in the capstan, 2 in the idler -- the same bought pulley, bored dia 37, seat H7. "
+     "76 N.m of tilt against the 6001 pair's 57, pressed into aluminium not bonded into PETG"),
+    ("S2b", "HTD-8M 28T pulley, 32 mm wide, bore 24", "2", "BUY", 79,
+     "THE CAPSTAN AND THE IDLER, and they must be identical (421). Bore both dia 37 past the "
+     "8 x 3.3 keyway. Buying the capstan retires 421's unproven tooth profile on the "
+     "highest-loaded pulley. CONFIRM: aluminium not steel, and that the toothed land is still "
+     "30 mm once the AF flanges are counted"),
     ("K4", "Compression spring, ~500 N/mm, 3 mm travel", "1", "BUY", 5,
      "idler carrier. Keep it even with a cut belt until the clamp is proven"),
-    ("S2b", "29T HTD-8M idler", "1", "PRINT", 0, "zero torque -- it only turns the belt round"),
     ("S2c", "Idler axle (8 mm) + 2 x 608-2RS", "1", "BUY", 10,
      "1828 N total, 914 N on each bearing -- under a 608's static rating, but only just"),
 
